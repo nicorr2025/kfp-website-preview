@@ -373,4 +373,10 @@ app.get('/api/stats', (req, res) => {
 
 // ── Start ───────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 8080
-app.listen(PORT, () => console.log(`KFP Server running on http://localhost:${PORT}`))
+// Local dev: start server
+if (process.env.VERCEL !== '1') {
+  app.listen(PORT, () => console.log(`KFP Server running on http://localhost:${PORT}`))
+}
+
+// Vercel serverless export
+module.exports = app
