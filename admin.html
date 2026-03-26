@@ -1,0 +1,2676 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KFP Sawmill Operations | Dashboard</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico"/>
+<!-- Fonts & Icons -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Work+Sans:wght@600;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "surface-container-lowest": "#ffffff",
+        "primary": "#004623",
+        "on-primary": "#ffffff",
+        "surface-dim": "#dadad8",
+        "inverse-on-surface": "#f1f1ef",
+        "on-tertiary-fixed-variant": "#61401b",
+        "on-secondary-container": "#79533d",
+        "tertiary-fixed-dim": "#eebd8e",
+        "surface-bright": "#f9f9f7",
+        "primary-fixed": "#b1f1bf",
+        "surface-container-highest": "#e2e3e1",
+        "on-surface": "#1a1c1b",
+        "on-primary-fixed-variant": "#11512d",
+        "primary-fixed-dim": "#96d5a5",
+        "on-tertiary-fixed": "#2c1600",
+        "on-error-container": "#93000a",
+        "on-tertiary": "#ffffff",
+        "surface-container": "#eeeeec",
+        "surface": "#f9f9f7",
+        "primary-container": "#215e38",
+        "surface-variant": "#e2e3e1",
+        "on-surface-variant": "#404941",
+        "secondary": "#7d553f",
+        "secondary-container": "#fec9ae",
+        "tertiary": "#543511",
+        "on-tertiary-container": "#eebd8e",
+        "tertiary-fixed": "#ffdcbd",
+        "surface-container-low": "#f4f4f2",
+        "background": "#f9f9f7",
+        "tertiary-container": "#6f4b26",
+        "secondary-fixed": "#ffdbca",
+        "on-secondary-fixed-variant": "#623e2a",
+        "inverse-primary": "#96d5a5",
+        "on-secondary-fixed": "#2f1404",
+        "error-container": "#ffdad6",
+        "on-error": "#ffffff",
+        "secondary-fixed-dim": "#efbca1",
+        "outline-variant": "#c0c9bf",
+        "on-primary-fixed": "#00210d",
+        "on-background": "#1a1c1b",
+        "outline": "#707970",
+        "error": "#ba1a1a",
+        "surface-tint": "#2e6a43",
+        "inverse-surface": "#2f3130"
+      },
+      fontFamily: {
+        "headline": ["Work Sans"],
+        "body": ["Inter"],
+        "label": ["Inter"]
+      },
+      borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+    },
+  },
+}
+</script>
+<style>
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+body { font-family: 'Inter', sans-serif; }
+h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
+
+/* Sidebar active state */
+.nav-active {
+  background: #f9f9f7;
+  color: #004623;
+  border-radius: 0.75rem 0 0 0.75rem;
+  margin-left: 0.5rem;
+  transform: translateX(1px);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #c0c9bf; border-radius: 3px; }
+
+/* Sidebar collapse for mobile */
+@media (max-width: 1024px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main-content { margin-left: 0 !important; }
+  .top-bar { width: 100% !important; left: 0 !important; }
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-surface text-on-surface">
+
+<!-- Auth Loading Overlay -->
+<div id="auth-loading" class="fixed inset-0 bg-surface z-[100] flex items-center justify-center">
+  <div class="text-center">
+    <img src="images/kfp-logo.png" alt="KFP" class="h-20 w-auto mx-auto mb-4 animate-pulse"/>
+    <p class="text-sm font-bold text-stone-400 uppercase tracking-wider">Loading...</p>
+  </div>
+</div>
+
+<!-- Pending Approval Overlay -->
+<div id="auth-pending" class="hidden fixed inset-0 bg-surface z-[100] flex items-center justify-center">
+  <div class="text-center max-w-md">
+    <span class="material-symbols-outlined text-6xl text-stone-300 mb-4">hourglass_top</span>
+    <h2 class="text-2xl font-black text-primary uppercase tracking-tighter mb-2">Awaiting Approval</h2>
+    <p class="text-stone-500 mb-6">Your account is pending approval from an administrator. This page will automatically update when you're approved.</p>
+    <button onclick="authSignOut()" class="text-sm text-stone-500 hover:text-primary transition-colors">Sign Out</button>
+  </div>
+</div>
+
+<!-- Access Denied Overlay -->
+<div id="auth-denied" class="hidden fixed inset-0 bg-surface z-[100] flex items-center justify-center">
+  <div class="text-center max-w-md">
+    <span class="material-symbols-outlined text-6xl text-error/50 mb-4">block</span>
+    <h2 class="text-2xl font-black text-primary uppercase tracking-tighter mb-2">Access Denied</h2>
+    <p class="text-stone-500 mb-6">Your access request has been denied. Contact an administrator if you believe this is an error.</p>
+    <button onclick="authSignOut()" class="text-sm text-stone-500 hover:text-primary transition-colors">Sign Out</button>
+  </div>
+</div>
+
+<!-- Sidebar -->
+<aside class="sidebar h-screen w-64 fixed left-0 top-0 bg-[#e2e3e1] flex flex-col py-6 z-50 transition-transform duration-300">
+  <!-- Brand -->
+  <div class="px-5 mb-8 flex items-center gap-3">
+    <img class="w-12 h-12 object-contain" src="images/kfp-logo.png" alt="KFP Logo"/>
+    <div class="flex flex-col">
+      <span class="text-2xl font-black text-primary tracking-tighter uppercase">KFP</span>
+      <span class="text-[10px] font-semibold text-stone-500 uppercase tracking-widest">Sawmill CRM</span>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="flex-1 space-y-1" id="sidebar-nav">
+    <a href="#" data-page="dashboard" class="nav-link nav-active flex items-center gap-3 px-4 py-3 font-['Work_Sans'] font-semibold text-sm tracking-tight transition-all duration-200">
+      <span class="material-symbols-outlined">dashboard</span>
+      Dashboard
+    </a>
+    <a href="#" data-page="inventory" class="nav-link flex items-center gap-3 px-4 py-3 text-stone-600 hover:bg-[#eeeeec] font-['Work_Sans'] font-semibold text-sm tracking-tight transition-colors duration-200">
+      <span class="material-symbols-outlined">inventory_2</span>
+      Inventory
+    </a>
+    <a href="#" data-page="orders" class="nav-link flex items-center gap-3 px-4 py-3 text-stone-600 hover:bg-[#eeeeec] font-['Work_Sans'] font-semibold text-sm tracking-tight transition-colors duration-200">
+      <span class="material-symbols-outlined">receipt_long</span>
+      Orders
+    </a>
+    <a href="#" data-page="customers" class="nav-link flex items-center gap-3 px-4 py-3 text-stone-600 hover:bg-[#eeeeec] font-['Work_Sans'] font-semibold text-sm tracking-tight transition-colors duration-200">
+      <span class="material-symbols-outlined">group</span>
+      Customers
+    </a>
+    <a href="#" data-page="quotes" class="nav-link flex items-center gap-3 px-4 py-3 text-stone-600 hover:bg-[#eeeeec] font-['Work_Sans'] font-semibold text-sm tracking-tight transition-colors duration-200">
+      <span class="material-symbols-outlined">request_quote</span>
+      Quotes
+    </a>
+    <a href="#" data-page="shipping" class="nav-link flex items-center gap-3 px-4 py-3 text-stone-600 hover:bg-[#eeeeec] font-['Work_Sans'] font-semibold text-sm tracking-tight transition-colors duration-200">
+      <span class="material-symbols-outlined">local_shipping</span>
+      Shipping
+    </a>
+
+    <a href="#" data-page="outreach" class="nav-link flex items-center gap-3 px-4 py-3 text-stone-600 hover:bg-[#eeeeec] font-['Work_Sans'] font-semibold text-sm tracking-tight transition-colors duration-200">
+      <span class="material-symbols-outlined">campaign</span>
+      Outreach
+    </a>
+
+    <!-- Divider -->
+    <div class="my-4 mx-4 h-[1px] bg-outline-variant/20"></div>
+
+    <a href="#" data-page="website" class="nav-link flex items-center gap-3 px-4 py-3 text-stone-600 hover:bg-[#eeeeec] font-['Work_Sans'] font-semibold text-sm tracking-tight transition-colors duration-200">
+      <span class="material-symbols-outlined">language</span>
+      Website
+    </a>
+    <a href="#" data-page="team" class="nav-link flex items-center gap-3 px-4 py-3 text-stone-600 hover:bg-[#eeeeec] font-['Work_Sans'] font-semibold text-sm tracking-tight transition-colors duration-200" id="nav-team">
+      <span class="material-symbols-outlined">admin_panel_settings</span>
+      Team
+    </a>
+    <a href="#" data-page="settings" class="nav-link flex items-center gap-3 px-4 py-3 text-stone-600 hover:bg-[#eeeeec] font-['Work_Sans'] font-semibold text-sm tracking-tight transition-colors duration-200">
+      <span class="material-symbols-outlined">settings</span>
+      Settings
+    </a>
+  </nav>
+
+  <!-- Bottom Profile -->
+  <div class="px-4 mt-auto">
+    <a href="index.html" class="flex items-center gap-2 px-3 py-2 mb-2 text-xs font-semibold text-stone-500 hover:text-primary hover:bg-surface-container-low rounded-lg transition-colors">
+      <span class="material-symbols-outlined text-sm">arrow_back</span>
+      Back to Website
+    </a>
+    <div class="bg-surface-container-low p-3 rounded-xl flex items-center gap-3">
+      <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary text-xs font-bold" id="profile-initials">--</div>
+      <div class="overflow-hidden flex-1">
+        <p class="text-xs font-bold truncate" id="profile-name">Loading...</p>
+        <p class="text-[10px] text-stone-500 uppercase tracking-tighter" id="profile-role">—</p>
+      </div>
+      <button onclick="authSignOut()" class="text-stone-400 hover:text-error transition-colors" title="Sign Out">
+        <span class="material-symbols-outlined text-lg">logout</span>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content ml-64 min-h-screen">
+  <!-- Top Bar -->
+  <header class="top-bar fixed top-0 right-0 w-[calc(100%-16rem)] h-14 z-40 bg-[#f9f9f7]/80 backdrop-blur-md flex justify-between items-center px-8">
+    <!-- Mobile menu toggle -->
+    <button class="lg:hidden mr-4" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+      <span class="material-symbols-outlined">menu</span>
+    </button>
+    <div class="flex items-center gap-4 w-1/2">
+      <div class="relative w-full max-w-md">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-sm">search</span>
+        <input class="w-full bg-surface-container border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary transition-all" placeholder="Search orders, inventory or customers..." type="text"/>
+      </div>
+    </div>
+    <div class="flex items-center gap-4">
+      <button class="hover:bg-stone-100 rounded-full p-2 relative">
+        <span class="material-symbols-outlined text-stone-600">notifications</span>
+        <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-surface"></span>
+      </button>
+      <button class="hover:bg-stone-100 rounded-full p-2">
+        <span class="material-symbols-outlined text-stone-600">help_outline</span>
+      </button>
+      <div class="h-6 w-[1px] bg-outline-variant/20"></div>
+      <div class="text-right hidden xl:block">
+        <p class="font-bold text-[10px] uppercase tracking-tight text-primary">KFP Sawmill Operations</p>
+        <p class="text-[10px] text-stone-400">v1.0</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Content Container -->
+  <div class="pt-20 px-8 pb-12">
+
+    <!-- ==================== DASHBOARD PAGE ==================== -->
+    <div id="page-dashboard" class="page-content">
+      <!-- Page Header -->
+      <div class="flex justify-between items-end mb-8">
+        <div>
+          <h1 class="text-4xl font-black text-primary tracking-tighter uppercase">Operations Dashboard</h1>
+          <p class="text-stone-500 font-medium mt-1 text-sm">Real-time status of the Kentucky Forest Products mill floor.</p>
+        </div>
+        <div class="flex gap-3">
+          <button class="bg-surface-container px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 text-stone-700 hover:bg-surface-dim transition-colors">
+            <span class="material-symbols-outlined text-sm">download</span>
+            Export PDF
+          </button>
+          <button class="bg-primary px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 text-on-primary hover:bg-primary-container transition-colors shadow-lg shadow-primary/10">
+            <span class="material-symbols-outlined text-sm">add</span>
+            New Entry
+          </button>
+        </div>
+      </div>
+
+      <!-- Key Metrics -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        <!-- Total Leads -->
+        <div class="bg-surface-container-low p-5 rounded-xl flex flex-col justify-between group hover:bg-surface-container-lowest transition-all duration-300">
+          <div class="flex justify-between items-start">
+            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Total Leads</span>
+            <div class="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+              <span class="material-symbols-outlined text-xl">person_search</span>
+            </div>
+          </div>
+          <div class="mt-3">
+            <p class="text-4xl font-black text-primary">142</p>
+            <p class="text-xs text-secondary font-bold mt-1 flex items-center gap-1">
+              <span class="material-symbols-outlined text-xs">arrow_upward</span>
+              12.4% <span class="text-stone-400 font-normal">from last month</span>
+            </p>
+          </div>
+        </div>
+        <!-- Active Orders -->
+        <div class="bg-surface-container-low p-5 rounded-xl flex flex-col justify-between group hover:bg-surface-container-lowest transition-all duration-300">
+          <div class="flex justify-between items-start">
+            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Active Orders</span>
+            <div class="w-9 h-9 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary group-hover:scale-110 transition-transform">
+              <span class="material-symbols-outlined text-xl">engineering</span>
+            </div>
+          </div>
+          <div class="mt-3">
+            <p class="text-4xl font-black text-primary">38</p>
+            <div class="flex gap-1 mt-2">
+              <div class="h-1 flex-1 bg-primary rounded-full"></div>
+              <div class="h-1 flex-1 bg-primary rounded-full"></div>
+              <div class="h-1 flex-1 bg-primary rounded-full"></div>
+              <div class="h-1 flex-1 bg-stone-300 rounded-full"></div>
+            </div>
+            <p class="text-[10px] text-stone-500 font-bold mt-1">84% Capacity</p>
+          </div>
+        </div>
+        <!-- Pending Invoices -->
+        <div class="bg-surface-container-low p-5 rounded-xl flex flex-col justify-between group hover:bg-surface-container-lowest transition-all duration-300">
+          <div class="flex justify-between items-start">
+            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Pending Invoices</span>
+            <div class="w-9 h-9 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary group-hover:scale-110 transition-transform">
+              <span class="material-symbols-outlined text-xl">payments</span>
+            </div>
+          </div>
+          <div class="mt-3">
+            <p class="text-4xl font-black text-primary">$42.8k</p>
+            <p class="text-xs text-error font-bold mt-1 flex items-center gap-1">
+              <span class="material-symbols-outlined text-xs">priority_high</span>
+              4 Overdue <span class="text-stone-400 font-normal">($8.2k)</span>
+            </p>
+          </div>
+        </div>
+        <!-- Current Inventory -->
+        <div class="bg-surface-container-low p-5 rounded-xl flex flex-col justify-between group hover:bg-surface-container-lowest transition-all duration-300">
+          <div class="flex justify-between items-start">
+            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Current Inventory</span>
+            <div class="w-9 h-9 rounded-lg bg-primary-container/10 flex items-center justify-center text-primary-container group-hover:scale-110 transition-transform">
+              <span class="material-symbols-outlined text-xl">warehouse</span>
+            </div>
+          </div>
+          <div class="mt-3">
+            <p class="text-4xl font-black text-primary">12.5k</p>
+            <p class="text-[10px] text-stone-500 font-bold mt-1 tracking-wider uppercase">Board Feet (BF)</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
+        <!-- Production Volume -->
+        <div class="lg:col-span-2 bg-surface-container-low p-6 rounded-xl">
+          <div class="flex justify-between items-center mb-6">
+            <div>
+              <h3 class="text-lg font-black uppercase tracking-tighter text-primary">Production Volume</h3>
+              <p class="text-xs text-stone-500 font-medium">Daily output across all milling stations (30 days)</p>
+            </div>
+            <select class="bg-surface border-none text-[10px] font-bold uppercase tracking-widest rounded-lg focus:ring-primary">
+              <option>Last 30 Days</option>
+              <option>Last Quarter</option>
+              <option>Year to Date</option>
+            </select>
+          </div>
+          <div class="h-56 flex items-end gap-2 relative">
+            <div class="absolute left-0 top-0 h-full flex flex-col justify-between text-[10px] font-bold text-stone-300 pointer-events-none">
+              <span>15k</span><span>10k</span><span>5k</span><span>0</span>
+            </div>
+            <svg class="w-full h-full ml-8" preserveAspectRatio="none" viewBox="0 0 800 200">
+              <defs>
+                <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#004623" stop-opacity="0.15"/>
+                  <stop offset="100%" stop-color="#004623" stop-opacity="0.01"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,180 L50,160 L100,170 L150,140 L200,150 L250,110 L300,130 L350,90 L400,100 L450,60 L500,80 L550,50 L600,70 L650,40 L700,60 L750,30 L800,45" fill="none" stroke="#004623" stroke-linecap="round" stroke-width="3"/>
+              <path d="M0,180 L50,160 L100,170 L150,140 L200,150 L250,110 L300,130 L350,90 L400,100 L450,60 L500,80 L550,50 L600,70 L650,40 L700,60 L750,30 L800,45 V200 H0 Z" fill="url(#chartGrad)"/>
+            </svg>
+          </div>
+          <div class="flex justify-between ml-10 mt-3 text-[10px] font-black text-stone-400 uppercase tracking-widest">
+            <span>Day 1</span><span>Day 10</span><span>Day 20</span><span>Day 30</span>
+          </div>
+        </div>
+        <!-- Sales by Wood Type -->
+        <div class="bg-surface-container-low p-6 rounded-xl flex flex-col">
+          <h3 class="text-lg font-black uppercase tracking-tighter text-primary mb-1">Sales by Product</h3>
+          <p class="text-xs text-stone-500 font-medium mb-6">Revenue distribution by category</p>
+          <div class="space-y-5 flex-1 flex flex-col justify-center">
+            <div class="space-y-1.5">
+              <div class="flex justify-between text-xs font-bold uppercase tracking-tight">
+                <span>Lumber</span>
+                <span class="text-primary">$34,200</span>
+              </div>
+              <div class="h-2.5 bg-stone-200 rounded-full overflow-hidden">
+                <div class="h-full bg-primary w-[80%] rounded-full"></div>
+              </div>
+            </div>
+            <div class="space-y-1.5">
+              <div class="flex justify-between text-xs font-bold uppercase tracking-tight">
+                <span>Matting</span>
+                <span class="text-primary">$22,600</span>
+              </div>
+              <div class="h-2.5 bg-stone-200 rounded-full overflow-hidden">
+                <div class="h-full bg-secondary w-[55%] rounded-full"></div>
+              </div>
+            </div>
+            <div class="space-y-1.5">
+              <div class="flex justify-between text-xs font-bold uppercase tracking-tight">
+                <span>Utility Poles</span>
+                <span class="text-primary">$18,400</span>
+              </div>
+              <div class="h-2.5 bg-stone-200 rounded-full overflow-hidden">
+                <div class="h-full bg-tertiary w-[45%] rounded-full"></div>
+              </div>
+            </div>
+            <div class="space-y-1.5">
+              <div class="flex justify-between text-xs font-bold uppercase tracking-tight">
+                <span>Fencing</span>
+                <span class="text-primary">$12,800</span>
+              </div>
+              <div class="h-2.5 bg-stone-200 rounded-full overflow-hidden">
+                <div class="h-full bg-primary-container w-[30%] rounded-full"></div>
+              </div>
+            </div>
+            <div class="space-y-1.5">
+              <div class="flex justify-between text-xs font-bold uppercase tracking-tight">
+                <span>Cross-Ties</span>
+                <span class="text-primary">$8,900</span>
+              </div>
+              <div class="h-2.5 bg-stone-200 rounded-full overflow-hidden">
+                <div class="h-full bg-stone-400 w-[20%] rounded-full"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Orders Table -->
+      <div class="bg-surface-container-lowest rounded-2xl shadow-xl shadow-stone-200/50 overflow-hidden">
+        <div class="p-6 flex justify-between items-center bg-surface-container-low">
+          <div>
+            <h3 class="text-xl font-black uppercase tracking-tighter text-primary">Recent Orders</h3>
+            <p class="text-xs text-stone-500 font-medium">Currently moving through processing and shipping</p>
+          </div>
+          <button class="text-xs font-bold uppercase tracking-widest text-secondary hover:text-primary transition-colors flex items-center gap-1">
+            View Full Ledger
+            <span class="material-symbols-outlined text-sm">chevron_right</span>
+          </button>
+        </div>
+        <table class="w-full text-left">
+          <thead class="bg-surface-container-low">
+            <tr>
+              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Customer</th>
+              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Product</th>
+              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Status</th>
+              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Date</th>
+              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 text-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-container">
+            <tr class="hover:bg-surface transition-colors">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center font-bold text-stone-600 text-sm">BB</div>
+                  <div>
+                    <p class="text-sm font-bold text-primary">Bluegrass Builders</p>
+                    <p class="text-[10px] text-stone-500 uppercase tracking-tighter">#ORD-40129</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-secondary"></span>
+                  <span class="text-sm font-medium">White Oak Fencing (500 LF)</span>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <span class="bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Processing</span>
+              </td>
+              <td class="px-6 py-4 text-sm font-medium text-stone-600">Mar 24, 2026</td>
+              <td class="px-6 py-4 text-right font-black text-primary">$4,250.00</td>
+            </tr>
+            <tr class="hover:bg-surface transition-colors">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center font-bold text-stone-600 text-sm">AE</div>
+                  <div>
+                    <p class="text-sm font-bold text-primary">Appalachian Electric</p>
+                    <p class="text-[10px] text-stone-500 uppercase tracking-tighter">#ORD-40130</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-tertiary"></span>
+                  <span class="text-sm font-medium">Utility Poles 45' (24 qty)</span>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <span class="bg-tertiary/10 text-tertiary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Drying</span>
+              </td>
+              <td class="px-6 py-4 text-sm font-medium text-stone-600">Mar 22, 2026</td>
+              <td class="px-6 py-4 text-right font-black text-primary">$18,720.00</td>
+            </tr>
+            <tr class="hover:bg-surface transition-colors">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center font-bold text-stone-600 text-sm">DC</div>
+                  <div>
+                    <p class="text-sm font-bold text-primary">Daniel Construction</p>
+                    <p class="text-[10px] text-stone-500 uppercase tracking-tighter">#ORD-40131</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-primary"></span>
+                  <span class="text-sm font-medium">3-Ply Crane Mats 16' (12 qty)</span>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <span class="bg-secondary/10 text-secondary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Shipped</span>
+              </td>
+              <td class="px-6 py-4 text-sm font-medium text-stone-600">Mar 20, 2026</td>
+              <td class="px-6 py-4 text-right font-black text-primary">$9,600.00</td>
+            </tr>
+            <tr class="hover:bg-surface transition-colors">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center font-bold text-stone-600 text-sm">KP</div>
+                  <div>
+                    <p class="text-sm font-bold text-primary">Kentucky Power Co.</p>
+                    <p class="text-[10px] text-stone-500 uppercase tracking-tighter">#ORD-40132</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-primary-container"></span>
+                  <span class="text-sm font-medium">Cross Arms 10' (200 qty)</span>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <span class="bg-surface-container-highest text-stone-500 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Staged</span>
+              </td>
+              <td class="px-6 py-4 text-sm font-medium text-stone-600">Mar 18, 2026</td>
+              <td class="px-6 py-4 text-right font-black text-primary">$6,400.00</td>
+            </tr>
+            <tr class="hover:bg-surface transition-colors">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center font-bold text-stone-600 text-sm">RR</div>
+                  <div>
+                    <p class="text-sm font-bold text-primary">Red River Farms</p>
+                    <p class="text-[10px] text-stone-500 uppercase tracking-tighter">#ORD-40133</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-stone-400"></span>
+                  <span class="text-sm font-medium">Pine Mulch (8 pallets)</span>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <span class="bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Complete</span>
+              </td>
+              <td class="px-6 py-4 text-sm font-medium text-stone-600">Mar 15, 2026</td>
+              <td class="px-6 py-4 text-right font-black text-primary">$2,100.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================== INVENTORY PAGE ==================== -->
+    <div id="page-inventory" class="page-content hidden">
+      <div class="flex justify-between items-end mb-8">
+        <div>
+          <h1 class="text-4xl font-black text-primary tracking-tighter uppercase">Inventory</h1>
+          <p class="text-stone-500 font-medium mt-1 text-sm">Current stock levels across all product lines.</p>
+        </div>
+        <button class="bg-primary px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 text-on-primary hover:bg-primary-container transition-colors shadow-lg shadow-primary/10">
+          <span class="material-symbols-outlined text-sm">add</span>
+          Add Stock
+        </button>
+      </div>
+      <!-- Inventory Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="font-black text-primary uppercase tracking-tight">Lumber</h3>
+            <span class="bg-primary/10 text-primary text-[10px] font-black uppercase px-2 py-0.5 rounded-full">In Stock</span>
+          </div>
+          <div class="space-y-3">
+            <div class="flex justify-between text-sm"><span class="text-stone-600">Pine (Treated)</span><span class="font-bold">4,200 BF</span></div>
+            <div class="flex justify-between text-sm"><span class="text-stone-600">White Oak</span><span class="font-bold">2,800 BF</span></div>
+            <div class="flex justify-between text-sm"><span class="text-stone-600">Red Oak</span><span class="font-bold">1,950 BF</span></div>
+            <div class="flex justify-between text-sm"><span class="text-stone-600">Poplar</span><span class="font-bold">3,100 BF</span></div>
+          </div>
+        </div>
+        <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="font-black text-primary uppercase tracking-tight">Fencing</h3>
+            <span class="bg-primary/10 text-primary text-[10px] font-black uppercase px-2 py-0.5 rounded-full">In Stock</span>
+          </div>
+          <div class="space-y-3">
+            <div class="flex justify-between text-sm"><span class="text-stone-600">Pine Pickets</span><span class="font-bold">2,400 pcs</span></div>
+            <div class="flex justify-between text-sm"><span class="text-stone-600">Oak Split Rail</span><span class="font-bold">1,600 LF</span></div>
+            <div class="flex justify-between text-sm"><span class="text-stone-600">Treated Poplar Posts</span><span class="font-bold">890 pcs</span></div>
+          </div>
+        </div>
+        <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="font-black text-primary uppercase tracking-tight">Matting</h3>
+            <span class="bg-tertiary/10 text-tertiary text-[10px] font-black uppercase px-2 py-0.5 rounded-full">Low Stock</span>
+          </div>
+          <div class="space-y-3">
+            <div class="flex justify-between text-sm"><span class="text-stone-600">3-Ply 12'</span><span class="font-bold">45 units</span></div>
+            <div class="flex justify-between text-sm"><span class="text-stone-600">3-Ply 16'</span><span class="font-bold">28 units</span></div>
+            <div class="flex justify-between text-sm"><span class="text-stone-600">Crane Mats 40'</span><span class="font-bold text-error">8 units</span></div>
+            <div class="flex justify-between text-sm"><span class="text-stone-600">Transition Mats</span><span class="font-bold">62 units</span></div>
+          </div>
+        </div>
+        <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="font-black text-primary uppercase tracking-tight">Utility Poles</h3>
+            <span class="bg-primary/10 text-primary text-[10px] font-black uppercase px-2 py-0.5 rounded-full">In Stock</span>
+          </div>
+          <div class="space-y-3">
+            <div class="flex justify-between text-sm"><span class="text-stone-600">25'-35'</span><span class="font-bold">180 poles</span></div>
+            <div class="flex justify-between text-sm"><span class="text-stone-600">40'-55'</span><span class="font-bold">96 poles</span></div>
+            <div class="flex justify-between text-sm"><span class="text-stone-600">60'-105' (Ext.)</span><span class="font-bold">22 poles</span></div>
+          </div>
+        </div>
+        <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="font-black text-primary uppercase tracking-tight">Cross Arms</h3>
+            <span class="bg-primary/10 text-primary text-[10px] font-black uppercase px-2 py-0.5 rounded-full">In Stock</span>
+          </div>
+          <div class="space-y-3">
+            <div class="flex justify-between text-sm"><span class="text-stone-600">8' Standard</span><span class="font-bold">340 pcs</span></div>
+            <div class="flex justify-between text-sm"><span class="text-stone-600">10' Standard</span><span class="font-bold">210 pcs</span></div>
+          </div>
+        </div>
+        <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="font-black text-primary uppercase tracking-tight">Byproducts</h3>
+            <span class="bg-primary/10 text-primary text-[10px] font-black uppercase px-2 py-0.5 rounded-full">In Stock</span>
+          </div>
+          <div class="space-y-3">
+            <div class="flex justify-between text-sm"><span class="text-stone-600">Pine Mulch</span><span class="font-bold">42 pallets</span></div>
+            <div class="flex justify-between text-sm"><span class="text-stone-600">Erosion Control</span><span class="font-bold">18 pallets</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== ORDERS PAGE ==================== -->
+    <div id="page-orders" class="page-content hidden">
+      <div class="flex justify-between items-end mb-8">
+        <div>
+          <h1 class="text-4xl font-black text-primary tracking-tighter uppercase">Orders</h1>
+          <p class="text-stone-500 font-medium mt-1 text-sm">Manage and track all customer orders.</p>
+        </div>
+        <button class="bg-primary px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 text-on-primary hover:bg-primary-container transition-colors shadow-lg shadow-primary/10">
+          <span class="material-symbols-outlined text-sm">add</span>
+          New Order
+        </button>
+      </div>
+      <!-- Order Filters -->
+      <div class="flex gap-2 mb-6">
+        <button class="bg-primary text-on-primary px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">All</button>
+        <button class="bg-surface-container text-stone-600 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-surface-dim transition-colors">Processing</button>
+        <button class="bg-surface-container text-stone-600 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-surface-dim transition-colors">Drying</button>
+        <button class="bg-surface-container text-stone-600 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-surface-dim transition-colors">Staged</button>
+        <button class="bg-surface-container text-stone-600 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-surface-dim transition-colors">Shipped</button>
+        <button class="bg-surface-container text-stone-600 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-surface-dim transition-colors">Complete</button>
+      </div>
+      <div class="bg-surface-container-lowest rounded-2xl shadow-xl shadow-stone-200/50 overflow-hidden">
+        <table class="w-full text-left">
+          <thead class="bg-surface-container-low">
+            <tr>
+              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Order ID</th>
+              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Customer</th>
+              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Product</th>
+              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Qty</th>
+              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Status</th>
+              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Ship Date</th>
+              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 text-right">Total</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-container">
+            <tr class="hover:bg-surface transition-colors cursor-pointer">
+              <td class="px-6 py-4 text-sm font-bold text-primary">#ORD-40129</td>
+              <td class="px-6 py-4 text-sm font-medium">Bluegrass Builders</td>
+              <td class="px-6 py-4 text-sm">White Oak Fencing</td>
+              <td class="px-6 py-4 text-sm">500 LF</td>
+              <td class="px-6 py-4"><span class="bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Processing</span></td>
+              <td class="px-6 py-4 text-sm text-stone-600">Mar 28, 2026</td>
+              <td class="px-6 py-4 text-right font-black text-primary">$4,250.00</td>
+            </tr>
+            <tr class="hover:bg-surface transition-colors cursor-pointer">
+              <td class="px-6 py-4 text-sm font-bold text-primary">#ORD-40130</td>
+              <td class="px-6 py-4 text-sm font-medium">Appalachian Electric</td>
+              <td class="px-6 py-4 text-sm">Utility Poles 45'</td>
+              <td class="px-6 py-4 text-sm">24</td>
+              <td class="px-6 py-4"><span class="bg-tertiary/10 text-tertiary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Drying</span></td>
+              <td class="px-6 py-4 text-sm text-stone-600">Apr 5, 2026</td>
+              <td class="px-6 py-4 text-right font-black text-primary">$18,720.00</td>
+            </tr>
+            <tr class="hover:bg-surface transition-colors cursor-pointer">
+              <td class="px-6 py-4 text-sm font-bold text-primary">#ORD-40131</td>
+              <td class="px-6 py-4 text-sm font-medium">Daniel Construction</td>
+              <td class="px-6 py-4 text-sm">3-Ply Crane Mats 16'</td>
+              <td class="px-6 py-4 text-sm">12</td>
+              <td class="px-6 py-4"><span class="bg-secondary/10 text-secondary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Shipped</span></td>
+              <td class="px-6 py-4 text-sm text-stone-600">Mar 21, 2026</td>
+              <td class="px-6 py-4 text-right font-black text-primary">$9,600.00</td>
+            </tr>
+            <tr class="hover:bg-surface transition-colors cursor-pointer">
+              <td class="px-6 py-4 text-sm font-bold text-primary">#ORD-40132</td>
+              <td class="px-6 py-4 text-sm font-medium">Kentucky Power Co.</td>
+              <td class="px-6 py-4 text-sm">Cross Arms 10'</td>
+              <td class="px-6 py-4 text-sm">200</td>
+              <td class="px-6 py-4"><span class="bg-surface-container-highest text-stone-500 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Staged</span></td>
+              <td class="px-6 py-4 text-sm text-stone-600">Mar 30, 2026</td>
+              <td class="px-6 py-4 text-right font-black text-primary">$6,400.00</td>
+            </tr>
+            <tr class="hover:bg-surface transition-colors cursor-pointer">
+              <td class="px-6 py-4 text-sm font-bold text-primary">#ORD-40133</td>
+              <td class="px-6 py-4 text-sm font-medium">Red River Farms</td>
+              <td class="px-6 py-4 text-sm">Pine Mulch</td>
+              <td class="px-6 py-4 text-sm">8 pallets</td>
+              <td class="px-6 py-4"><span class="bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Complete</span></td>
+              <td class="px-6 py-4 text-sm text-stone-600">Mar 16, 2026</td>
+              <td class="px-6 py-4 text-right font-black text-primary">$2,100.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================== CUSTOMERS PAGE ==================== -->
+    <div id="page-customers" class="page-content hidden">
+      <div class="flex justify-between items-end mb-8">
+        <div>
+          <h1 class="text-4xl font-black text-primary tracking-tighter uppercase">Customers</h1>
+          <p class="text-stone-500 font-medium mt-1 text-sm">Manage your customer relationships and contact info.</p>
+        </div>
+        <button class="bg-primary px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 text-on-primary hover:bg-primary-container transition-colors shadow-lg shadow-primary/10">
+          <span class="material-symbols-outlined text-sm">person_add</span>
+          Add Customer
+        </button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all cursor-pointer">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-11 h-11 rounded-lg bg-primary flex items-center justify-center text-on-primary font-bold">BB</div>
+            <div>
+              <p class="font-bold text-primary">Bluegrass Builders</p>
+              <p class="text-[10px] text-stone-500 uppercase tracking-wider">Commercial · Lexington, KY</p>
+            </div>
+          </div>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between"><span class="text-stone-500">Contact</span><span class="font-medium">Mark Thompson</span></div>
+            <div class="flex justify-between"><span class="text-stone-500">Orders (YTD)</span><span class="font-bold text-primary">12</span></div>
+            <div class="flex justify-between"><span class="text-stone-500">Revenue (YTD)</span><span class="font-bold text-primary">$48,200</span></div>
+          </div>
+        </div>
+        <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all cursor-pointer">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-11 h-11 rounded-lg bg-secondary flex items-center justify-center text-on-primary font-bold">AE</div>
+            <div>
+              <p class="font-bold text-primary">Appalachian Electric</p>
+              <p class="text-[10px] text-stone-500 uppercase tracking-wider">Utility · Corbin, KY</p>
+            </div>
+          </div>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between"><span class="text-stone-500">Contact</span><span class="font-medium">Sarah Williams</span></div>
+            <div class="flex justify-between"><span class="text-stone-500">Orders (YTD)</span><span class="font-bold text-primary">8</span></div>
+            <div class="flex justify-between"><span class="text-stone-500">Revenue (YTD)</span><span class="font-bold text-primary">$142,800</span></div>
+          </div>
+        </div>
+        <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all cursor-pointer">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-11 h-11 rounded-lg bg-tertiary flex items-center justify-center text-on-primary font-bold">DC</div>
+            <div>
+              <p class="font-bold text-primary">Daniel Construction</p>
+              <p class="text-[10px] text-stone-500 uppercase tracking-wider">Industrial · Somerset, KY</p>
+            </div>
+          </div>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between"><span class="text-stone-500">Contact</span><span class="font-medium">James Daniel</span></div>
+            <div class="flex justify-between"><span class="text-stone-500">Orders (YTD)</span><span class="font-bold text-primary">6</span></div>
+            <div class="flex justify-between"><span class="text-stone-500">Revenue (YTD)</span><span class="font-bold text-primary">$67,400</span></div>
+          </div>
+        </div>
+        <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all cursor-pointer">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-11 h-11 rounded-lg bg-primary-container flex items-center justify-center text-on-primary font-bold">KP</div>
+            <div>
+              <p class="font-bold text-primary">Kentucky Power Co.</p>
+              <p class="text-[10px] text-stone-500 uppercase tracking-wider">Utility · Frankfort, KY</p>
+            </div>
+          </div>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between"><span class="text-stone-500">Contact</span><span class="font-medium">David Chen</span></div>
+            <div class="flex justify-between"><span class="text-stone-500">Orders (YTD)</span><span class="font-bold text-primary">15</span></div>
+            <div class="flex justify-between"><span class="text-stone-500">Revenue (YTD)</span><span class="font-bold text-primary">$198,500</span></div>
+          </div>
+        </div>
+        <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all cursor-pointer">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-11 h-11 rounded-lg bg-stone-500 flex items-center justify-center text-on-primary font-bold">RR</div>
+            <div>
+              <p class="font-bold text-primary">Red River Farms</p>
+              <p class="text-[10px] text-stone-500 uppercase tracking-wider">Agricultural · Richmond, KY</p>
+            </div>
+          </div>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between"><span class="text-stone-500">Contact</span><span class="font-medium">Lisa Harper</span></div>
+            <div class="flex justify-between"><span class="text-stone-500">Orders (YTD)</span><span class="font-bold text-primary">4</span></div>
+            <div class="flex justify-between"><span class="text-stone-500">Revenue (YTD)</span><span class="font-bold text-primary">$8,400</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== QUOTES PAGE ==================== -->
+    <div id="page-quotes" class="page-content hidden">
+      <div class="flex justify-between items-end mb-8">
+        <div>
+          <h1 class="text-4xl font-black text-primary tracking-tighter uppercase">Quotes</h1>
+          <p class="text-stone-500 font-medium mt-1 text-sm">Create, manage, and send quotes to customers.</p>
+        </div>
+        <button class="bg-primary px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 text-on-primary hover:bg-primary-container transition-colors shadow-lg shadow-primary/10">
+          <span class="material-symbols-outlined text-sm">add</span>
+          New Quote
+        </button>
+      </div>
+      <div class="bg-surface-container-lowest rounded-2xl shadow-xl shadow-stone-200/50 overflow-hidden">
+        <table class="w-full text-left">
+          <thead class="bg-surface-container-low">
+            <tr>
+              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Quote #</th>
+              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Customer</th>
+              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Products</th>
+              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Status</th>
+              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Expires</th>
+              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 text-right">Total</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-container">
+            <tr class="hover:bg-surface transition-colors cursor-pointer">
+              <td class="px-6 py-4 text-sm font-bold text-primary">#QT-1082</td>
+              <td class="px-6 py-4 text-sm font-medium">Cumberland Homes LLC</td>
+              <td class="px-6 py-4 text-sm">Pine Fencing 800 LF + Posts</td>
+              <td class="px-6 py-4"><span class="bg-tertiary/10 text-tertiary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Pending</span></td>
+              <td class="px-6 py-4 text-sm text-stone-600">Apr 10, 2026</td>
+              <td class="px-6 py-4 text-right font-black text-primary">$7,840.00</td>
+            </tr>
+            <tr class="hover:bg-surface transition-colors cursor-pointer">
+              <td class="px-6 py-4 text-sm font-bold text-primary">#QT-1081</td>
+              <td class="px-6 py-4 text-sm font-medium">Tri-County Electric</td>
+              <td class="px-6 py-4 text-sm">Utility Poles 35' (40 qty)</td>
+              <td class="px-6 py-4"><span class="bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Accepted</span></td>
+              <td class="px-6 py-4 text-sm text-stone-600">—</td>
+              <td class="px-6 py-4 text-right font-black text-primary">$24,000.00</td>
+            </tr>
+            <tr class="hover:bg-surface transition-colors cursor-pointer">
+              <td class="px-6 py-4 text-sm font-bold text-primary">#QT-1080</td>
+              <td class="px-6 py-4 text-sm font-medium">Southeastern Pipeline Co.</td>
+              <td class="px-6 py-4 text-sm">3-Ply Mats 40' (30 qty)</td>
+              <td class="px-6 py-4"><span class="bg-error/10 text-error text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Expired</span></td>
+              <td class="px-6 py-4 text-sm text-stone-600">Mar 15, 2026</td>
+              <td class="px-6 py-4 text-right font-black text-primary">$36,000.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================== SHIPPING PAGE ==================== -->
+    <div id="page-shipping" class="page-content hidden">
+      <div class="flex justify-between items-end mb-8">
+        <div>
+          <h1 class="text-4xl font-black text-primary tracking-tighter uppercase">Shipping</h1>
+          <p class="text-stone-500 font-medium mt-1 text-sm">Track shipments and manage logistics.</p>
+        </div>
+        <button class="bg-primary px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 text-on-primary hover:bg-primary-container transition-colors shadow-lg shadow-primary/10">
+          <span class="material-symbols-outlined text-sm">add</span>
+          Schedule Shipment
+        </button>
+      </div>
+      <!-- Active Shipments -->
+      <div class="space-y-4">
+        <div class="bg-surface-container-low p-5 rounded-xl flex items-center justify-between hover:bg-surface-container-lowest transition-all">
+          <div class="flex items-center gap-4">
+            <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined">local_shipping</span>
+            </div>
+            <div>
+              <p class="font-bold text-primary text-sm">#SHP-2241 — Daniel Construction</p>
+              <p class="text-xs text-stone-500">3-Ply Crane Mats 16' × 12 · Full Truckload</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="bg-secondary/10 text-secondary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">In Transit</span>
+            <p class="text-[10px] text-stone-500 mt-1">ETA: Mar 27, 2026</p>
+          </div>
+        </div>
+        <div class="bg-surface-container-low p-5 rounded-xl flex items-center justify-between hover:bg-surface-container-lowest transition-all">
+          <div class="flex items-center gap-4">
+            <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined">inventory</span>
+            </div>
+            <div>
+              <p class="font-bold text-primary text-sm">#SHP-2240 — Kentucky Power Co.</p>
+              <p class="text-xs text-stone-500">Cross Arms 10' × 200 · Palletized</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="bg-surface-container-highest text-stone-500 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Staging</span>
+            <p class="text-[10px] text-stone-500 mt-1">Pickup: Mar 30, 2026</p>
+          </div>
+        </div>
+        <div class="bg-surface-container-low p-5 rounded-xl flex items-center justify-between hover:bg-surface-container-lowest transition-all">
+          <div class="flex items-center gap-4">
+            <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined">check_circle</span>
+            </div>
+            <div>
+              <p class="font-bold text-primary text-sm">#SHP-2239 — Red River Farms</p>
+              <p class="text-xs text-stone-500">Pine Mulch × 8 Pallets · LTL</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Delivered</span>
+            <p class="text-[10px] text-stone-500 mt-1">Mar 16, 2026</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== OUTREACH PAGE ==================== -->
+    <div id="page-outreach" class="page-content hidden">
+      <!-- Outreach Sub-Navigation -->
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex gap-1">
+          <button onclick="showOutreachTab('campaigns')" class="outreach-tab outreach-tab-active px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-colors" data-tab="campaigns">Campaigns</button>
+          <button onclick="showOutreachTab('leads')" class="outreach-tab bg-surface-container text-stone-600 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-surface-dim transition-colors" data-tab="leads">Leads</button>
+          <button onclick="showOutreachTab('compose')" class="outreach-tab bg-surface-container text-stone-600 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-surface-dim transition-colors" data-tab="compose">Compose</button>
+          <button onclick="showOutreachTab('templates')" class="outreach-tab bg-surface-container text-stone-600 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-surface-dim transition-colors" data-tab="templates">Templates</button>
+          <button onclick="showOutreachTab('outreach-settings')" class="outreach-tab bg-surface-container text-stone-600 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-surface-dim transition-colors" data-tab="outreach-settings">Settings</button>
+        </div>
+        <button onclick="showOutreachTab('compose')" class="bg-primary px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 text-on-primary hover:bg-primary-container transition-colors shadow-lg shadow-primary/10">
+          <span class="material-symbols-outlined text-sm">add</span>
+          New Campaign
+        </button>
+      </div>
+
+      <!-- ── CAMPAIGNS TAB ─────────────────────────────────────────── -->
+      <div id="outreach-campaigns" class="outreach-content">
+        <!-- Stats Bar -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6" id="outreach-stats">
+          <div class="bg-surface-container-low p-4 rounded-xl">
+            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Emails Sent</span>
+            <p class="text-2xl font-black text-primary mt-1" id="stat-emails-sent">0</p>
+          </div>
+          <div class="bg-surface-container-low p-4 rounded-xl">
+            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Reply Rate</span>
+            <p class="text-2xl font-black text-primary mt-1" id="stat-reply-rate">0%</p>
+          </div>
+          <div class="bg-surface-container-low p-4 rounded-xl">
+            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Bounce Rate</span>
+            <p class="text-2xl font-black text-primary mt-1" id="stat-bounce-rate">0%</p>
+          </div>
+          <div class="bg-surface-container-low p-4 rounded-xl">
+            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Total Leads</span>
+            <p class="text-2xl font-black text-primary mt-1" id="stat-total-leads">0</p>
+          </div>
+        </div>
+
+        <!-- Campaign Cards Grid -->
+        <div id="campaigns-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- Populated by JS -->
+        </div>
+        <div id="campaigns-empty" class="bg-surface-container-low rounded-xl p-16 text-center">
+          <span class="material-symbols-outlined text-5xl text-stone-300 mb-4">campaign</span>
+          <h3 class="text-lg font-black text-primary uppercase tracking-tight">No Campaigns Yet</h3>
+          <p class="text-sm text-stone-500 mt-1 mb-4">Create your first outreach campaign to start reaching prospects.</p>
+          <button onclick="showOutreachTab('compose')" class="bg-primary px-5 py-2 rounded-lg text-sm font-bold text-on-primary hover:bg-primary-container transition-colors">
+            <span class="material-symbols-outlined text-sm align-middle mr-1">add</span>
+            Create Campaign
+          </button>
+        </div>
+      </div>
+
+      <!-- ── LEADS TAB ─────────────────────────────────────────────── -->
+      <div id="outreach-leads" class="outreach-content hidden">
+        <!-- Filter Bar -->
+        <div class="bg-surface-container-low rounded-xl p-4 mb-4 flex items-center gap-3 flex-wrap">
+          <select id="leads-status-filter" onchange="filterLeads()" class="bg-surface-container-highest border-none rounded-lg px-3 py-2 text-sm focus:ring-primary">
+            <option value="all">All Statuses</option>
+            <option value="new">New</option>
+            <option value="active">Active</option>
+            <option value="replied">Replied</option>
+            <option value="bounced">Bounced</option>
+            <option value="unsubscribed">Unsubscribed</option>
+            <option value="completed">Completed</option>
+          </select>
+          <select id="leads-campaign-filter" onchange="filterLeads()" class="bg-surface-container-highest border-none rounded-lg px-3 py-2 text-sm focus:ring-primary">
+            <option value="all">All Campaigns</option>
+          </select>
+          <div class="flex-1 min-w-[200px] relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-sm">search</span>
+            <input type="text" id="leads-search" oninput="filterLeads()" placeholder="Search leads..." class="w-full bg-surface-container-highest border-none rounded-lg pl-9 pr-4 py-2 text-sm focus:ring-primary"/>
+          </div>
+          <span class="text-xs text-stone-500" id="leads-count">0 leads</span>
+        </div>
+
+        <!-- Leads Table -->
+        <div class="bg-surface-container-lowest rounded-2xl shadow-xl shadow-stone-200/50 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-surface-container-low">
+                <tr>
+                  <th class="px-4 py-3 w-10"><input type="checkbox" id="leads-select-all" onchange="toggleAllLeads()" class="rounded border-stone-300 text-primary focus:ring-primary"/></th>
+                  <th class="px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Email</th>
+                  <th class="px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Name</th>
+                  <th class="px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Company</th>
+                  <th class="px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Title</th>
+                  <th class="px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Status</th>
+                  <th class="px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="leads-tbody">
+                <tr><td colspan="7" class="px-4 py-16 text-center text-stone-400">No leads yet. Import leads via search or CSV.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- Pagination -->
+          <div id="leads-pagination" class="hidden flex items-center justify-between px-4 py-3 border-t border-surface-container">
+            <span class="text-xs text-stone-500" id="leads-page-info"></span>
+            <div class="flex gap-1" id="leads-page-buttons"></div>
+          </div>
+        </div>
+
+        <!-- Bulk Action Bar -->
+        <div id="bulk-action-bar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-primary text-on-primary rounded-xl px-6 py-3 shadow-2xl flex items-center gap-4 z-50">
+          <span class="text-sm font-bold" id="bulk-selected-count">0 selected</span>
+          <button onclick="exportLeadsCSV()" class="bg-on-primary/20 hover:bg-on-primary/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">Export CSV</button>
+          <button onclick="bulkDeleteLeads()" class="bg-error/80 hover:bg-error px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">Delete</button>
+          <button onclick="clearLeadSelection()" class="hover:bg-on-primary/20 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">Clear</button>
+        </div>
+      </div>
+
+      <!-- ── COMPOSE TAB (Wizard) ──────────────────────────────────── -->
+      <div id="outreach-compose" class="outreach-content hidden">
+        <!-- Wizard Progress Bar -->
+        <div class="bg-surface-container-low rounded-xl p-6 mb-6">
+          <div class="flex items-center justify-between max-w-2xl mx-auto">
+            <div class="flex flex-col items-center">
+              <div id="wizard-dot-1" class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center text-sm font-bold ring-4 ring-primary/20">1</div>
+              <span class="mt-2 text-xs font-bold text-primary">Audience</span>
+            </div>
+            <div class="flex-1 mx-3 mt-[-1.25rem]"><div id="wizard-line-1" class="h-0.5 rounded-full bg-stone-200"></div></div>
+            <div class="flex flex-col items-center">
+              <div id="wizard-dot-2" class="w-10 h-10 rounded-full bg-surface-container text-stone-400 flex items-center justify-center text-sm font-bold">2</div>
+              <span class="mt-2 text-xs font-medium text-stone-400">Message</span>
+            </div>
+            <div class="flex-1 mx-3 mt-[-1.25rem]"><div id="wizard-line-2" class="h-0.5 rounded-full bg-stone-200"></div></div>
+            <div class="flex flex-col items-center">
+              <div id="wizard-dot-3" class="w-10 h-10 rounded-full bg-surface-container text-stone-400 flex items-center justify-center text-sm font-bold">3</div>
+              <span class="mt-2 text-xs font-medium text-stone-400">Review</span>
+            </div>
+            <div class="flex-1 mx-3 mt-[-1.25rem]"><div id="wizard-line-3" class="h-0.5 rounded-full bg-stone-200"></div></div>
+            <div class="flex flex-col items-center">
+              <div id="wizard-dot-4" class="w-10 h-10 rounded-full bg-surface-container text-stone-400 flex items-center justify-center text-sm font-bold">4</div>
+              <span class="mt-2 text-xs font-medium text-stone-400">Send</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 1: Audience -->
+        <div id="wizard-step-1" class="wizard-step">
+          <h2 class="text-2xl font-black text-primary uppercase tracking-tighter mb-4">Select Your Audience</h2>
+          <!-- Source Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <button onclick="selectAudienceSource('apollo')" class="audience-source-card bg-surface-container-low p-5 rounded-xl text-left hover:bg-surface-container-lowest transition-all group" data-source="apollo">
+              <span class="material-symbols-outlined text-3xl text-primary mb-2 group-hover:scale-110 transition-transform">travel_explore</span>
+              <h3 class="font-black text-primary uppercase tracking-tight text-sm">Prospect Search</h3>
+              <p class="text-xs text-stone-500 mt-1">Search for prospects by title, location, company</p>
+            </button>
+            <button onclick="selectAudienceSource('csv')" class="audience-source-card bg-surface-container-low p-5 rounded-xl text-left hover:bg-surface-container-lowest transition-all group" data-source="csv">
+              <span class="material-symbols-outlined text-3xl text-secondary mb-2 group-hover:scale-110 transition-transform">upload_file</span>
+              <h3 class="font-black text-primary uppercase tracking-tight text-sm">CSV Import</h3>
+              <p class="text-xs text-stone-500 mt-1">Upload a CSV file with lead data</p>
+            </button>
+            <button onclick="selectAudienceSource('manual')" class="audience-source-card bg-surface-container-low p-5 rounded-xl text-left hover:bg-surface-container-lowest transition-all group" data-source="manual">
+              <span class="material-symbols-outlined text-3xl text-tertiary mb-2 group-hover:scale-110 transition-transform">person_add</span>
+              <h3 class="font-black text-primary uppercase tracking-tight text-sm">Manual Entry</h3>
+              <p class="text-xs text-stone-500 mt-1">Add leads one at a time</p>
+            </button>
+          </div>
+
+          <!-- Prospect Search Panel -->
+          <div id="apollo-panel" class="hidden">
+            <div class="bg-surface-container-low rounded-xl p-5 space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Job Titles</label>
+                  <input type="text" id="apollo-titles" placeholder="CEO, VP Operations, Director..." class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary"/>
+                </div>
+                <div>
+                  <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Person Locations</label>
+                  <input type="text" id="apollo-locations" placeholder="Kentucky, Tennessee, Ohio..." class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary"/>
+                </div>
+                <div>
+                  <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Company Domains</label>
+                  <input type="text" id="apollo-domains" placeholder="acme.com, example.com..." class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary"/>
+                </div>
+              </div>
+
+              <!-- Advanced Filters Toggle -->
+              <button onclick="document.getElementById('apollo-advanced').classList.toggle('hidden')" class="flex items-center gap-1.5 text-xs font-bold text-stone-500 hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-sm">expand_more</span>
+                Advanced Filters
+              </button>
+
+              <!-- Advanced Filters -->
+              <div id="apollo-advanced" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 pt-3 border-t border-outline-variant/20">
+                <div>
+                  <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Employee Ranges</label>
+                  <input type="text" id="apollo-employees" placeholder="1-50, 51-200, 201-1000" class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary"/>
+                </div>
+                <div>
+                  <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Org Locations</label>
+                  <input type="text" id="apollo-org-locations" placeholder="United States, Kentucky..." class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary"/>
+                </div>
+                <div>
+                  <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Keywords / Tags</label>
+                  <input type="text" id="apollo-keywords" placeholder="utility, construction, lumber..." class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary"/>
+                </div>
+                <!-- Seniority Pills -->
+                <div class="md:col-span-3">
+                  <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1.5">Seniority</label>
+                  <div class="flex flex-wrap gap-1.5" id="seniority-pills">
+                    <button onclick="togglePill(this)" data-field="seniorities" data-value="owner" class="pill-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-surface-container text-stone-500 hover:bg-surface-dim transition-colors">Owner</button>
+                    <button onclick="togglePill(this)" data-field="seniorities" data-value="founder" class="pill-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-surface-container text-stone-500 hover:bg-surface-dim transition-colors">Founder</button>
+                    <button onclick="togglePill(this)" data-field="seniorities" data-value="c_suite" class="pill-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-surface-container text-stone-500 hover:bg-surface-dim transition-colors">C-Suite</button>
+                    <button onclick="togglePill(this)" data-field="seniorities" data-value="partner" class="pill-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-surface-container text-stone-500 hover:bg-surface-dim transition-colors">Partner</button>
+                    <button onclick="togglePill(this)" data-field="seniorities" data-value="vp" class="pill-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-surface-container text-stone-500 hover:bg-surface-dim transition-colors">VP</button>
+                    <button onclick="togglePill(this)" data-field="seniorities" data-value="head" class="pill-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-surface-container text-stone-500 hover:bg-surface-dim transition-colors">Head</button>
+                    <button onclick="togglePill(this)" data-field="seniorities" data-value="director" class="pill-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-surface-container text-stone-500 hover:bg-surface-dim transition-colors">Director</button>
+                    <button onclick="togglePill(this)" data-field="seniorities" data-value="manager" class="pill-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-surface-container text-stone-500 hover:bg-surface-dim transition-colors">Manager</button>
+                    <button onclick="togglePill(this)" data-field="seniorities" data-value="senior" class="pill-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-surface-container text-stone-500 hover:bg-surface-dim transition-colors">Senior</button>
+                  </div>
+                </div>
+                <!-- Department Pills -->
+                <div class="md:col-span-2">
+                  <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1.5">Departments</label>
+                  <div class="flex flex-wrap gap-1.5" id="department-pills">
+                    <button onclick="togglePill(this)" data-field="departments" data-value="engineering" class="pill-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-surface-container text-stone-500 hover:bg-surface-dim transition-colors">Engineering</button>
+                    <button onclick="togglePill(this)" data-field="departments" data-value="operations" class="pill-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-surface-container text-stone-500 hover:bg-surface-dim transition-colors">Operations</button>
+                    <button onclick="togglePill(this)" data-field="departments" data-value="sales" class="pill-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-surface-container text-stone-500 hover:bg-surface-dim transition-colors">Sales</button>
+                    <button onclick="togglePill(this)" data-field="departments" data-value="executive" class="pill-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-surface-container text-stone-500 hover:bg-surface-dim transition-colors">Executive</button>
+                    <button onclick="togglePill(this)" data-field="departments" data-value="finance" class="pill-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-surface-container text-stone-500 hover:bg-surface-dim transition-colors">Finance</button>
+                    <button onclick="togglePill(this)" data-field="departments" data-value="marketing" class="pill-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-surface-container text-stone-500 hover:bg-surface-dim transition-colors">Marketing</button>
+                  </div>
+                </div>
+                <div>
+                  <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Results per page</label>
+                  <select id="apollo-per-page" class="bg-surface-container-highest border-none rounded-lg px-3 py-2.5 text-sm focus:ring-primary">
+                    <option value="10">10</option>
+                    <option value="25" selected>25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Search Button -->
+              <div class="flex items-center justify-between pt-3 border-t border-outline-variant/20">
+                <span class="text-xs text-stone-400" id="apollo-credits"></span>
+                <button onclick="apolloSearch()" id="apollo-search-btn" class="bg-primary hover:bg-primary-container text-on-primary px-6 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors">
+                  <span class="material-symbols-outlined text-sm">search</span>
+                  Search
+                </button>
+              </div>
+            </div>
+
+            <!-- Search Error -->
+            <div id="apollo-error" class="hidden bg-error/10 text-error rounded-xl p-3 text-sm flex items-center gap-2 mt-4">
+              <span class="material-symbols-outlined text-sm">error</span>
+              <span id="apollo-error-text"></span>
+            </div>
+
+            <!-- Search Results -->
+            <div id="apollo-results" class="hidden mt-4">
+              <div class="bg-surface-container-lowest rounded-2xl shadow-xl shadow-stone-200/50 overflow-hidden">
+                <div class="overflow-x-auto">
+                  <table class="w-full text-sm">
+                    <thead class="bg-surface-container-low">
+                      <tr>
+                        <th class="px-4 py-3 w-10"><input type="checkbox" id="apollo-select-all" onchange="toggleAllApollo()" class="rounded border-stone-300 text-primary focus:ring-primary"/></th>
+                        <th class="px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Name</th>
+                        <th class="px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Email</th>
+                        <th class="px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Title</th>
+                        <th class="px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Company</th>
+                        <th class="px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Location</th>
+                      </tr>
+                    </thead>
+                    <tbody id="apollo-results-tbody"></tbody>
+                  </table>
+                </div>
+                <div class="flex items-center justify-between px-4 py-3 border-t border-surface-container">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-stone-500" id="apollo-page-info"></span>
+                    <div class="flex gap-1" id="apollo-page-buttons"></div>
+                  </div>
+                  <button onclick="useSelectedApolloLeads()" id="apollo-use-btn" class="hidden bg-primary hover:bg-primary-container text-on-primary px-5 py-2 rounded-lg text-sm font-bold transition-colors">
+                    Use <span id="apollo-use-count">0</span> Leads
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CSV Panel -->
+          <div id="csv-panel" class="hidden">
+            <div class="bg-surface-container-low rounded-xl p-8 text-center border-2 border-dashed border-outline-variant/30" id="csv-dropzone">
+              <span class="material-symbols-outlined text-5xl text-stone-300 mb-3">upload_file</span>
+              <h3 class="font-black text-primary uppercase tracking-tight mb-1">Drop CSV Here</h3>
+              <p class="text-sm text-stone-500 mb-4">or click to browse</p>
+              <input type="file" accept=".csv,.tsv" id="csv-file-input" onchange="handleCSVUpload(event)" class="hidden"/>
+              <button onclick="document.getElementById('csv-file-input').click()" class="bg-primary text-on-primary px-5 py-2 rounded-lg text-sm font-bold hover:bg-primary-container transition-colors">
+                Choose File
+              </button>
+            </div>
+            <div id="csv-preview" class="hidden mt-4">
+              <div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-xl shadow-stone-200/50">
+                <div class="p-4 bg-surface-container-low flex justify-between items-center">
+                  <span class="text-sm font-bold text-primary" id="csv-preview-count">0 leads found</span>
+                  <button onclick="useCSVLeads()" class="bg-primary text-on-primary px-4 py-2 rounded-lg text-sm font-bold hover:bg-primary-container transition-colors">Use These Leads</button>
+                </div>
+                <div class="overflow-x-auto max-h-64">
+                  <table class="w-full text-sm">
+                    <thead class="bg-surface-container-low sticky top-0">
+                      <tr id="csv-preview-header"></tr>
+                    </thead>
+                    <tbody id="csv-preview-tbody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Manual Entry Panel -->
+          <div id="manual-panel" class="hidden">
+            <div class="bg-surface-container-low rounded-xl p-5">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Email *</label>
+                  <input type="email" id="manual-email" class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary" placeholder="email@company.com"/>
+                </div>
+                <div>
+                  <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">First Name</label>
+                  <input type="text" id="manual-first" class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary"/>
+                </div>
+                <div>
+                  <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Last Name</label>
+                  <input type="text" id="manual-last" class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary"/>
+                </div>
+                <div>
+                  <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Company</label>
+                  <input type="text" id="manual-company" class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary"/>
+                </div>
+                <div>
+                  <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Title</label>
+                  <input type="text" id="manual-title" class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary"/>
+                </div>
+                <div>
+                  <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">City / State</label>
+                  <input type="text" id="manual-location" class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary" placeholder="London, KY"/>
+                </div>
+              </div>
+              <button onclick="addManualLead()" class="bg-primary text-on-primary px-5 py-2 rounded-lg text-sm font-bold hover:bg-primary-container transition-colors">
+                <span class="material-symbols-outlined text-sm align-middle mr-1">add</span>
+                Add Lead
+              </button>
+            </div>
+          </div>
+
+          <!-- Selected Leads Summary -->
+          <div id="compose-selected-summary" class="hidden mt-6">
+            <div class="bg-surface-container-low rounded-xl p-4">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-sm font-black text-primary uppercase tracking-tight">Selected Leads (<span id="compose-lead-count">0</span>)</span>
+                <button onclick="clearComposeLeads()" class="text-xs text-stone-500 hover:text-error transition-colors">Clear All</button>
+              </div>
+              <div id="compose-lead-chips" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Message -->
+        <div id="wizard-step-2" class="wizard-step hidden">
+          <h2 class="text-2xl font-black text-primary uppercase tracking-tighter mb-4">Compose Your Message</h2>
+          <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
+            <!-- Editor -->
+            <div class="lg:col-span-3 space-y-4">
+              <div id="email-steps-container">
+                <!-- Step 1 (always shown) -->
+                <div class="bg-surface-container-low rounded-xl p-5 email-step-editor" data-step="0">
+                  <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-black uppercase tracking-[0.2em] text-stone-400">Step 1 — Initial Email</span>
+                  </div>
+                  <div class="space-y-3">
+                    <div>
+                      <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Subject</label>
+                      <input type="text" class="email-step-subject w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary" placeholder="Subject line..."/>
+                    </div>
+                    <div>
+                      <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Body</label>
+                      <textarea class="email-step-body w-full bg-surface-container-highest border-none rounded-lg px-4 py-3 text-sm focus:ring-primary h-40 resize-y" placeholder="Write your email here..."></textarea>
+                    </div>
+                    <!-- Variable Chips -->
+                    <div class="flex flex-wrap gap-1.5">
+                      <span class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 self-center mr-1">Variables:</span>
+                      <button onclick="insertVariable('$first_name', this)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary hover:bg-primary/20 transition-colors">$first_name</button>
+                      <button onclick="insertVariable('$last_name', this)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary hover:bg-primary/20 transition-colors">$last_name</button>
+                      <button onclick="insertVariable('$company', this)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary hover:bg-primary/20 transition-colors">$company</button>
+                      <button onclick="insertVariable('$title', this)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary hover:bg-primary/20 transition-colors">$title</button>
+                      <button onclick="insertVariable('$city', this)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary hover:bg-primary/20 transition-colors">$city</button>
+                      <button onclick="insertVariable('$state', this)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary hover:bg-primary/20 transition-colors">$state</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button onclick="addEmailStep()" id="add-step-btn" class="w-full bg-surface-container-low rounded-xl p-3 text-sm font-bold text-stone-500 hover:text-primary hover:bg-surface-container-lowest transition-colors flex items-center justify-center gap-1">
+                <span class="material-symbols-outlined text-sm">add</span>
+                Add Follow-Up Step
+              </button>
+            </div>
+            <!-- Templates Sidebar -->
+            <div class="lg:col-span-2 space-y-4">
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <h3 class="font-black text-primary uppercase tracking-tight text-sm mb-3">Templates</h3>
+                <div id="compose-templates-list" class="space-y-2">
+                  <p class="text-xs text-stone-400">No templates saved yet.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Review -->
+        <div id="wizard-step-3" class="wizard-step hidden">
+          <h2 class="text-2xl font-black text-primary uppercase tracking-tighter mb-4">Review & Send</h2>
+          <div class="space-y-5">
+            <div class="bg-surface-container-low rounded-xl p-5">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Campaign Name</label>
+                  <input type="text" id="campaign-name" class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary" placeholder="Q1 Utility Outreach"/>
+                </div>
+                <div>
+                  <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Send From</label>
+                  <input type="email" id="sender-email" readonly class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm text-stone-500 cursor-not-allowed" placeholder="Your login email"/>
+                </div>
+              </div>
+              <!-- Summary -->
+              <div class="grid grid-cols-3 gap-4 text-center">
+                <div class="bg-surface-container-lowest rounded-lg p-3">
+                  <p class="text-2xl font-black text-primary" id="review-recipient-count">0</p>
+                  <p class="text-[10px] font-bold text-stone-400 uppercase">Recipients</p>
+                </div>
+                <div class="bg-surface-container-lowest rounded-lg p-3">
+                  <p class="text-2xl font-black text-primary" id="review-step-count">1</p>
+                  <p class="text-[10px] font-bold text-stone-400 uppercase">Email Steps</p>
+                </div>
+                <div class="bg-surface-container-lowest rounded-lg p-3">
+                  <p class="text-2xl font-black text-primary" id="review-span">1 day</p>
+                  <p class="text-[10px] font-bold text-stone-400 uppercase">Campaign Span</p>
+                </div>
+              </div>
+            </div>
+            <!-- Preview -->
+            <div class="bg-surface-container-low rounded-xl p-5">
+              <h3 class="font-black text-primary uppercase tracking-tight text-sm mb-3">Email Preview</h3>
+              <div id="review-preview" class="bg-surface-container-lowest rounded-lg p-4 space-y-3">
+                <p class="text-sm text-stone-500 italic">Configure your message in Step 2 first.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: Confirm -->
+        <div id="wizard-step-4" class="wizard-step hidden">
+          <div class="text-center py-12">
+            <span class="material-symbols-outlined text-6xl text-primary mb-4">check_circle</span>
+            <h2 class="text-3xl font-black text-primary uppercase tracking-tighter mb-2">Campaign Created!</h2>
+            <p class="text-stone-500 mb-6" id="confirm-message">Your leads have been imported and the campaign is ready.</p>
+            <div id="confirm-stats" class="grid grid-cols-3 gap-4 max-w-lg mx-auto mb-8">
+              <div class="bg-surface-container-low rounded-lg p-3">
+                <p class="text-2xl font-black text-primary" id="confirm-imported">0</p>
+                <p class="text-[10px] font-bold text-stone-400 uppercase">Imported</p>
+              </div>
+              <div class="bg-surface-container-low rounded-lg p-3">
+                <p class="text-2xl font-black text-primary" id="confirm-skipped">0</p>
+                <p class="text-[10px] font-bold text-stone-400 uppercase">Skipped (Dupes)</p>
+              </div>
+              <div class="bg-surface-container-low rounded-lg p-3">
+                <p class="text-2xl font-black text-primary" id="confirm-steps">1</p>
+                <p class="text-[10px] font-bold text-stone-400 uppercase">Steps</p>
+              </div>
+            </div>
+            <button onclick="resetWizard(); showOutreachTab('campaigns')" class="bg-primary text-on-primary px-6 py-2.5 rounded-lg text-sm font-bold hover:bg-primary-container transition-colors">
+              View Campaigns
+            </button>
+          </div>
+        </div>
+
+        <!-- Wizard Navigation -->
+        <div id="wizard-nav" class="flex items-center justify-between mt-6">
+          <button onclick="wizardPrev()" id="wizard-prev-btn" class="px-5 py-2.5 rounded-lg text-sm font-bold bg-surface-container text-stone-700 hover:bg-surface-dim transition-colors">Cancel</button>
+          <button onclick="wizardNext()" id="wizard-next-btn" class="px-6 py-2.5 rounded-lg text-sm font-bold bg-primary text-on-primary hover:bg-primary-container transition-colors disabled:opacity-40" disabled>Next</button>
+        </div>
+      </div>
+
+      <!-- ── TEMPLATES TAB ─────────────────────────────────────────── -->
+      <div id="outreach-templates" class="outreach-content hidden">
+        <div class="flex justify-between items-end mb-6">
+          <div>
+            <h2 class="text-2xl font-black text-primary uppercase tracking-tighter">Email Templates</h2>
+            <p class="text-sm text-stone-500">Save and reuse email sequences</p>
+          </div>
+          <button onclick="showTemplateEditor()" class="bg-primary px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 text-on-primary hover:bg-primary-container transition-colors">
+            <span class="material-symbols-outlined text-sm">add</span>
+            New Template
+          </button>
+        </div>
+        <div id="templates-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+        <div id="templates-empty" class="bg-surface-container-low rounded-xl p-12 text-center">
+          <span class="material-symbols-outlined text-4xl text-stone-300 mb-3">description</span>
+          <h3 class="font-black text-primary uppercase tracking-tight">No Templates</h3>
+          <p class="text-sm text-stone-500 mt-1">Create reusable email templates for your campaigns.</p>
+        </div>
+
+        <!-- Template Editor Modal -->
+        <div id="template-editor" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div class="bg-surface rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-black text-primary uppercase tracking-tight">Template Editor</h3>
+              <button onclick="hideTemplateEditor()" class="text-stone-400 hover:text-stone-700"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="space-y-4">
+              <div>
+                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Template Name</label>
+                <input type="text" id="tpl-name" class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary" placeholder="Initial Outreach"/>
+              </div>
+              <div id="tpl-steps-container">
+                <div class="bg-surface-container-low rounded-xl p-4 tpl-step-editor" data-step="0">
+                  <span class="text-xs font-black uppercase tracking-[0.2em] text-stone-400 mb-2 block">Step 1</span>
+                  <input type="text" class="tpl-step-subject w-full bg-surface-container-highest border-none rounded-lg px-4 py-2 text-sm focus:ring-primary mb-2" placeholder="Subject..."/>
+                  <textarea class="tpl-step-body w-full bg-surface-container-highest border-none rounded-lg px-4 py-2 text-sm focus:ring-primary h-28 resize-y" placeholder="Email body..."></textarea>
+                </div>
+              </div>
+              <button onclick="addTplStep()" class="text-sm font-bold text-stone-500 hover:text-primary flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">add</span> Add Step
+              </button>
+              <div class="flex justify-end gap-3 pt-3 border-t border-outline-variant/20">
+                <button onclick="hideTemplateEditor()" class="px-4 py-2 rounded-lg text-sm font-bold bg-surface-container text-stone-700 hover:bg-surface-dim transition-colors">Cancel</button>
+                <button onclick="saveTemplate()" class="px-5 py-2 rounded-lg text-sm font-bold bg-primary text-on-primary hover:bg-primary-container transition-colors">Save Template</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── OUTREACH SETTINGS TAB ─────────────────────────────────── -->
+      <div id="outreach-outreach-settings" class="outreach-content hidden">
+        <h2 class="text-2xl font-black text-primary uppercase tracking-tighter mb-6">Outreach Settings</h2>
+        <div class="max-w-2xl space-y-5">
+          <div class="bg-surface-container-low p-5 rounded-xl">
+            <h3 class="font-black text-primary uppercase tracking-tight mb-4">Sender Email</h3>
+            <div>
+              <p class="text-sm text-stone-600 mb-2">Outreach emails are sent from the email address you used to sign in.</p>
+              <div class="bg-surface-container-highest rounded-lg py-2.5 px-4 text-sm text-stone-500" id="settings-sender-display">—</div>
+            </div>
+          </div>
+          <div class="bg-surface-container-low p-5 rounded-xl">
+            <h3 class="font-black text-primary uppercase tracking-tight mb-4">Warmup Schedule</h3>
+            <p class="text-sm text-stone-500 mb-3">Daily sending limits ramp up over time to protect deliverability.</p>
+            <div class="flex items-end gap-2 h-32">
+              <div class="flex flex-col items-center flex-1"><div class="bg-primary/20 w-full rounded-t" style="height:20%"></div><span class="text-[10px] font-bold text-stone-400 mt-1">Wk1</span><span class="text-xs font-black text-primary">5/day</span></div>
+              <div class="flex flex-col items-center flex-1"><div class="bg-primary/30 w-full rounded-t" style="height:40%"></div><span class="text-[10px] font-bold text-stone-400 mt-1">Wk2</span><span class="text-xs font-black text-primary">10/day</span></div>
+              <div class="flex flex-col items-center flex-1"><div class="bg-primary/50 w-full rounded-t" style="height:60%"></div><span class="text-[10px] font-bold text-stone-400 mt-1">Wk3</span><span class="text-xs font-black text-primary">15/day</span></div>
+              <div class="flex flex-col items-center flex-1"><div class="bg-primary/70 w-full rounded-t" style="height:80%"></div><span class="text-[10px] font-bold text-stone-400 mt-1">Wk4</span><span class="text-xs font-black text-primary">20/day</span></div>
+              <div class="flex flex-col items-center flex-1"><div class="bg-primary w-full rounded-t" style="height:100%"></div><span class="text-[10px] font-bold text-stone-400 mt-1">Wk5+</span><span class="text-xs font-black text-primary">25/day</span></div>
+            </div>
+          </div>
+          <div class="bg-surface-container-low p-5 rounded-xl">
+            <h3 class="font-black text-primary uppercase tracking-tight mb-4">Sending Window</h3>
+            <p class="text-sm text-stone-500">Emails are sent Monday–Friday, 8:00 AM – 6:00 PM Eastern Time.</p>
+          </div>
+          <div class="bg-surface-container-low p-5 rounded-xl">
+            <h3 class="font-black text-primary uppercase tracking-tight mb-4">Lead Search API</h3>
+            <p class="text-sm text-stone-500">Lead search integration is active. API key is configured server-side.</p>
+            <div class="mt-2 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-primary"></span>
+              <span class="text-xs font-bold text-primary">Connected</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== WEBSITE PAGE ==================== -->
+    <div id="page-website" class="page-content hidden">
+      <div class="flex justify-between items-end mb-8">
+        <div>
+          <h1 class="text-4xl font-black text-primary tracking-tighter uppercase">Website</h1>
+          <p class="text-stone-500 font-medium mt-1 text-sm">Manage website content and incoming quote requests.</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div class="bg-surface-container-low p-5 rounded-xl">
+          <h3 class="font-black text-primary uppercase tracking-tight mb-4">Recent Quote Requests</h3>
+          <div class="space-y-3">
+            <div class="bg-surface-container-lowest p-4 rounded-lg flex justify-between items-center">
+              <div>
+                <p class="text-sm font-bold">John Miller</p>
+                <p class="text-xs text-stone-500">Fencing quote — 300 LF Pine</p>
+              </div>
+              <span class="text-[10px] font-bold text-stone-400">2h ago</span>
+            </div>
+            <div class="bg-surface-container-lowest p-4 rounded-lg flex justify-between items-center">
+              <div>
+                <p class="text-sm font-bold">Roberts Contracting</p>
+                <p class="text-xs text-stone-500">Matting — 20 crane mats 40'</p>
+              </div>
+              <span class="text-[10px] font-bold text-stone-400">5h ago</span>
+            </div>
+            <div class="bg-surface-container-lowest p-4 rounded-lg flex justify-between items-center">
+              <div>
+                <p class="text-sm font-bold">East KY Rural Electric</p>
+                <p class="text-xs text-stone-500">Utility poles 50' — 60 qty</p>
+              </div>
+              <span class="text-[10px] font-bold text-stone-400">1d ago</span>
+            </div>
+          </div>
+        </div>
+        <div class="bg-surface-container-low p-5 rounded-xl">
+          <h3 class="font-black text-primary uppercase tracking-tight mb-4">Quick Links</h3>
+          <div class="space-y-3">
+            <a href="index.html" target="_blank" class="bg-surface-container-lowest p-4 rounded-lg flex items-center gap-3 hover:bg-surface transition-colors">
+              <span class="material-symbols-outlined text-primary">language</span>
+              <div>
+                <p class="text-sm font-bold">View Live Site</p>
+                <p class="text-xs text-stone-500">kyforest.com</p>
+              </div>
+            </a>
+            <a href="contact.html" target="_blank" class="bg-surface-container-lowest p-4 rounded-lg flex items-center gap-3 hover:bg-surface transition-colors">
+              <span class="material-symbols-outlined text-primary">edit</span>
+              <div>
+                <p class="text-sm font-bold">Edit Contact Page</p>
+                <p class="text-xs text-stone-500">Update phone, address, hours</p>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SETTINGS PAGE ==================== -->
+    <div id="page-settings" class="page-content hidden">
+      <div class="mb-8">
+        <h1 class="text-4xl font-black text-primary tracking-tighter uppercase">Settings</h1>
+        <p class="text-stone-500 font-medium mt-1 text-sm">Manage your account and system preferences.</p>
+      </div>
+      <div class="max-w-2xl space-y-5">
+        <div class="bg-surface-container-low p-5 rounded-xl">
+          <h3 class="font-black text-primary uppercase tracking-tight mb-4">Company Info</h3>
+          <div class="space-y-4">
+            <div>
+              <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Company Name</label>
+              <input type="text" value="Kentucky Forest Products" class="w-full bg-surface-container-highest border-none rounded-lg py-2.5 px-4 text-sm focus:ring-2 focus:ring-primary"/>
+            </div>
+            <div>
+              <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Phone</label>
+              <input type="text" value="(606) 878-6200" class="w-full bg-surface-container-highest border-none rounded-lg py-2.5 px-4 text-sm focus:ring-2 focus:ring-primary"/>
+            </div>
+            <div>
+              <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Address</label>
+              <input type="text" value="London, Kentucky" class="w-full bg-surface-container-highest border-none rounded-lg py-2.5 px-4 text-sm focus:ring-2 focus:ring-primary"/>
+            </div>
+          </div>
+        </div>
+        <div class="bg-surface-container-low p-5 rounded-xl">
+          <h3 class="font-black text-primary uppercase tracking-tight mb-4">Notifications</h3>
+          <div class="space-y-3">
+            <label class="flex items-center justify-between cursor-pointer">
+              <span class="text-sm font-medium">New quote requests</span>
+              <div class="w-10 h-6 bg-primary rounded-full relative">
+                <div class="w-4 h-4 bg-white rounded-full absolute right-1 top-1"></div>
+              </div>
+            </label>
+            <label class="flex items-center justify-between cursor-pointer">
+              <span class="text-sm font-medium">Order status changes</span>
+              <div class="w-10 h-6 bg-primary rounded-full relative">
+                <div class="w-4 h-4 bg-white rounded-full absolute right-1 top-1"></div>
+              </div>
+            </label>
+            <label class="flex items-center justify-between cursor-pointer">
+              <span class="text-sm font-medium">Low inventory alerts</span>
+              <div class="w-10 h-6 bg-primary rounded-full relative">
+                <div class="w-4 h-4 bg-white rounded-full absolute right-1 top-1"></div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TEAM PAGE (admin only) ==================== -->
+    <div id="page-team" class="page-content hidden">
+      <div class="flex justify-between items-end mb-8">
+        <div>
+          <h1 class="text-4xl font-black text-primary tracking-tighter uppercase">Team</h1>
+          <p class="text-stone-500 font-medium mt-1 text-sm">Manage team access and permissions.</p>
+        </div>
+      </div>
+
+      <!-- Pending Requests -->
+      <div id="team-pending-section" class="mb-8">
+        <h2 class="text-lg font-black text-primary uppercase tracking-tight mb-4">Pending Requests</h2>
+        <div id="team-pending-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Populated by JS -->
+        </div>
+        <div id="team-pending-empty" class="bg-surface-container-low rounded-xl p-8 text-center">
+          <span class="material-symbols-outlined text-3xl text-stone-300 mb-2">check_circle</span>
+          <p class="text-sm text-stone-500">No pending requests</p>
+        </div>
+      </div>
+
+      <!-- Team Members Table -->
+      <div class="bg-surface-container-lowest rounded-2xl shadow-xl shadow-stone-200/50 overflow-hidden">
+        <div class="p-6 bg-surface-container-low flex justify-between items-center">
+          <h2 class="text-lg font-black text-primary uppercase tracking-tight">All Members</h2>
+          <span class="text-xs text-stone-500" id="team-member-count">0 members</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-container-low">
+              <tr>
+                <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 text-left">User</th>
+                <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 text-left">Role</th>
+                <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 text-left">Status</th>
+                <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 text-left">Tab Access</th>
+                <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="team-members-tbody">
+              <tr><td colspan="5" class="px-6 py-12 text-center text-stone-400">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- JavaScript: Auth + Sidebar Navigation + Outreach System -->
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+// SUPABASE AUTH
+// ══════════════════════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://lefcccyijavtcbgcvzqv.supabase.co'
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlZmNjY3lpamF2dGNiZ2N2enF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTYxNTgsImV4cCI6MjA4ODI5MjE1OH0.btMYNBjCXMUS2ByrnF91XIZxOB78NS2su5OojGuiBYQ'
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+let currentUser = null
+let currentMember = null
+
+async function getAuthToken() {
+  const { data: { session } } = await sb.auth.getSession()
+  return session?.access_token || null
+}
+
+async function authFetch(url, opts = {}) {
+  const token = await getAuthToken()
+  if (!token) { window.location.href = 'login.html'; return null; }
+  const headers = { ...opts.headers, 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+  return fetch(url, { ...opts, headers })
+}
+
+async function authSignOut() {
+  await sb.auth.signOut()
+  window.location.href = 'login.html'
+}
+
+// ── Auth Gate: runs on page load ────────────────────────────────────────────
+;(async function authGate() {
+  const { data: { session } } = await sb.auth.getSession()
+  if (!session) { window.location.href = 'login.html'; return; }
+
+  currentUser = session.user
+
+  // Fetch team member record (auto-provisions if needed)
+  try {
+    const res = await authFetch('/api/team/me')
+    const data = await res.json()
+    currentMember = data.member
+  } catch (e) {
+    console.error('Failed to fetch team record:', e)
+    window.location.href = 'login.html'
+    return
+  }
+
+  if (!currentMember) { window.location.href = 'login.html'; return; }
+
+  // Check status
+  if (currentMember.status === 'pending') {
+    document.getElementById('auth-loading').classList.add('hidden')
+    document.getElementById('auth-pending').classList.remove('hidden')
+    // Poll for approval every 10s
+    const pollInterval = setInterval(async () => {
+      const res = await authFetch('/api/team/me')
+      const data = await res.json()
+      if (data.member?.status === 'approved') {
+        clearInterval(pollInterval)
+        currentMember = data.member
+        document.getElementById('auth-pending').classList.add('hidden')
+        initAdmin()
+      } else if (data.member?.status === 'rejected') {
+        clearInterval(pollInterval)
+        document.getElementById('auth-pending').classList.add('hidden')
+        document.getElementById('auth-denied').classList.remove('hidden')
+      }
+    }, 10000)
+    return
+  }
+
+  if (currentMember.status === 'rejected') {
+    document.getElementById('auth-loading').classList.add('hidden')
+    document.getElementById('auth-denied').classList.remove('hidden')
+    return
+  }
+
+  // Approved — load admin
+  initAdmin()
+})()
+
+function initAdmin() {
+  // Update profile in sidebar
+  const name = currentMember.display_name || currentMember.email.split('@')[0]
+  const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+  document.getElementById('profile-name').textContent = name
+  document.getElementById('profile-initials').textContent = initials
+  document.getElementById('profile-role').textContent = currentMember.role === 'admin' ? 'Admin' : 'Member'
+
+  // Apply tab visibility
+  applyTabAccess()
+
+  // Auto-fill sender email from logged-in user
+  const senderField = document.getElementById('sender-email')
+  if (senderField) senderField.value = currentUser.email
+  const senderDisplay = document.getElementById('settings-sender-display')
+  if (senderDisplay) senderDisplay.textContent = currentUser.email
+
+  // Hide loading overlay
+  document.getElementById('auth-loading').classList.add('hidden')
+}
+
+function applyTabAccess() {
+  const isAdmin = currentMember.role === 'admin'
+  const allowed = new Set(currentMember.allowed_tabs || [])
+
+  // Team tab is admin-only regardless
+  if (!isAdmin) {
+    const teamNav = document.getElementById('nav-team')
+    if (teamNav) teamNav.style.display = 'none'
+    const teamPage = document.getElementById('page-team')
+    if (teamPage) teamPage.style.display = 'none'
+  }
+
+  if (isAdmin) return // admins see everything
+
+  // Hide disallowed tabs
+  document.querySelectorAll('.nav-link').forEach(link => {
+    const page = link.dataset.page
+    if (page && !allowed.has(page)) {
+      link.style.display = 'none'
+      const pageDiv = document.getElementById('page-' + page)
+      if (pageDiv) pageDiv.style.display = 'none'
+    }
+  })
+
+  // If current default page (dashboard) is hidden, show first available
+  if (!allowed.has('dashboard')) {
+    document.getElementById('page-dashboard')?.classList.add('hidden')
+    const firstAllowed = document.querySelector('.nav-link:not([style*="display: none"])')
+    if (firstAllowed) firstAllowed.click()
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TEAM MANAGEMENT
+// ══════════════════════════════════════════════════════════════════════════════
+const ALL_TABS = ['dashboard','inventory','orders','customers','quotes','shipping','outreach','website','settings','team']
+
+async function refreshTeam() {
+  try {
+    const res = await authFetch('/api/team')
+    const data = await res.json()
+    const members = data.members || []
+    const pending = members.filter(m => m.status === 'pending')
+    const nonPending = members.filter(m => m.status !== 'pending')
+
+    document.getElementById('team-member-count').textContent = members.length + ' member' + (members.length !== 1 ? 's' : '')
+
+    // Pending section
+    const pendingGrid = document.getElementById('team-pending-grid')
+    const pendingEmpty = document.getElementById('team-pending-empty')
+    if (pending.length === 0) {
+      pendingGrid.innerHTML = ''
+      pendingGrid.classList.add('hidden')
+      pendingEmpty.classList.remove('hidden')
+    } else {
+      pendingEmpty.classList.add('hidden')
+      pendingGrid.classList.remove('hidden')
+      pendingGrid.innerHTML = pending.map(m => `
+        <div class="bg-surface-container-low p-5 rounded-xl">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-full bg-tertiary flex items-center justify-center text-on-primary font-bold text-sm">${(m.display_name || m.email)[0].toUpperCase()}</div>
+            <div>
+              <p class="font-bold text-primary text-sm">${esc(m.display_name || m.email.split('@')[0])}</p>
+              <p class="text-[10px] text-stone-500">${esc(m.email)}</p>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="approveTeamMember('${m.id}')" class="flex-1 bg-primary text-on-primary py-2 rounded-lg text-xs font-bold hover:bg-primary-container transition-colors">Approve</button>
+            <button onclick="rejectTeamMember('${m.id}')" class="flex-1 bg-surface-container text-stone-600 py-2 rounded-lg text-xs font-bold hover:bg-error/10 hover:text-error transition-colors">Reject</button>
+          </div>
+        </div>
+      `).join('')
+    }
+
+    // Members table
+    const tbody = document.getElementById('team-members-tbody')
+    tbody.innerHTML = nonPending.map(m => {
+      const tabCheckboxes = ALL_TABS.map(tab =>
+        `<label class="inline-flex items-center gap-1 mr-2 mb-1"><input type="checkbox" ${(m.allowed_tabs || []).includes(tab) ? 'checked' : ''} onchange="toggleMemberTab('${m.id}', '${tab}', this.checked)" class="rounded border-stone-300 text-primary focus:ring-primary w-3.5 h-3.5"/><span class="text-[10px] font-bold text-stone-500 capitalize">${tab}</span></label>`
+      ).join('')
+
+      return `
+        <tr class="border-b border-surface-container hover:bg-surface transition-colors">
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-${m.role === 'admin' ? 'primary' : 'secondary'} flex items-center justify-center text-on-primary font-bold text-sm">${(m.display_name || m.email)[0].toUpperCase()}</div>
+              <div>
+                <p class="text-sm font-bold text-primary">${esc(m.display_name || m.email.split('@')[0])}</p>
+                <p class="text-[10px] text-stone-500">${esc(m.email)}</p>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4">
+            <select onchange="updateMemberRole('${m.id}', this.value)" class="bg-surface-container-highest border-none rounded text-xs font-bold focus:ring-primary py-1 px-2">
+              <option value="member" ${m.role === 'member' ? 'selected' : ''}>Member</option>
+              <option value="admin" ${m.role === 'admin' ? 'selected' : ''}>Admin</option>
+            </select>
+          </td>
+          <td class="px-6 py-4">
+            <span class="${m.status === 'approved' ? 'bg-primary/10 text-primary' : 'bg-error/10 text-error'} text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full">${m.status}</span>
+          </td>
+          <td class="px-6 py-4"><div class="flex flex-wrap">${tabCheckboxes}</div></td>
+          <td class="px-6 py-4 text-right">
+            ${m.user_id !== currentUser.id ? `<button onclick="deleteTeamMember('${m.id}')" class="text-stone-400 hover:text-error transition-colors"><span class="material-symbols-outlined text-sm">delete</span></button>` : '<span class="text-[10px] text-stone-400">You</span>'}
+          </td>
+        </tr>
+      `
+    }).join('')
+  } catch (e) {
+    console.error('Team refresh failed:', e)
+  }
+}
+
+async function approveTeamMember(id) {
+  await authFetch('/api/team/' + id, { method: 'PATCH', body: JSON.stringify({ status: 'approved', allowed_tabs: ['dashboard'] }) })
+  refreshTeam()
+}
+async function rejectTeamMember(id) {
+  if (!confirm('Reject this user?')) return
+  await authFetch('/api/team/' + id, { method: 'PATCH', body: JSON.stringify({ status: 'rejected' }) })
+  refreshTeam()
+}
+async function updateMemberRole(id, role) {
+  await authFetch('/api/team/' + id, { method: 'PATCH', body: JSON.stringify({ role }) })
+  refreshTeam()
+}
+async function toggleMemberTab(id, tab, checked) {
+  // Get current tabs first
+  const res = await authFetch('/api/team')
+  const data = await res.json()
+  const member = (data.members || []).find(m => m.id === id)
+  if (!member) return
+  let tabs = [...(member.allowed_tabs || [])]
+  if (checked && !tabs.includes(tab)) tabs.push(tab)
+  if (!checked) tabs = tabs.filter(t => t !== tab)
+  await authFetch('/api/team/' + id, { method: 'PATCH', body: JSON.stringify({ allowed_tabs: tabs }) })
+  refreshTeam()
+}
+async function deleteTeamMember(id) {
+  if (!confirm('Remove this team member?')) return
+  await authFetch('/api/team/' + id, { method: 'DELETE' })
+  refreshTeam()
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SIDEBAR NAVIGATION
+// ══════════════════════════════════════════════════════════════════════════════
+document.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    const page = link.dataset.page;
+    document.querySelectorAll('.nav-link').forEach(l => { l.classList.remove('nav-active'); l.classList.add('text-stone-600'); });
+    link.classList.add('nav-active');
+    link.classList.remove('text-stone-600');
+    document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
+    const target = document.getElementById('page-' + page);
+    if (target) target.classList.remove('hidden');
+    document.querySelector('.sidebar').classList.remove('open');
+    if (page === 'outreach') { refreshOutreachStats(); refreshCampaigns(); }
+    if (page === 'team') refreshTeam();
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// OUTREACH STATE
+// ══════════════════════════════════════════════════════════════════════════════
+let outreachState = {
+  apolloResults: [],
+  apolloSelected: new Set(),
+  apolloPage: 1,
+  apolloPagination: null,
+  apolloCredits: 0,
+  composeLeads: [],
+  emailSteps: [{ subject: '', body: '', delay: 0 }],
+  wizardStep: 1,
+  leadsSelected: new Set(),
+  leadsPage: 1,
+  editingTemplateId: null,
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// OUTREACH SUB-NAVIGATION
+// ══════════════════════════════════════════════════════════════════════════════
+function showOutreachTab(tab) {
+  document.querySelectorAll('.outreach-content').forEach(c => c.classList.add('hidden'));
+  const target = document.getElementById('outreach-' + tab);
+  if (target) target.classList.remove('hidden');
+  document.querySelectorAll('.outreach-tab').forEach(t => {
+    t.classList.remove('outreach-tab-active', 'bg-primary', 'text-on-primary');
+    t.classList.add('bg-surface-container', 'text-stone-600');
+  });
+  const activeTab = document.querySelector(`.outreach-tab[data-tab="${tab}"]`);
+  if (activeTab) {
+    activeTab.classList.add('outreach-tab-active', 'bg-primary', 'text-on-primary');
+    activeTab.classList.remove('bg-surface-container', 'text-stone-600');
+  }
+  if (tab === 'campaigns') { refreshOutreachStats(); refreshCampaigns(); }
+  if (tab === 'leads') refreshLeadsTable();
+  if (tab === 'templates') refreshTemplates();
+  if (tab === 'compose') { refreshComposeTemplates(); resetWizard(); }
+}
+
+// Init active tab styling
+document.addEventListener('DOMContentLoaded', () => {
+  const first = document.querySelector('.outreach-tab[data-tab="campaigns"]');
+  if (first) { first.classList.add('bg-primary', 'text-on-primary'); first.classList.remove('bg-surface-container', 'text-stone-600'); }
+  // Sender email is auto-set from logged-in user in initAdmin()
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// STATS
+// ══════════════════════════════════════════════════════════════════════════════
+async function refreshOutreachStats() {
+  try {
+    const res = await fetch('/api/stats');
+    const data = await res.json();
+    document.getElementById('stat-emails-sent').textContent = data.emails_sent || 0;
+    document.getElementById('stat-reply-rate').textContent = (data.reply_rate || 0) + '%';
+    document.getElementById('stat-bounce-rate').textContent = (data.bounce_rate || 0) + '%';
+    document.getElementById('stat-total-leads').textContent = data.total_leads || 0;
+  } catch(e) { console.error('Stats fetch failed:', e); }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CAMPAIGNS
+// ══════════════════════════════════════════════════════════════════════════════
+async function refreshCampaigns() {
+  try {
+    const res = await fetch('/api/campaigns');
+    const data = await res.json();
+    const grid = document.getElementById('campaigns-grid');
+    const empty = document.getElementById('campaigns-empty');
+    if (!data.campaigns || data.campaigns.length === 0) {
+      grid.innerHTML = '';
+      grid.classList.add('hidden');
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+    grid.classList.remove('hidden');
+    grid.innerHTML = data.campaigns.map(c => {
+      const total = c.lead_count || 0;
+      const s = c.leads_by_status || {};
+      return `<div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all">
+        <div class="flex justify-between items-start mb-3">
+          <div>
+            <h3 class="font-black text-primary uppercase tracking-tight text-sm">${esc(c.name)}</h3>
+            <p class="text-[10px] text-stone-400">${total} leads · ${timeAgo(c.created_at)}</p>
+          </div>
+          <button onclick="deleteCampaign(${c.id})" class="text-stone-400 hover:text-error transition-colors"><span class="material-symbols-outlined text-sm">delete</span></button>
+        </div>
+        <div class="flex gap-0.5 h-2 rounded-full overflow-hidden bg-stone-200 mb-2">
+          ${s.new ? `<div class="bg-stone-400 h-full" style="width:${(s.new/Math.max(total,1))*100}%"></div>` : ''}
+          ${s.active ? `<div class="bg-primary h-full" style="width:${(s.active/Math.max(total,1))*100}%"></div>` : ''}
+          ${s.replied ? `<div class="bg-blue-500 h-full" style="width:${(s.replied/Math.max(total,1))*100}%"></div>` : ''}
+          ${s.bounced ? `<div class="bg-error h-full" style="width:${(s.bounced/Math.max(total,1))*100}%"></div>` : ''}
+        </div>
+        <div class="flex gap-3 text-[10px] font-bold text-stone-400">
+          <span>New: ${s.new||0}</span><span>Active: ${s.active||0}</span><span>Replied: ${s.replied||0}</span><span>Bounced: ${s.bounced||0}</span>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) { console.error('Campaigns fetch failed:', e); }
+}
+
+async function deleteCampaign(id) {
+  if (!confirm('Delete this campaign?')) return;
+  await fetch('/api/campaigns/' + id, { method: 'DELETE' });
+  refreshCampaigns();
+  refreshOutreachStats();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// LEADS TABLE
+// ══════════════════════════════════════════════════════════════════════════════
+async function refreshLeadsTable() {
+  const status = document.getElementById('leads-status-filter').value;
+  const campaign = document.getElementById('leads-campaign-filter').value;
+  const q = document.getElementById('leads-search').value;
+  let url = `/api/leads?status=${status}&campaign_id=${campaign}`;
+  if (q) url += `&q=${encodeURIComponent(q)}`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    const leads = data.leads || [];
+    document.getElementById('leads-count').textContent = leads.length + ' lead' + (leads.length !== 1 ? 's' : '');
+    const tbody = document.getElementById('leads-tbody');
+    if (leads.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-16 text-center text-stone-400">No leads found.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = leads.map(l => `
+      <tr class="hover:bg-surface transition-colors border-b border-surface-container">
+        <td class="px-4 py-3"><input type="checkbox" ${outreachState.leadsSelected.has(l.id) ? 'checked' : ''} onchange="toggleLeadSelect(${l.id})" class="rounded border-stone-300 text-primary focus:ring-primary"/></td>
+        <td class="px-4 py-3 font-mono text-xs">${esc(l.email) || '—'}</td>
+        <td class="px-4 py-3 text-sm">${esc([l.first_name, l.last_name].filter(Boolean).join(' ')) || '—'}</td>
+        <td class="px-4 py-3 text-sm text-stone-500">${esc(l.company) || '—'}</td>
+        <td class="px-4 py-3 text-xs text-stone-500">${esc(l.title) || '—'}</td>
+        <td class="px-4 py-3">${statusBadge(l.status)}</td>
+        <td class="px-4 py-3 text-right">
+          <div class="flex items-center justify-end gap-1">
+            <button onclick="updateLeadStatus(${l.id},'replied')" class="p-1.5 rounded hover:bg-surface-dim text-stone-400 hover:text-blue-500 transition-colors" title="Mark replied"><span class="material-symbols-outlined text-sm">check</span></button>
+            <button onclick="updateLeadStatus(${l.id},'unsubscribed')" class="p-1.5 rounded hover:bg-surface-dim text-stone-400 hover:text-yellow-600 transition-colors" title="Unsubscribe"><span class="material-symbols-outlined text-sm">close</span></button>
+            <button onclick="deleteLead(${l.id})" class="p-1.5 rounded hover:bg-error/10 text-stone-400 hover:text-error transition-colors" title="Delete"><span class="material-symbols-outlined text-sm">delete</span></button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+    updateBulkBar();
+  } catch(e) { console.error('Leads fetch failed:', e); }
+}
+
+function filterLeads() { outreachState.leadsPage = 1; refreshLeadsTable(); }
+function toggleLeadSelect(id) {
+  if (outreachState.leadsSelected.has(id)) outreachState.leadsSelected.delete(id);
+  else outreachState.leadsSelected.add(id);
+  updateBulkBar();
+}
+function toggleAllLeads() {
+  const checkboxes = document.querySelectorAll('#leads-tbody input[type="checkbox"]');
+  const allChecked = [...checkboxes].every(c => c.checked);
+  checkboxes.forEach(c => { c.checked = !allChecked; });
+  // Toggle IDs from data - simplified
+  if (allChecked) outreachState.leadsSelected.clear();
+  updateBulkBar();
+}
+function clearLeadSelection() { outreachState.leadsSelected.clear(); refreshLeadsTable(); }
+function updateBulkBar() {
+  const bar = document.getElementById('bulk-action-bar');
+  const count = outreachState.leadsSelected.size;
+  if (count > 0) { bar.classList.remove('hidden'); document.getElementById('bulk-selected-count').textContent = count + ' selected'; }
+  else bar.classList.add('hidden');
+}
+async function updateLeadStatus(id, status) {
+  await fetch('/api/leads/' + id, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
+  refreshLeadsTable();
+  refreshOutreachStats();
+}
+async function deleteLead(id) {
+  if (!confirm('Delete this lead?')) return;
+  await fetch('/api/leads/' + id, { method: 'DELETE' });
+  outreachState.leadsSelected.delete(id);
+  refreshLeadsTable();
+  refreshOutreachStats();
+}
+async function bulkDeleteLeads() {
+  const ids = [...outreachState.leadsSelected];
+  if (!ids.length || !confirm(`Delete ${ids.length} leads?`)) return;
+  await fetch('/api/leads/bulk-delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids }) });
+  outreachState.leadsSelected.clear();
+  refreshLeadsTable();
+  refreshOutreachStats();
+}
+function exportLeadsCSV() {
+  // Simplified: export all currently displayed
+  alert('CSV export triggered. In production this would download a file.');
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// APOLLO SEARCH
+// ══════════════════════════════════════════════════════════════════════════════
+function selectAudienceSource(source) {
+  document.querySelectorAll('.audience-source-card').forEach(c => c.classList.remove('ring-2', 'ring-primary'));
+  const card = document.querySelector(`.audience-source-card[data-source="${source}"]`);
+  if (card) card.classList.add('ring-2', 'ring-primary');
+  ['apollo-panel', 'csv-panel', 'manual-panel'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  document.getElementById(source === 'apollo' ? 'apollo-panel' : source === 'csv' ? 'csv-panel' : 'manual-panel').classList.remove('hidden');
+}
+
+function togglePill(btn) {
+  btn.classList.toggle('bg-primary');
+  btn.classList.toggle('text-on-primary');
+  btn.classList.toggle('bg-surface-container');
+  btn.classList.toggle('text-stone-500');
+}
+
+function getActivePills(field) {
+  return [...document.querySelectorAll(`.pill-btn[data-field="${field}"].bg-primary`)].map(b => b.dataset.value);
+}
+
+async function apolloSearch(page = 1) {
+  const btn = document.getElementById('apollo-search-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">progress_activity</span> Searching...';
+
+  const splitCSV = v => v ? v.split(',').map(s => s.trim()).filter(Boolean) : undefined;
+  const payload = {
+    person_titles: splitCSV(document.getElementById('apollo-titles').value),
+    person_locations: splitCSV(document.getElementById('apollo-locations').value),
+    q_organization_domains: splitCSV(document.getElementById('apollo-domains').value),
+    organization_num_employees_ranges: splitCSV(document.getElementById('apollo-employees')?.value),
+    organization_locations: splitCSV(document.getElementById('apollo-org-locations')?.value),
+    q_organization_keyword_tags: splitCSV(document.getElementById('apollo-keywords')?.value),
+    person_seniorities: getActivePills('seniorities').length ? getActivePills('seniorities') : undefined,
+    person_departments: getActivePills('departments').length ? getActivePills('departments') : undefined,
+    per_page: parseInt(document.getElementById('apollo-per-page').value) || 25,
+    page,
+  };
+
+  try {
+    const res = await fetch('/api/apollo/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    outreachState.apolloResults = data.people || [];
+    outreachState.apolloPagination = data.pagination || null;
+    outreachState.apolloPage = page;
+    outreachState.apolloSelected = new Set();
+
+    document.getElementById('apollo-error').classList.add('hidden');
+    renderApolloResults();
+  } catch(e) {
+    document.getElementById('apollo-error').classList.remove('hidden');
+    document.getElementById('apollo-error-text').textContent = e.message;
+    document.getElementById('apollo-results').classList.add('hidden');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<span class="material-symbols-outlined text-sm">search</span> Search';
+}
+
+function renderApolloResults() {
+  const results = outreachState.apolloResults;
+  if (!results.length) { document.getElementById('apollo-results').classList.add('hidden'); return; }
+  document.getElementById('apollo-results').classList.remove('hidden');
+
+  const tbody = document.getElementById('apollo-results-tbody');
+  tbody.innerHTML = results.map((r, i) => `
+    <tr class="hover:bg-surface transition-colors border-b border-surface-container">
+      <td class="px-4 py-3"><input type="checkbox" ${outreachState.apolloSelected.has(r.id) ? 'checked' : ''} onchange="toggleApolloSelect('${r.id}')" class="rounded border-stone-300 text-primary focus:ring-primary"/></td>
+      <td class="px-4 py-3 font-medium text-sm">${esc([r.first_name, r.last_name].filter(Boolean).join(' ')) || '—'}</td>
+      <td class="px-4 py-3 font-mono text-xs text-stone-600">${r.email || '<span class=&quot;text-stone-400 italic&quot;>No email</span>'}</td>
+      <td class="px-4 py-3 text-xs text-stone-500">${esc(r.title) || '—'}</td>
+      <td class="px-4 py-3 text-xs text-stone-500">${esc(r.organization_name || r.organization?.name) || '—'}</td>
+      <td class="px-4 py-3 text-xs text-stone-500">${esc([r.city, r.state].filter(Boolean).join(', ')) || '—'}</td>
+    </tr>
+  `).join('');
+
+  // Pagination
+  const p = outreachState.apolloPagination;
+  document.getElementById('apollo-page-info').textContent = p ? `Page ${outreachState.apolloPage} of ${p.total_pages || '?'}${p.total_entries != null ? ` (${p.total_entries.toLocaleString()} total)` : ''}` : '';
+
+  const btns = document.getElementById('apollo-page-buttons');
+  btns.innerHTML = '';
+  if (outreachState.apolloPage > 1) btns.innerHTML += `<button onclick="apolloSearch(${outreachState.apolloPage - 1})" class="px-3 py-1 rounded text-xs bg-surface-container text-stone-600 hover:bg-surface-dim">Prev</button>`;
+  if (p && (p.total_pages == null || outreachState.apolloPage < p.total_pages)) btns.innerHTML += `<button onclick="apolloSearch(${outreachState.apolloPage + 1})" class="px-3 py-1 rounded text-xs bg-surface-container text-stone-600 hover:bg-surface-dim">Next</button>`;
+
+  updateApolloUseBtn();
+}
+
+function toggleApolloSelect(id) {
+  if (outreachState.apolloSelected.has(id)) outreachState.apolloSelected.delete(id);
+  else outreachState.apolloSelected.add(id);
+  updateApolloUseBtn();
+}
+function toggleAllApollo() {
+  const all = outreachState.apolloResults.every(r => outreachState.apolloSelected.has(r.id));
+  outreachState.apolloSelected = all ? new Set() : new Set(outreachState.apolloResults.map(r => r.id));
+  renderApolloResults();
+}
+function updateApolloUseBtn() {
+  const btn = document.getElementById('apollo-use-btn');
+  const count = outreachState.apolloSelected.size;
+  if (count > 0) { btn.classList.remove('hidden'); document.getElementById('apollo-use-count').textContent = count; }
+  else btn.classList.add('hidden');
+}
+function useSelectedApolloLeads() {
+  const leads = outreachState.apolloResults
+    .filter(r => outreachState.apolloSelected.has(r.id))
+    .map(r => ({
+      email: r.email, first_name: r.first_name, last_name: r.last_name,
+      company: r.organization_name || r.organization?.name || '',
+      title: r.title, city: r.city, state: r.state,
+      phone: r.phone_numbers?.[0]?.raw_number || '', linkedin_url: r.linkedin_url || '', source: 'apollo',
+    }));
+  addComposeLeads(leads);
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CSV IMPORT
+// ══════════════════════════════════════════════════════════════════════════════
+let csvParsedLeads = [];
+function handleCSVUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const lines = e.target.result.split('\n').filter(l => l.trim());
+    if (lines.length < 2) return;
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
+    const emailIdx = headers.findIndex(h => h.includes('email'));
+    const firstIdx = headers.findIndex(h => h.includes('first'));
+    const lastIdx = headers.findIndex(h => h.includes('last'));
+    const companyIdx = headers.findIndex(h => h.includes('company') || h.includes('org'));
+    const titleIdx = headers.findIndex(h => h.includes('title') || h.includes('position'));
+
+    csvParsedLeads = [];
+    const previewHeader = document.getElementById('csv-preview-header');
+    previewHeader.innerHTML = '<th class="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Email</th><th class="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Name</th><th class="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Company</th><th class="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Title</th>';
+
+    const tbody = document.getElementById('csv-preview-tbody');
+    tbody.innerHTML = '';
+
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
+      const lead = {
+        email: emailIdx >= 0 ? cols[emailIdx] : '',
+        first_name: firstIdx >= 0 ? cols[firstIdx] : '',
+        last_name: lastIdx >= 0 ? cols[lastIdx] : '',
+        company: companyIdx >= 0 ? cols[companyIdx] : '',
+        title: titleIdx >= 0 ? cols[titleIdx] : '',
+        source: 'csv',
+      };
+      if (!lead.email || !lead.email.includes('@')) continue;
+      csvParsedLeads.push(lead);
+      tbody.innerHTML += `<tr class="border-b border-surface-container"><td class="px-3 py-2 font-mono text-xs">${esc(lead.email)}</td><td class="px-3 py-2 text-sm">${esc([lead.first_name, lead.last_name].filter(Boolean).join(' '))}</td><td class="px-3 py-2 text-sm text-stone-500">${esc(lead.company)}</td><td class="px-3 py-2 text-xs text-stone-500">${esc(lead.title)}</td></tr>`;
+    }
+
+    document.getElementById('csv-preview-count').textContent = csvParsedLeads.length + ' leads found';
+    document.getElementById('csv-preview').classList.remove('hidden');
+  };
+  reader.readAsText(file);
+}
+function useCSVLeads() { addComposeLeads(csvParsedLeads); }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// MANUAL ENTRY
+// ══════════════════════════════════════════════════════════════════════════════
+function addManualLead() {
+  const email = document.getElementById('manual-email').value.trim();
+  if (!email || !email.includes('@')) return alert('Valid email required');
+  const loc = document.getElementById('manual-location').value.split(',');
+  const lead = {
+    email,
+    first_name: document.getElementById('manual-first').value.trim(),
+    last_name: document.getElementById('manual-last').value.trim(),
+    company: document.getElementById('manual-company').value.trim(),
+    title: document.getElementById('manual-title').value.trim(),
+    city: loc[0]?.trim() || '',
+    state: loc[1]?.trim() || '',
+    source: 'manual',
+  };
+  addComposeLeads([lead]);
+  ['manual-email','manual-first','manual-last','manual-company','manual-title','manual-location'].forEach(id => document.getElementById(id).value = '');
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// COMPOSE LEADS MANAGEMENT
+// ══════════════════════════════════════════════════════════════════════════════
+function addComposeLeads(leads) {
+  const existing = new Set(outreachState.composeLeads.map(l => l.email.toLowerCase()));
+  const fresh = leads.filter(l => l.email && !existing.has(l.email.toLowerCase()));
+  outreachState.composeLeads.push(...fresh);
+  renderComposeLeadsSummary();
+  updateWizardNav();
+}
+function removeComposeLead(idx) {
+  outreachState.composeLeads.splice(idx, 1);
+  renderComposeLeadsSummary();
+  updateWizardNav();
+}
+function clearComposeLeads() {
+  outreachState.composeLeads = [];
+  renderComposeLeadsSummary();
+  updateWizardNav();
+}
+function renderComposeLeadsSummary() {
+  const summary = document.getElementById('compose-selected-summary');
+  const count = outreachState.composeLeads.length;
+  if (count === 0) { summary.classList.add('hidden'); return; }
+  summary.classList.remove('hidden');
+  document.getElementById('compose-lead-count').textContent = count;
+  document.getElementById('compose-lead-chips').innerHTML = outreachState.composeLeads.map((l, i) =>
+    `<span class="bg-surface-container-lowest rounded-lg px-2.5 py-1 text-xs font-medium flex items-center gap-1.5">${esc(l.email)}<button onclick="removeComposeLead(${i})" class="text-stone-400 hover:text-error"><span class="material-symbols-outlined text-xs">close</span></button></span>`
+  ).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// COMPOSE WIZARD
+// ══════════════════════════════════════════════════════════════════════════════
+function resetWizard() {
+  outreachState.wizardStep = 1;
+  outreachState.composeLeads = [];
+  outreachState.emailSteps = [{ subject: '', body: '', delay: 0 }];
+  renderComposeLeadsSummary();
+  updateWizardUI();
+}
+
+function wizardNext() {
+  if (outreachState.wizardStep === 1 && outreachState.composeLeads.length === 0) return;
+  if (outreachState.wizardStep === 2) collectEmailSteps();
+  if (outreachState.wizardStep === 3) { launchCampaign(); return; }
+  outreachState.wizardStep = Math.min(outreachState.wizardStep + 1, 4);
+  updateWizardUI();
+  if (outreachState.wizardStep === 3) renderReviewStep();
+}
+
+function wizardPrev() {
+  if (outreachState.wizardStep === 2) collectEmailSteps();
+  if (outreachState.wizardStep === 1) { showOutreachTab('campaigns'); return; }
+  outreachState.wizardStep = Math.max(outreachState.wizardStep - 1, 1);
+  updateWizardUI();
+}
+
+function updateWizardUI() {
+  const step = outreachState.wizardStep;
+  document.querySelectorAll('.wizard-step').forEach(s => s.classList.add('hidden'));
+  const target = document.getElementById('wizard-step-' + step);
+  if (target) target.classList.remove('hidden');
+
+  // Progress dots
+  for (let i = 1; i <= 4; i++) {
+    const dot = document.getElementById('wizard-dot-' + i);
+    dot.className = 'w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ';
+    if (i < step) { dot.className += 'bg-primary text-on-primary'; dot.innerHTML = '<span class="material-symbols-outlined text-lg">check</span>'; }
+    else if (i === step) { dot.className += 'bg-primary text-on-primary ring-4 ring-primary/20'; dot.textContent = i; }
+    else { dot.className += 'bg-surface-container text-stone-400'; dot.textContent = i; }
+    if (i < 4) {
+      const line = document.getElementById('wizard-line-' + i);
+      line.className = 'h-0.5 rounded-full ' + (i < step ? 'bg-primary' : 'bg-stone-200');
+    }
+  }
+
+  // Nav buttons
+  const nav = document.getElementById('wizard-nav');
+  nav.classList.toggle('hidden', step === 4);
+  document.getElementById('wizard-prev-btn').textContent = step === 1 ? 'Cancel' : 'Back';
+  const nextBtn = document.getElementById('wizard-next-btn');
+  nextBtn.textContent = step === 3 ? 'Launch Campaign' : 'Next';
+  updateWizardNav();
+}
+
+function updateWizardNav() {
+  const step = outreachState.wizardStep;
+  const nextBtn = document.getElementById('wizard-next-btn');
+  if (step === 1) nextBtn.disabled = outreachState.composeLeads.length === 0;
+  else if (step === 2) {
+    collectEmailSteps();
+    nextBtn.disabled = !outreachState.emailSteps[0]?.subject?.trim() || !outreachState.emailSteps[0]?.body?.trim();
+  } else nextBtn.disabled = false;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// EMAIL STEP EDITOR
+// ══════════════════════════════════════════════════════════════════════════════
+function collectEmailSteps() {
+  const editors = document.querySelectorAll('.email-step-editor');
+  outreachState.emailSteps = [...editors].map((el, i) => ({
+    subject: el.querySelector('.email-step-subject')?.value || '',
+    body: el.querySelector('.email-step-body')?.value || '',
+    delay: i === 0 ? 0 : parseInt(el.querySelector('.email-step-delay')?.value) || 3,
+  }));
+}
+
+function addEmailStep() {
+  if (document.querySelectorAll('.email-step-editor').length >= 3) return;
+  const num = document.querySelectorAll('.email-step-editor').length + 1;
+  const container = document.getElementById('email-steps-container');
+  const div = document.createElement('div');
+  div.className = 'bg-surface-container-low rounded-xl p-5 email-step-editor mt-4';
+  div.innerHTML = `
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-xs font-black uppercase tracking-[0.2em] text-stone-400">Step ${num} — Follow-Up</span>
+      <div class="flex items-center gap-3">
+        <label class="text-[10px] font-bold text-stone-400">Delay:</label>
+        <select class="email-step-delay bg-surface-container-highest border-none rounded text-xs focus:ring-primary">
+          <option value="1">1 day</option><option value="2">2 days</option><option value="3" selected>3 days</option>
+          <option value="5">5 days</option><option value="7">7 days</option><option value="14">14 days</option>
+        </select>
+        <button onclick="this.closest('.email-step-editor').remove(); updateWizardNav()" class="text-stone-400 hover:text-error"><span class="material-symbols-outlined text-sm">close</span></button>
+      </div>
+    </div>
+    <div class="space-y-3">
+      <div><label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Subject</label><input type="text" class="email-step-subject w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary" placeholder="Follow-up subject..."/></div>
+      <div><label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Body</label><textarea class="email-step-body w-full bg-surface-container-highest border-none rounded-lg px-4 py-3 text-sm focus:ring-primary h-32 resize-y" placeholder="Follow-up body..."></textarea></div>
+      <div class="flex flex-wrap gap-1.5"><span class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 self-center mr-1">Variables:</span>
+        <button onclick="insertVariable('$first_name',this)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary hover:bg-primary/20">$first_name</button>
+        <button onclick="insertVariable('$company',this)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary hover:bg-primary/20">$company</button>
+        <button onclick="insertVariable('$title',this)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary hover:bg-primary/20">$title</button>
+      </div>
+    </div>
+  `;
+  container.appendChild(div);
+  if (document.querySelectorAll('.email-step-editor').length >= 3) document.getElementById('add-step-btn').classList.add('hidden');
+}
+
+function insertVariable(variable, btn) {
+  const editor = btn.closest('.email-step-editor') || btn.closest('.wizard-step');
+  const textarea = editor?.querySelector('.email-step-body');
+  if (textarea) {
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    textarea.value = textarea.value.substring(0, start) + variable + textarea.value.substring(end);
+    textarea.focus();
+    textarea.setSelectionRange(start + variable.length, start + variable.length);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// REVIEW STEP
+// ══════════════════════════════════════════════════════════════════════════════
+function renderReviewStep() {
+  collectEmailSteps();
+  document.getElementById('review-recipient-count').textContent = outreachState.composeLeads.length;
+  document.getElementById('review-step-count').textContent = outreachState.emailSteps.length;
+  const totalDays = outreachState.emailSteps.reduce((sum, s) => sum + (s.delay || 0), 0) + 1;
+  document.getElementById('review-span').textContent = totalDays + ' day' + (totalDays !== 1 ? 's' : '');
+
+  const preview = document.getElementById('review-preview');
+  const sample = outreachState.composeLeads[0] || { first_name: 'John', last_name: 'Doe', company: 'Acme Corp', title: 'VP', city: 'London', state: 'KY' };
+  preview.innerHTML = outreachState.emailSteps.map((step, i) => {
+    const sub = substituteVars(step.subject, sample);
+    const body = substituteVars(step.body, sample);
+    return `<div class="border-b border-surface-container pb-3 last:border-0 last:pb-0">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Step ${i+1}${i > 0 ? ` (+${step.delay} days)` : ''}</span>
+      </div>
+      <p class="text-sm font-bold text-primary mb-1">${esc(sub)}</p>
+      <p class="text-sm text-stone-600 whitespace-pre-wrap">${esc(body)}</p>
+    </div>`;
+  }).join('');
+}
+
+function substituteVars(text, lead) {
+  return (text || '')
+    .replace(/\$first_name/g, lead.first_name || '')
+    .replace(/\$last_name/g, lead.last_name || '')
+    .replace(/\$company/g, lead.company || '')
+    .replace(/\$title/g, lead.title || '')
+    .replace(/\$city/g, lead.city || '')
+    .replace(/\$state/g, lead.state || '');
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// LAUNCH CAMPAIGN
+// ══════════════════════════════════════════════════════════════════════════════
+async function launchCampaign() {
+  collectEmailSteps();
+  const name = document.getElementById('campaign-name').value || 'Campaign ' + new Date().toLocaleDateString();
+  const sender = currentUser?.email || '';
+
+  // Create campaign
+  const campRes = await fetch('/api/campaigns', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, steps: outreachState.emailSteps, sender_email: sender }),
+  });
+  const campaign = await campRes.json();
+
+  // Import leads
+  const leadsToImport = outreachState.composeLeads.map(l => ({ ...l, campaign_id: campaign.id }));
+  const leadRes = await fetch('/api/leads', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(leadsToImport),
+  });
+  const leadData = await leadRes.json();
+
+  // Show step 4
+  outreachState.wizardStep = 4;
+  updateWizardUI();
+  document.getElementById('confirm-imported').textContent = leadData.added || 0;
+  document.getElementById('confirm-skipped').textContent = Math.max(0, outreachState.composeLeads.length - (leadData.added || 0));
+  document.getElementById('confirm-steps').textContent = outreachState.emailSteps.length;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TEMPLATES
+// ══════════════════════════════════════════════════════════════════════════════
+async function refreshTemplates() {
+  try {
+    const res = await fetch('/api/templates');
+    const data = await res.json();
+    const grid = document.getElementById('templates-grid');
+    const empty = document.getElementById('templates-empty');
+    if (!data.templates || data.templates.length === 0) {
+      grid.innerHTML = ''; grid.classList.add('hidden'); empty.classList.remove('hidden'); return;
+    }
+    empty.classList.add('hidden'); grid.classList.remove('hidden');
+    grid.innerHTML = data.templates.map(t => `
+      <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all">
+        <div class="flex justify-between items-start mb-2">
+          <h3 class="font-black text-primary uppercase tracking-tight text-sm">${esc(t.name)}</h3>
+          <div class="flex gap-1">
+            <button onclick="editTemplate(${t.id})" class="text-stone-400 hover:text-primary"><span class="material-symbols-outlined text-sm">edit</span></button>
+            <button onclick="deleteTemplate(${t.id})" class="text-stone-400 hover:text-error"><span class="material-symbols-outlined text-sm">delete</span></button>
+          </div>
+        </div>
+        <p class="text-xs text-stone-500">${t.steps.length} step${t.steps.length !== 1 ? 's' : ''}</p>
+        <p class="text-xs text-stone-400 mt-1 truncate">${esc(t.steps[0]?.subject || 'No subject')}</p>
+      </div>
+    `).join('');
+  } catch(e) { console.error('Templates fetch failed:', e); }
+}
+
+async function refreshComposeTemplates() {
+  try {
+    const res = await fetch('/api/templates');
+    const data = await res.json();
+    const list = document.getElementById('compose-templates-list');
+    if (!data.templates?.length) { list.innerHTML = '<p class="text-xs text-stone-400">No templates saved yet.</p>'; return; }
+    list.innerHTML = data.templates.map(t => `
+      <button onclick='applyTemplate(${JSON.stringify(t.steps)})' class="w-full text-left bg-surface-container-lowest rounded-lg p-3 hover:bg-surface transition-colors">
+        <p class="text-sm font-bold text-primary">${esc(t.name)}</p>
+        <p class="text-xs text-stone-500 truncate">${esc(t.steps[0]?.subject || '')}</p>
+      </button>
+    `).join('');
+  } catch(e) {}
+}
+
+function applyTemplate(steps) {
+  outreachState.emailSteps = steps;
+  const container = document.getElementById('email-steps-container');
+  container.innerHTML = '';
+  steps.forEach((step, i) => {
+    const div = document.createElement('div');
+    div.className = 'bg-surface-container-low rounded-xl p-5 email-step-editor' + (i > 0 ? ' mt-4' : '');
+    div.innerHTML = `
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-black uppercase tracking-[0.2em] text-stone-400">Step ${i+1}${i === 0 ? ' — Initial Email' : ' — Follow-Up'}</span>
+        ${i > 0 ? `<div class="flex items-center gap-3"><label class="text-[10px] font-bold text-stone-400">Delay:</label><select class="email-step-delay bg-surface-container-highest border-none rounded text-xs focus:ring-primary"><option value="1" ${step.delay==1?'selected':''}>1 day</option><option value="2" ${step.delay==2?'selected':''}>2 days</option><option value="3" ${step.delay==3?'selected':''}>3 days</option><option value="5" ${step.delay==5?'selected':''}>5 days</option><option value="7" ${step.delay==7?'selected':''}>7 days</option></select><button onclick="this.closest('.email-step-editor').remove()" class="text-stone-400 hover:text-error"><span class="material-symbols-outlined text-sm">close</span></button></div>` : ''}
+      </div>
+      <div class="space-y-3">
+        <div><label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Subject</label><input type="text" class="email-step-subject w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary" value="${esc(step.subject)}"/></div>
+        <div><label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Body</label><textarea class="email-step-body w-full bg-surface-container-highest border-none rounded-lg px-4 py-3 text-sm focus:ring-primary h-32 resize-y">${esc(step.body)}</textarea></div>
+        <div class="flex flex-wrap gap-1.5"><span class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 self-center mr-1">Variables:</span>
+          <button onclick="insertVariable('$first_name',this)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary hover:bg-primary/20">$first_name</button>
+          <button onclick="insertVariable('$company',this)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary hover:bg-primary/20">$company</button>
+          <button onclick="insertVariable('$title',this)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary hover:bg-primary/20">$title</button>
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function showTemplateEditor(id = null) {
+  outreachState.editingTemplateId = id;
+  document.getElementById('tpl-name').value = '';
+  const container = document.getElementById('tpl-steps-container');
+  container.innerHTML = `<div class="bg-surface-container-low rounded-xl p-4 tpl-step-editor" data-step="0">
+    <span class="text-xs font-black uppercase tracking-[0.2em] text-stone-400 mb-2 block">Step 1</span>
+    <input type="text" class="tpl-step-subject w-full bg-surface-container-highest border-none rounded-lg px-4 py-2 text-sm focus:ring-primary mb-2" placeholder="Subject..."/>
+    <textarea class="tpl-step-body w-full bg-surface-container-highest border-none rounded-lg px-4 py-2 text-sm focus:ring-primary h-28 resize-y" placeholder="Email body..."></textarea>
+  </div>`;
+  document.getElementById('template-editor').classList.remove('hidden');
+}
+function hideTemplateEditor() { document.getElementById('template-editor').classList.add('hidden'); }
+
+function addTplStep() {
+  const num = document.querySelectorAll('.tpl-step-editor').length + 1;
+  if (num > 3) return;
+  const container = document.getElementById('tpl-steps-container');
+  const div = document.createElement('div');
+  div.className = 'bg-surface-container-low rounded-xl p-4 tpl-step-editor mt-3';
+  div.innerHTML = `<div class="flex justify-between mb-2"><span class="text-xs font-black uppercase tracking-[0.2em] text-stone-400">Step ${num}</span><button onclick="this.closest('.tpl-step-editor').remove()" class="text-stone-400 hover:text-error text-xs">Remove</button></div>
+    <input type="text" class="tpl-step-subject w-full bg-surface-container-highest border-none rounded-lg px-4 py-2 text-sm focus:ring-primary mb-2" placeholder="Subject..."/>
+    <textarea class="tpl-step-body w-full bg-surface-container-highest border-none rounded-lg px-4 py-2 text-sm focus:ring-primary h-28 resize-y" placeholder="Email body..."></textarea>`;
+  container.appendChild(div);
+}
+
+async function saveTemplate() {
+  const name = document.getElementById('tpl-name').value.trim();
+  if (!name) return alert('Template name required');
+  const steps = [...document.querySelectorAll('.tpl-step-editor')].map(el => ({
+    subject: el.querySelector('.tpl-step-subject').value,
+    body: el.querySelector('.tpl-step-body').value,
+    delay: 3,
+  }));
+  await fetch('/api/templates', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, steps }) });
+  hideTemplateEditor();
+  refreshTemplates();
+}
+
+async function deleteTemplate(id) {
+  if (!confirm('Delete this template?')) return;
+  await fetch('/api/templates/' + id, { method: 'DELETE' });
+  refreshTemplates();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// UTILITIES
+// ══════════════════════════════════════════════════════════════════════════════
+function esc(str) { if (!str) return ''; const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+function statusBadge(status) {
+  const styles = {
+    new: 'bg-stone-200 text-stone-600',
+    active: 'bg-primary/10 text-primary',
+    replied: 'bg-blue-100 text-blue-600',
+    bounced: 'bg-error/10 text-error',
+    unsubscribed: 'bg-yellow-100 text-yellow-700',
+    completed: 'bg-primary/10 text-primary',
+  };
+  return `<span class="${styles[status] || styles.new} text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full">${status || 'new'}</span>`;
+}
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return mins + 'm ago';
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return hours + 'h ago';
+  return Math.floor(hours / 24) + 'd ago';
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Contact Us | Kentucky Forest Products</title>
+<meta name="description" content="Get in touch with Kentucky Forest Products for quotes, questions, or to schedule a visit. Located at 24 Seeley Rd, London, KY. Call (606) 250-2220."/>
+<link rel="icon" type="image/x-icon" href="favicon.ico"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "surface-container-low": "#f4f4ef",
+        "secondary-container": "#fed3c7",
+        "surface-variant": "#e3e3de",
+        "primary-fixed-dim": "#91d78a",
+        "on-secondary": "#ffffff",
+        "on-tertiary": "#ffffff",
+        "error-container": "#ffdad6",
+        "surface-container": "#eeeee9",
+        "on-surface-variant": "#41493e",
+        "on-background": "#1a1c19",
+        "on-error": "#ffffff",
+        "on-secondary-container": "#795950",
+        "inverse-on-surface": "#f1f1ec",
+        "outline-variant": "#c0c9bb",
+        "inverse-primary": "#91d78a",
+        "surface-tint": "#2a6b2c",
+        "secondary": "#77574d",
+        "surface": "#fafaf5",
+        "surface-container-lowest": "#ffffff",
+        "on-primary": "#ffffff",
+        "primary": "#00450d",
+        "inverse-surface": "#2f312e",
+        "outline": "#717a6d",
+        "surface-dim": "#dadad5",
+        "tertiary": "#4d352b",
+        "surface-bright": "#fafaf5",
+        "primary-fixed": "#acf4a4",
+        "on-primary-fixed-variant": "#0c5216",
+        "on-surface": "#1a1c19",
+        "primary-container": "#1b5e20",
+        "error": "#ba1a1a",
+        "surface-container-high": "#e8e8e3",
+        "surface-container-highest": "#e3e3de"
+      },
+      fontFamily: {
+        "headline": ["Manrope", "sans-serif"],
+        "body": ["Manrope", "sans-serif"],
+        "label": ["Manrope", "sans-serif"]
+      },
+      borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+    },
+  },
+}
+</script>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  }
+  .glass-card {
+    background: rgba(250, 250, 245, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(192, 201, 187, 0.2);
+  }
+  .text-shadow-sm {
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  /* Dropdown menus */
+  .nav-dropdown { display: none; position: absolute; top: 100%; left: 0; min-width: 220px; }
+  .nav-group:hover .nav-dropdown { display: block; }
+  .nav-dropdown a { display: block; padding: 0.625rem 1.25rem; }
+  .nav-dropdown a:hover { background: rgba(0, 69, 13, 0.05); }
+  /* Mobile menu */
+  .mobile-menu { display: none; }
+  .mobile-menu.active { display: block; }
+  .mobile-submenu { display: none; }
+  .mobile-submenu.active { display: block; }
+</style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased selection:bg-primary selection:text-on-primary">
+
+<!-- ========== NAVIGATION ========== -->
+<nav class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-md shadow-sm transition-all duration-300">
+  <div class="flex justify-between items-center w-full px-6 py-4 max-w-screen-2xl mx-auto">
+    <!-- Logo -->
+    <a href="index.html" class="flex items-center gap-3">
+      <img src="images/kfp-logo.png" alt="Kentucky Forest Products" class="h-20 w-auto"/>
+    </a>
+
+    <!-- Desktop Nav -->
+    <div class="hidden lg:flex items-center space-x-8">
+      <a class="text-on-surface-variant hover:text-primary transition-colors text-sm font-medium tracking-tight pb-1" href="index.html">Home</a>
+
+      <!-- Wood Products Dropdown -->
+      <div class="relative nav-group">
+        <button class="text-on-surface-variant hover:text-primary transition-colors text-sm font-medium tracking-tight flex items-center gap-1 pb-1">
+          Wood Products <span class="material-symbols-outlined text-base">expand_more</span>
+        </button>
+        <div class="nav-dropdown glass-card rounded-xl shadow-2xl py-2 mt-1">
+          <a href="lumber.html" class="text-sm text-on-surface-variant hover:text-primary font-medium">Lumber</a>
+          <a href="fencing.html" class="text-sm text-on-surface-variant hover:text-primary font-medium">Fencing</a>
+          <a href="logs.html" class="text-sm text-on-surface-variant hover:text-primary font-medium">We Buy Logs</a>
+        </div>
+      </div>
+
+      <!-- Industrial Solutions Dropdown -->
+      <div class="relative nav-group">
+        <button class="text-on-surface-variant hover:text-primary transition-colors text-sm font-medium tracking-tight flex items-center gap-1 pb-1">
+          Industrial Solutions <span class="material-symbols-outlined text-base">expand_more</span>
+        </button>
+        <div class="nav-dropdown glass-card rounded-xl shadow-2xl py-2 mt-1">
+          <a href="matting.html" class="text-sm text-on-surface-variant hover:text-primary font-medium">Matting</a>
+          <a href="utility.html" class="text-sm text-on-surface-variant hover:text-primary font-medium">Utility Poles &amp; Cross Arms</a>
+          <a href="cross-ties.html" class="text-sm text-on-surface-variant hover:text-primary font-medium">Railroad Cross-Ties</a>
+        </div>
+      </div>
+
+      <a class="text-on-surface-variant hover:text-primary transition-colors text-sm font-medium tracking-tight pb-1" href="byproducts.html">Byproducts</a>
+      <a class="text-primary font-bold border-b-2 border-primary pb-1 text-sm tracking-tight" href="contact.html">Contact</a>
+    </div>
+
+    <!-- CTA + Mobile Toggle -->
+    <div class="flex items-center gap-4">
+      <a href="contact.html" class="hidden md:inline-block bg-primary text-on-primary px-6 py-2.5 rounded-xl font-semibold hover:opacity-90 transition-all active:scale-95 duration-150 text-sm shadow-sm">
+        Request Quote
+      </a>
+      <button onclick="document.getElementById('mobile-menu').classList.toggle('active')" class="lg:hidden text-primary">
+        <span class="material-symbols-outlined text-3xl">menu</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="mobile-menu lg:hidden bg-white/95 backdrop-blur-md border-t border-outline-variant/20 px-6 pb-6">
+    <a href="index.html" class="block py-3 text-on-surface font-medium border-b border-outline-variant/10">Home</a>
+
+    <div class="border-b border-outline-variant/10">
+      <button onclick="this.nextElementSibling.classList.toggle('active')" class="flex justify-between items-center w-full py-3 text-on-surface font-medium">
+        Wood Products <span class="material-symbols-outlined">expand_more</span>
+      </button>
+      <div class="mobile-submenu pl-4 pb-2">
+        <a href="lumber.html" class="block py-2 text-sm text-on-surface-variant">Lumber</a>
+        <a href="fencing.html" class="block py-2 text-sm text-on-surface-variant">Fencing</a>
+        <a href="logs.html" class="block py-2 text-sm text-on-surface-variant">We Buy Logs</a>
+      </div>
+    </div>
+
+    <div class="border-b border-outline-variant/10">
+      <button onclick="this.nextElementSibling.classList.toggle('active')" class="flex justify-between items-center w-full py-3 text-on-surface font-medium">
+        Industrial Solutions <span class="material-symbols-outlined">expand_more</span>
+      </button>
+      <div class="mobile-submenu pl-4 pb-2">
+        <a href="matting.html" class="block py-2 text-sm text-on-surface-variant">Matting</a>
+        <a href="utility.html" class="block py-2 text-sm text-on-surface-variant">Utility Poles &amp; Cross Arms</a>
+        <a href="cross-ties.html" class="block py-2 text-sm text-on-surface-variant">Railroad Cross-Ties</a>
+      </div>
+    </div>
+
+    <a href="byproducts.html" class="block py-3 text-on-surface font-medium border-b border-outline-variant/10">Byproducts</a>
+    <a href="contact.html" class="block py-3 text-primary font-bold border-b border-outline-variant/10">Contact</a>
+    <a href="contact.html" class="block mt-4 bg-primary text-on-primary text-center px-6 py-3 rounded-xl font-semibold">Request Quote</a>
+  </div>
+</nav>
+
+<!-- ========== HERO ========== -->
+<main>
+<section class="relative h-[40vh] min-h-[320px] flex items-center justify-center overflow-hidden pt-16">
+  <div class="absolute inset-0 z-0">
+    <img alt="Kentucky Forest Products sawmill facility" class="w-full h-full object-cover" src="images/P1140094.jpg"/>
+    <div class="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-surface"></div>
+  </div>
+  <div class="relative z-10 max-w-7xl mx-auto px-6 w-full">
+    <div class="glass-card max-w-3xl p-10 md:p-16 rounded-xl">
+      <h1 class="text-5xl md:text-7xl font-extrabold font-headline leading-[1.1] text-primary tracking-tight mb-6">
+        Contact Us
+      </h1>
+      <p class="text-lg md:text-xl text-on-surface-variant max-w-xl leading-relaxed">
+        Get in touch for quotes, questions, or to schedule a visit to our facility.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CONTACT INFO + FORM ========== -->
+<section class="py-24 bg-surface-container-high">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <!-- Left Column: Contact Details -->
+      <div class="space-y-10">
+        <div>
+          <h2 class="text-3xl md:text-4xl font-headline font-bold text-primary tracking-tight mb-2">Get In Touch</h2>
+          <div class="h-1 w-20 bg-secondary mt-4 mb-8"></div>
+        </div>
+
+        <div class="space-y-8">
+          <div class="flex items-start gap-5">
+            <span class="material-symbols-outlined text-primary text-3xl mt-1">location_on</span>
+            <div>
+              <h3 class="font-bold text-primary mb-1">Address</h3>
+              <p class="text-on-surface-variant leading-relaxed">24 Seeley Rd<br/>London, KY</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-5">
+            <span class="material-symbols-outlined text-primary text-3xl mt-1">phone</span>
+            <div>
+              <h3 class="font-bold text-primary mb-1">Phone</h3>
+              <a href="tel:6062502220" class="text-on-surface-variant hover:text-primary transition-colors">(606) 250-2220</a>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-5">
+            <span class="material-symbols-outlined text-primary text-3xl mt-1">schedule</span>
+            <div>
+              <h3 class="font-bold text-primary mb-1">Hours</h3>
+              <p class="text-on-surface-variant leading-relaxed">Monday &ndash; Friday: 7:30 AM &ndash; 4:30 PM<br/>Saturday &ndash; Sunday: Closed</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-5">
+            <span class="material-symbols-outlined text-primary text-3xl mt-1">link</span>
+            <div>
+              <h3 class="font-bold text-primary mb-1">Social</h3>
+              <a href="https://www.facebook.com" target="_blank" rel="noopener" class="text-on-surface-variant hover:text-primary transition-colors">Facebook</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Contact Form -->
+      <div class="glass-card rounded-xl p-8 md:p-12 shadow-lg">
+        <h3 class="text-2xl font-bold text-primary mb-8">Send Us a Message</h3>
+        <form action="#" method="POST" class="space-y-6">
+          <div>
+            <label for="name" class="block text-sm font-semibold text-primary mb-2">Name <span class="text-error">*</span></label>
+            <input type="text" id="name" name="name" required class="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-white/50 text-on-surface placeholder-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" placeholder="Your full name"/>
+          </div>
+
+          <div>
+            <label for="email" class="block text-sm font-semibold text-primary mb-2">Email <span class="text-error">*</span></label>
+            <input type="email" id="email" name="email" required class="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-white/50 text-on-surface placeholder-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" placeholder="you@example.com"/>
+          </div>
+
+          <div>
+            <label for="phone" class="block text-sm font-semibold text-primary mb-2">Phone <span class="text-on-surface-variant/50 font-normal">(optional)</span></label>
+            <input type="tel" id="phone" name="phone" class="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-white/50 text-on-surface placeholder-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" placeholder="(555) 123-4567"/>
+          </div>
+
+          <div>
+            <label for="message" class="block text-sm font-semibold text-primary mb-2">Message <span class="text-error">*</span></label>
+            <textarea id="message" name="message" required rows="5" class="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-white/50 text-on-surface placeholder-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-vertical" placeholder="Tell us about your project or request..."></textarea>
+          </div>
+
+          <button type="submit" class="w-full bg-primary text-on-primary px-8 py-4 rounded-xl font-bold hover:shadow-xl hover:opacity-90 transition-all active:scale-[0.98] duration-150 text-base">
+            Send Message
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== MAP ========== -->
+<section class="py-24 bg-surface">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="mb-12">
+      <h2 class="text-3xl md:text-4xl font-headline font-bold text-primary tracking-tight">Find Us</h2>
+      <div class="h-1 w-20 bg-secondary mt-4"></div>
+    </div>
+    <div class="rounded-xl overflow-hidden shadow-lg" style="height: 450px;">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3188.5!2d-84.08!3d37.13!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzfCsDA3JzQ4LjAiTiA4NMKwMDQnNDguMCJX!5e0!3m2!1sen!2sus!4v1234567890"
+        width="100%"
+        height="100%"
+        style="border:0;"
+        allowfullscreen=""
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title="Kentucky Forest Products location on Google Maps">
+      </iframe>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ========== FOOTER ========== -->
+<footer class="bg-primary text-on-primary/60 font-body text-sm tracking-wide w-full py-12 px-8">
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-12 max-w-7xl mx-auto">
+    <div class="col-span-1">
+      <img src="images/kfp-logo-white.png" alt="Kentucky Forest Products" class="h-16 w-auto mb-3"/>
+      <div class="text-lg font-black text-white uppercase tracking-widest mb-2">Kentucky Forest Products</div>
+      <div class="text-xs text-on-primary/40 mb-6">Pole &amp; Lumber Co. &bull; Est. 1981</div>
+      <p class="text-on-primary/50 leading-relaxed">
+        24 Seeley Rd<br/>London, KY<br/><a href="tel:6062502220" class="hover:text-white transition-colors">(606) 250-2220</a>
+      </p>
+      <p class="text-on-primary/40 mt-4">Mon&ndash;Fri: 7:30 AM &ndash; 4:30 PM</p>
+    </div>
+    <div>
+      <h4 class="text-white font-semibold mb-6">Wood Products</h4>
+      <ul class="space-y-4">
+        <li><a class="text-on-primary/50 hover:text-white transition-colors" href="lumber.html">Lumber</a></li>
+        <li><a class="text-on-primary/50 hover:text-white transition-colors" href="fencing.html">Fencing</a></li>
+        <li><a class="text-on-primary/50 hover:text-white transition-colors" href="logs.html">We Buy Logs</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="text-white font-semibold mb-6">Industrial Solutions</h4>
+      <ul class="space-y-4">
+        <li><a class="text-on-primary/50 hover:text-white transition-colors" href="matting.html">Matting</a></li>
+        <li><a class="text-on-primary/50 hover:text-white transition-colors" href="utility.html">Utility Poles &amp; Cross Arms</a></li>
+        <li><a class="text-on-primary/50 hover:text-white transition-colors" href="cross-ties.html">Railroad Cross-Ties</a></li>
+        <li><a class="text-on-primary/50 hover:text-white transition-colors" href="byproducts.html">Byproducts</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="text-white font-semibold mb-6">Connect</h4>
+      <ul class="space-y-4">
+        <li><a class="text-on-primary/50 hover:text-white transition-colors" href="contact.html">Contact Us</a></li>
+        <li><a class="text-on-primary/50 hover:text-white transition-colors" href="https://www.facebook.com" target="_blank" rel="noopener">Facebook</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="max-w-7xl mx-auto mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
+    <div class="text-on-primary/30">&copy; 2025 Kentucky Forest Products. All rights reserved.</div>
+    <div class="flex gap-8">
+      <a class="text-on-primary/50 hover:text-white transition-colors" href="#">Privacy Policy</a>
+      <a class="text-on-primary/50 hover:text-white transition-colors" href="#">Terms of Service</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

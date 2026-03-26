@@ -1,0 +1,15 @@
+{
+  "name": "kfp-website",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5",
+    "@supabase/supabase-js": "^2.39.0"
+  }
+}

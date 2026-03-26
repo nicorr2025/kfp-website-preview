@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KFP Admin — Sign In</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Work+Sans:wght@600;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        "primary": "#004623",
+        "primary-container": "#215e38",
+        "on-primary": "#ffffff",
+        "surface": "#f9f9f7",
+        "surface-container": "#eeeeec",
+        "surface-container-low": "#f4f4f2",
+        "surface-container-highest": "#e2e3e1",
+        "on-surface": "#1a1c1b",
+        "error": "#ba1a1a",
+        "secondary": "#7d553f",
+      },
+      fontFamily: { "headline": ["Work Sans"], "body": ["Inter"] },
+    },
+  },
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+</style>
+</head>
+<body class="bg-surface min-h-screen flex items-center justify-center p-4">
+
+<div class="w-full max-w-md">
+  <!-- Logo -->
+  <div class="text-center mb-8">
+    <img src="images/kfp-logo.png" alt="KFP Logo" class="h-24 w-auto mx-auto mb-4"/>
+    <h1 class="text-2xl font-black text-primary uppercase tracking-tighter">Sawmill Operations</h1>
+    <p class="text-sm text-stone-500 mt-1">Sign in to access the admin dashboard</p>
+  </div>
+
+  <!-- Card -->
+  <div class="bg-surface-container-low rounded-2xl p-8 shadow-xl shadow-stone-200/30">
+    <!-- Tabs -->
+    <div class="flex mb-6">
+      <button onclick="showMode('login')" id="tab-login" class="flex-1 py-2 text-sm font-bold uppercase tracking-wider text-center rounded-l-lg bg-primary text-on-primary transition-colors">Sign In</button>
+      <button onclick="showMode('signup')" id="tab-signup" class="flex-1 py-2 text-sm font-bold uppercase tracking-wider text-center rounded-r-lg bg-surface-container text-stone-600 transition-colors">Sign Up</button>
+    </div>
+
+    <!-- Error/Success Messages -->
+    <div id="msg-error" class="hidden bg-error/10 text-error rounded-lg p-3 text-sm mb-4 flex items-center gap-2">
+      <span class="material-symbols-outlined text-sm">error</span>
+      <span id="msg-error-text"></span>
+    </div>
+    <div id="msg-success" class="hidden bg-primary/10 text-primary rounded-lg p-3 text-sm mb-4 flex items-center gap-2">
+      <span class="material-symbols-outlined text-sm">check_circle</span>
+      <span id="msg-success-text"></span>
+    </div>
+
+    <!-- Login Form -->
+    <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+      <div>
+        <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Email</label>
+        <input type="email" id="login-email" required class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary" placeholder="you@company.com"/>
+      </div>
+      <div>
+        <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Password</label>
+        <div class="relative">
+          <input type="password" id="login-password" required class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary pr-12" placeholder="••••••••"/>
+          <button type="button" onclick="togglePassword('login-password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600">
+            <span class="material-symbols-outlined text-xl">visibility</span>
+          </button>
+        </div>
+      </div>
+      <button type="submit" id="login-btn" class="w-full bg-primary hover:bg-primary-container text-on-primary py-3 rounded-lg text-sm font-bold uppercase tracking-wider transition-colors">
+        Sign In
+      </button>
+      <button type="button" onclick="handleForgotPassword()" class="w-full text-xs text-stone-500 hover:text-primary transition-colors text-center py-1">
+        Forgot your password?
+      </button>
+    </form>
+
+    <!-- Signup Form -->
+    <form id="form-signup" onsubmit="handleSignup(event)" class="space-y-4 hidden">
+      <div>
+        <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Email</label>
+        <input type="email" id="signup-email" required class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary" placeholder="you@company.com"/>
+      </div>
+      <div>
+        <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Password</label>
+        <div class="relative">
+          <input type="password" id="signup-password" required minlength="8" class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary pr-12" placeholder="Min 8 characters"/>
+          <button type="button" onclick="togglePassword('signup-password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600">
+            <span class="material-symbols-outlined text-xl">visibility</span>
+          </button>
+        </div>
+      </div>
+      <div>
+        <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Confirm Password</label>
+        <div class="relative">
+          <input type="password" id="signup-confirm" required minlength="8" class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary pr-12" placeholder="Re-enter password"/>
+          <button type="button" onclick="togglePassword('signup-confirm', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600">
+            <span class="material-symbols-outlined text-xl">visibility</span>
+          </button>
+        </div>
+      </div>
+      <button type="submit" id="signup-btn" class="w-full bg-primary hover:bg-primary-container text-on-primary py-3 rounded-lg text-sm font-bold uppercase tracking-wider transition-colors">
+        Create Account
+      </button>
+    </form>
+
+    <!-- Reset Password Form (hidden by default) -->
+    <form id="form-reset" onsubmit="handleReset(event)" class="space-y-4 hidden">
+      <p class="text-sm text-stone-600 mb-2">Enter your email and we'll send you a password reset link.</p>
+      <div>
+        <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Email</label>
+        <input type="email" id="reset-email" required class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary" placeholder="you@company.com"/>
+      </div>
+      <button type="submit" class="w-full bg-primary hover:bg-primary-container text-on-primary py-3 rounded-lg text-sm font-bold uppercase tracking-wider transition-colors">
+        Send Reset Link
+      </button>
+      <button type="button" onclick="showMode('login')" class="w-full text-xs text-stone-500 hover:text-primary transition-colors text-center py-1">
+        Back to Sign In
+      </button>
+    </form>
+  </div>
+
+  <p class="text-center text-[10px] text-stone-400 mt-6 uppercase tracking-wider">Kentucky Forest Products — Pole & Lumber Co. Est. 1981</p>
+</div>
+
+<script>
+// ── Supabase Client ─────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://lefcccyijavtcbgcvzqv.supabase.co'
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlZmNjY3lpamF2dGNiZ2N2enF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTYxNTgsImV4cCI6MjA4ODI5MjE1OH0.btMYNBjCXMUS2ByrnF91XIZxOB78NS2su5OojGuiBYQ'
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+// Check if already logged in
+;(async () => {
+  const { data: { session } } = await sb.auth.getSession()
+  if (session) window.location.href = 'admin.html'
+})()
+
+// ── Mode Switching ──────────────────────────────────────────────────────────
+function showMode(mode) {
+  hideMessages()
+  document.getElementById('form-login').classList.add('hidden')
+  document.getElementById('form-signup').classList.add('hidden')
+  document.getElementById('form-reset').classList.add('hidden')
+  document.getElementById('tab-login').classList.remove('bg-primary', 'text-on-primary')
+  document.getElementById('tab-login').classList.add('bg-surface-container', 'text-stone-600')
+  document.getElementById('tab-signup').classList.remove('bg-primary', 'text-on-primary')
+  document.getElementById('tab-signup').classList.add('bg-surface-container', 'text-stone-600')
+
+  if (mode === 'login') {
+    document.getElementById('form-login').classList.remove('hidden')
+    document.getElementById('tab-login').classList.add('bg-primary', 'text-on-primary')
+    document.getElementById('tab-login').classList.remove('bg-surface-container', 'text-stone-600')
+  } else if (mode === 'signup') {
+    document.getElementById('form-signup').classList.remove('hidden')
+    document.getElementById('tab-signup').classList.add('bg-primary', 'text-on-primary')
+    document.getElementById('tab-signup').classList.remove('bg-surface-container', 'text-stone-600')
+  } else if (mode === 'reset') {
+    document.getElementById('form-reset').classList.remove('hidden')
+  }
+}
+
+// ── Messages ────────────────────────────────────────────────────────────────
+function showError(msg) {
+  hideMessages()
+  document.getElementById('msg-error-text').textContent = msg
+  document.getElementById('msg-error').classList.remove('hidden')
+}
+function showSuccess(msg) {
+  hideMessages()
+  document.getElementById('msg-success-text').textContent = msg
+  document.getElementById('msg-success').classList.remove('hidden')
+}
+function hideMessages() {
+  document.getElementById('msg-error').classList.add('hidden')
+  document.getElementById('msg-success').classList.add('hidden')
+}
+
+// ── Password Toggle ─────────────────────────────────────────────────────────
+function togglePassword(inputId, btn) {
+  const input = document.getElementById(inputId)
+  const icon = btn.querySelector('.material-symbols-outlined')
+  if (input.type === 'password') {
+    input.type = 'text'
+    icon.textContent = 'visibility_off'
+  } else {
+    input.type = 'password'
+    icon.textContent = 'visibility'
+  }
+}
+
+// ── Login ───────────────────────────────────────────────────────────────────
+async function handleLogin(e) {
+  e.preventDefault()
+  const btn = document.getElementById('login-btn')
+  btn.disabled = true
+  btn.textContent = 'Signing in...'
+  hideMessages()
+
+  const email = document.getElementById('login-email').value.trim()
+  const password = document.getElementById('login-password').value
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password })
+
+  if (error) {
+    showError(error.message)
+    btn.disabled = false
+    btn.textContent = 'Sign In'
+    return
+  }
+
+  window.location.href = 'admin.html'
+}
+
+// ── Signup ──────────────────────────────────────────────────────────────────
+async function handleSignup(e) {
+  e.preventDefault()
+  const btn = document.getElementById('signup-btn')
+  btn.disabled = true
+  btn.textContent = 'Creating account...'
+  hideMessages()
+
+  const email = document.getElementById('signup-email').value.trim()
+  const password = document.getElementById('signup-password').value
+  const confirm = document.getElementById('signup-confirm').value
+
+  if (password !== confirm) {
+    showError('Passwords do not match')
+    btn.disabled = false
+    btn.textContent = 'Create Account'
+    return
+  }
+  if (password.length < 8) {
+    showError('Password must be at least 8 characters')
+    btn.disabled = false
+    btn.textContent = 'Create Account'
+    return
+  }
+
+  const { data, error } = await sb.auth.signUp({
+    email,
+    password,
+    options: { emailRedirectTo: window.location.origin + '/admin.html' }
+  })
+
+  if (error) {
+    showError(error.message)
+    btn.disabled = false
+    btn.textContent = 'Create Account'
+    return
+  }
+
+  showSuccess('Account created! Check your email to verify your address, then sign in.')
+  btn.disabled = false
+  btn.textContent = 'Create Account'
+  setTimeout(() => showMode('login'), 3000)
+}
+
+// ── Forgot Password ─────────────────────────────────────────────────────────
+function handleForgotPassword() { showMode('reset') }
+
+async function handleReset(e) {
+  e.preventDefault()
+  hideMessages()
+  const email = document.getElementById('reset-email').value.trim()
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/admin.html'
+  })
+  if (error) { showError(error.message); return }
+  showSuccess('Password reset link sent! Check your email.')
+}
+</script>
+
+</body>
+</html>

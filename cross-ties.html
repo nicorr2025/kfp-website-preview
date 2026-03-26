@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Railroad Cross-Ties | Kentucky Forest Products</title>
+<meta name="description" content="Heavy-duty hardwood railroad cross-ties from Kentucky Forest Products. Crafted from select dense hardwoods including Oak, Maple, and Hickory. Standard 7x9x8.5ft dimensions."/>
+<link rel="icon" type="image/x-icon" href="favicon.ico"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "surface-container-low": "#f4f4ef",
+        "secondary-container": "#fed3c7",
+        "surface-variant": "#e3e3de",
+        "primary-fixed-dim": "#91d78a",
+        "on-secondary": "#ffffff",
+        "on-tertiary": "#ffffff",
+        "error-container": "#ffdad6",
+        "surface-container": "#eeeee9",
+        "on-surface-variant": "#41493e",
+        "on-background": "#1a1c19",
+        "on-error": "#ffffff",
+        "on-secondary-container": "#795950",
+        "inverse-on-surface": "#f1f1ec",
+        "outline-variant": "#c0c9bb",
+        "inverse-primary": "#91d78a",
+        "surface-tint": "#2a6b2c",
+        "secondary": "#77574d",
+        "surface": "#fafaf5",
+        "surface-container-lowest": "#ffffff",
+        "on-primary": "#ffffff",
+        "primary": "#00450d",
+        "inverse-surface": "#2f312e",
+        "outline": "#717a6d",
+        "surface-dim": "#dadad5",
+        "tertiary": "#4d352b",
+        "surface-bright": "#fafaf5",
+        "primary-fixed": "#acf4a4",
+        "on-primary-fixed-variant": "#0c5216",
+        "on-surface": "#1a1c19",
+        "primary-container": "#1b5e20",
+        "error": "#ba1a1a",
+        "surface-container-high": "#e8e8e3",
+        "surface-container-highest": "#e3e3de"
+      },
+      fontFamily: {
+        "headline": ["Manrope", "sans-serif"],
+        "body": ["Manrope", "sans-serif"],
+        "label": ["Manrope", "sans-serif"]
+      },
+      borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+    },
+  },
+}
+</script>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  }
+  .glass-card {
+    background: rgba(250, 250, 245, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(192, 201, 187, 0.2);
+  }
+  .text-shadow-sm {
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  /* Dropdown menus */
+  .nav-dropdown { display: none; position: absolute; top: 100%; left: 0; min-width: 220px; }
+  .nav-group:hover .nav-dropdown { display: block; }
+  .nav-dropdown a { display: block; padding: 0.625rem 1.25rem; }
+  .nav-dropdown a:hover { background: rgba(0, 69, 13, 0.05); }
+  /* Mobile menu */
+  .mobile-menu { display: none; }
+  .mobile-menu.active { display: block; }
+  .mobile-submenu { display: none; }
+  .mobile-submenu.active { display: block; }
+</style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased selection:bg-primary selection:text-on-primary">
+
+<!-- ========== NAVIGATION ========== -->
+<nav class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-md shadow-sm transition-all duration-300">
+  <div class="flex justify-between items-center w-full px-6 py-4 max-w-screen-2xl mx-auto">
+    <!-- Logo -->
+    <a href="index.html" class="flex items-center gap-3">
+      <img src="images/kfp-logo.png" alt="Kentucky Forest Products" class="h-20 w-auto"/>
+    </a>
+
+    <!-- Desktop Nav -->
+    <div class="hidden lg:flex items-center space-x-8">
+      <a class="text-on-surface-variant hover:text-primary transition-colors text-sm font-medium tracking-tight pb-1" href="index.html">Home</a>
+
+      <!-- Wood Products Dropdown -->
+      <div class="relative nav-group">
+        <button class="text-on-surface-variant hover:text-primary transition-colors text-sm font-medium tracking-tight flex items-center gap-1 pb-1">
+          Wood Products <span class="material-symbols-outlined text-base">expand_more</span>
+        </button>
+        <div class="nav-dropdown glass-card rounded-xl shadow-2xl py-2 mt-1">
+          <a href="lumber.html" class="text-sm text-on-surface-variant hover:text-primary font-medium">Lumber</a>
+          <a href="fencing.html" class="text-sm text-on-surface-variant hover:text-primary font-medium">Fencing</a>
+          <a href="logs.html" class="text-sm text-on-surface-variant hover:text-primary font-medium">We Buy Logs</a>
+        </div>
+      </div>
+
+      <!-- Industrial Solutions Dropdown -->
+      <div class="relative nav-group">
+        <button class="text-on-surface-variant hover:text-primary transition-colors text-sm font-medium tracking-tight flex items-center gap-1 pb-1">
+          Industrial Solutions <span class="material-symbols-outlined text-base">expand_more</span>
+        </button>
+        <div class="nav-dropdown glass-card rounded-xl shadow-2xl py-2 mt-1">
+          <a href="matting.html" class="text-sm text-on-surface-variant hover:text-primary font-medium">Matting</a>
+          <a href="utility.html" class="text-sm text-on-surface-variant hover:text-primary font-medium">Utility Poles &amp; Cross Arms</a>
+          <a href="cross-ties.html" class="text-sm text-on-surface-variant hover:text-primary font-medium">Railroad Cross-Ties</a>
+        </div>
+      </div>
+
+      <a class="text-on-surface-variant hover:text-primary transition-colors text-sm font-medium tracking-tight pb-1" href="byproducts.html">Byproducts</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors text-sm font-medium tracking-tight pb-1" href="contact.html">Contact</a>
+    </div>
+
+    <!-- CTA + Mobile Toggle -->
+    <div class="flex items-center gap-4">
+      <a href="contact.html" class="hidden md:inline-block bg-primary text-on-primary px-6 py-2.5 rounded-xl font-semibold hover:opacity-90 transition-all active:scale-95 duration-150 text-sm shadow-sm">
+        Request Quote
+      </a>
+      <button onclick="document.getElementById('mobile-menu').classList.toggle('active')" class="lg:hidden text-primary">
+        <span class="material-symbols-outlined text-3xl">menu</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="mobile-menu lg:hidden bg-white/95 backdrop-blur-md border-t border-outline-variant/20 px-6 pb-6">
+    <a href="index.html" class="block py-3 text-on-surface font-medium border-b border-outline-variant/10">Home</a>
+
+    <div class="border-b border-outline-variant/10">
+      <button onclick="this.nextElementSibling.classList.toggle('active')" class="flex justify-between items-center w-full py-3 text-on-surface font-medium">
+        Wood Products <span class="material-symbols-outlined">expand_more</span>
+      </button>
+      <div class="mobile-submenu pl-4 pb-2">
+        <a href="lumber.html" class="block py-2 text-sm text-on-surface-variant">Lumber</a>
+        <a href="fencing.html" class="block py-2 text-sm text-on-surface-variant">Fencing</a>
+        <a href="logs.html" class="block py-2 text-sm text-on-surface-variant">We Buy Logs</a>
+      </div>
+    </div>
+
+    <div class="border-b border-outline-variant/10">
+      <button onclick="this.nextElementSibling.classList.toggle('active')" class="flex justify-between items-center w-full py-3 text-on-surface font-medium">
+        Industrial Solutions <span class="material-symbols-outlined">expand_more</span>
+      </button>
+      <div class="mobile-submenu pl-4 pb-2">
+        <a href="matting.html" class="block py-2 text-sm text-on-surface-variant">Matting</a>
+        <a href="utility.html" class="block py-2 text-sm text-on-surface-variant">Utility Poles &amp; Cross Arms</a>
+        <a href="cross-ties.html" class="block py-2 text-sm text-on-surface-variant">Railroad Cross-Ties</a>
+      </div>
+    </div>
+
+    <a href="byproducts.html" class="block py-3 text-on-surface font-medium border-b border-outline-variant/10">Byproducts</a>
+    <a href="contact.html" class="block py-3 text-on-surface font-medium border-b border-outline-variant/10">Contact</a>
+    <a href="contact.html" class="block mt-4 bg-primary text-on-primary text-center px-6 py-3 rounded-xl font-semibold">Request Quote</a>
+  </div>
+</nav>
+
+<!-- ========== HERO ========== -->
+<main>
+<section class="relative h-[60vh] min-h-[450px] flex items-center justify-center overflow-hidden pt-16">
+  <div class="absolute inset-0 z-0">
+    <img alt="Railroad tracks stretching into the distance through a forested landscape" class="w-full h-full object-cover" src="images/P1140378.jpg"/>
+    <div class="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-surface"></div>
+  </div>
+  <div class="relative z-10 max-w-7xl mx-auto px-6 w-full">
+    <div class="glass-card max-w-3xl p-10 md:p-16 rounded-xl">
+      <span class="uppercase tracking-[0.2em] text-primary font-bold mb-6 block text-xs">Industrial Solutions</span>
+      <h1 class="text-5xl md:text-7xl font-extrabold font-headline leading-[1.1] text-primary tracking-tight mb-8">
+        Railroad Cross-Ties
+      </h1>
+      <p class="text-lg md:text-xl text-on-surface-variant max-w-xl leading-relaxed">
+        Heavy-duty hardwood cross-ties built for the demands of railroad infrastructure.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PRODUCT OVERVIEW ========== -->
+<section class="py-24 bg-surface">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="mb-16">
+      <h2 class="text-3xl md:text-4xl font-headline font-bold text-primary tracking-tight">Product Overview</h2>
+      <div class="h-1 w-20 bg-secondary mt-4"></div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Feature 1 -->
+      <div class="glass-card rounded-xl p-8 hover:shadow-lg transition-shadow duration-300">
+        <span class="material-symbols-outlined text-primary text-4xl mb-5 block">forest</span>
+        <h3 class="text-lg font-bold text-primary mb-3">Select Dense Hardwoods</h3>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Crafted from select, dense hardwoods including Oak (White/Red), Maple (Hard/Soft), Hickory, and other tie species.</p>
+      </div>
+      <!-- Feature 2 -->
+      <div class="glass-card rounded-xl p-8 hover:shadow-lg transition-shadow duration-300">
+        <span class="material-symbols-outlined text-primary text-4xl mb-5 block">straighten</span>
+        <h3 class="text-lg font-bold text-primary mb-3">Standard Dimensions</h3>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Standard dimensions: 7" x 9" x 8.5 ft &mdash; precision-cut to meet railroad industry specifications.</p>
+      </div>
+      <!-- Feature 3 -->
+      <div class="glass-card rounded-xl p-8 hover:shadow-lg transition-shadow duration-300">
+        <span class="material-symbols-outlined text-primary text-4xl mb-5 block">shield</span>
+        <h3 class="text-lg font-bold text-primary mb-3">Crushing &amp; Abrasion Resistance</h3>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Superior resistance to crushing and abrasion, ensuring long service life under heavy rail traffic.</p>
+      </div>
+      <!-- Feature 4 -->
+      <div class="glass-card rounded-xl p-8 hover:shadow-lg transition-shadow duration-300">
+        <span class="material-symbols-outlined text-primary text-4xl mb-5 block">fitness_center</span>
+        <h3 class="text-lg font-bold text-primary mb-3">Exceptional Strength</h3>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Exceptional strength and load-bearing capabilities designed to support the heaviest rolling stock.</p>
+      </div>
+      <!-- Feature 5 -->
+      <div class="glass-card rounded-xl p-8 hover:shadow-lg transition-shadow duration-300">
+        <span class="material-symbols-outlined text-primary text-4xl mb-5 block">construction</span>
+        <h3 class="text-lg font-bold text-primary mb-3">Robust Construction</h3>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Robust hardwood construction that stands up to the toughest environmental and operational conditions.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== APPLICATIONS ========== -->
+<section class="py-24 bg-surface-container-high">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="mb-16">
+      <h2 class="text-3xl md:text-4xl font-headline font-bold text-primary tracking-tight">Applications</h2>
+      <div class="h-1 w-20 bg-secondary mt-4"></div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="glass-card rounded-xl p-8 flex items-start gap-5 hover:shadow-lg transition-shadow duration-300">
+        <span class="material-symbols-outlined text-primary text-3xl mt-1">train</span>
+        <div>
+          <h3 class="text-lg font-bold text-primary mb-2">Main Line Railroad Tracks</h3>
+          <p class="text-sm text-on-surface-variant leading-relaxed">Dependable cross-ties engineered to handle the constant stress of main line freight and passenger rail service.</p>
+        </div>
+      </div>
+      <div class="glass-card rounded-xl p-8 flex items-start gap-5 hover:shadow-lg transition-shadow duration-300">
+        <span class="material-symbols-outlined text-primary text-3xl mt-1">factory</span>
+        <div>
+          <h3 class="text-lg font-bold text-primary mb-2">Industrial Spurs</h3>
+          <p class="text-sm text-on-surface-variant leading-relaxed">Quality ties for industrial spur lines connecting manufacturing facilities, warehouses, and distribution centers.</p>
+        </div>
+      </div>
+      <div class="glass-card rounded-xl p-8 flex items-start gap-5 hover:shadow-lg transition-shadow duration-300">
+        <span class="material-symbols-outlined text-primary text-3xl mt-1">home_repair_service</span>
+        <div>
+          <h3 class="text-lg font-bold text-primary mb-2">Railway Infrastructure Maintenance</h3>
+          <p class="text-sm text-on-surface-variant leading-relaxed">Replacement ties for ongoing maintenance programs, keeping existing rail infrastructure safe and operational.</p>
+        </div>
+      </div>
+      <div class="glass-card rounded-xl p-8 flex items-start gap-5 hover:shadow-lg transition-shadow duration-300">
+        <span class="material-symbols-outlined text-primary text-3xl mt-1">local_shipping</span>
+        <div>
+          <h3 class="text-lg font-bold text-primary mb-2">Any Scale Railroad Project</h3>
+          <p class="text-sm text-on-surface-variant leading-relaxed">We can supply quality timber for any scale of railroad project &mdash; from small siding installations to large-scale track construction.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CTA ========== -->
+<section class="py-24 bg-surface">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="bg-primary rounded-[2rem] p-12 md:p-24 text-center text-on-primary overflow-hidden relative">
+      <div class="absolute inset-0 opacity-10 pointer-events-none">
+        <div class="absolute inset-0" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 40px 40px;"></div>
+      </div>
+      <div class="relative z-10 max-w-3xl mx-auto">
+        <h2 class="text-4xl md:text-6xl font-headline font-extrabold mb-8 leading-tight">Need Railroad Cross-Ties?</h2>
+        <p class="text-xl text-primary-fixed mb-12 opacity-90">
+          Contact us for pricing and availability. We supply quality hardwood cross-ties for projects of any scale.
+        </p>
+        <div class="flex flex-col md:flex-row gap-4 justify-center">
+          <a href="contact.html" class="bg-white text-primary px-10 py-5 rounded-xl font-black text-lg hover:scale-105 transition-transform shadow-xl inline-block">
+            Get a Quote
+          </a>
+          <a href="tel:6062502220" class="border border-white/30 backdrop-blur-sm px-10 py-5 rounded-xl font-black text-lg hover:bg-white/10 transition-colors inline-block">
+            Call (606) 250-2220
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ========== FOOTER ========== -->
+<footer class="bg-primary text-on-primary/60 font-body text-sm tracking-wide w-full py-12 px-8">
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-12 max-w-7xl mx-auto">
+    <div class="col-span-1">
+      <img src="images/kfp-logo-white.png" alt="Kentucky Forest Products" class="h-16 w-auto mb-3"/>
+      <div class="text-lg font-black text-white uppercase tracking-widest mb-2">Kentucky Forest Products</div>
+      <div class="text-xs text-on-primary/40 mb-6">Pole &amp; Lumber Co. &bull; Est. 1981</div>
+      <p class="text-on-primary/50 leading-relaxed">
+        24 Seeley Rd<br/>London, KY<br/><a href="tel:6062502220" class="hover:text-white transition-colors">(606) 250-2220</a>
+      </p>
+      <p class="text-on-primary/40 mt-4">Mon&ndash;Fri: 7:30 AM &ndash; 4:30 PM</p>
+    </div>
+    <div>
+      <h4 class="text-white font-semibold mb-6">Wood Products</h4>
+      <ul class="space-y-4">
+        <li><a class="text-on-primary/50 hover:text-white transition-colors" href="lumber.html">Lumber</a></li>
+        <li><a class="text-on-primary/50 hover:text-white transition-colors" href="fencing.html">Fencing</a></li>
+        <li><a class="text-on-primary/50 hover:text-white transition-colors" href="logs.html">We Buy Logs</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="text-white font-semibold mb-6">Industrial Solutions</h4>
+      <ul class="space-y-4">
+        <li><a class="text-on-primary/50 hover:text-white transition-colors" href="matting.html">Matting</a></li>
+        <li><a class="text-on-primary/50 hover:text-white transition-colors" href="utility.html">Utility Poles &amp; Cross Arms</a></li>
+        <li><a class="text-on-primary/50 hover:text-white transition-colors" href="cross-ties.html">Railroad Cross-Ties</a></li>
+        <li><a class="text-on-primary/50 hover:text-white transition-colors" href="byproducts.html">Byproducts</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="text-white font-semibold mb-6">Connect</h4>
+      <ul class="space-y-4">
+        <li><a class="text-on-primary/50 hover:text-white transition-colors" href="contact.html">Contact Us</a></li>
+        <li><a class="text-on-primary/50 hover:text-white transition-colors" href="https://www.facebook.com" target="_blank" rel="noopener">Facebook</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="max-w-7xl mx-auto mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
+    <div class="text-on-primary/30">&copy; 2025 Kentucky Forest Products. All rights reserved.</div>
+    <div class="flex gap-8">
+      <a class="text-on-primary/50 hover:text-white transition-colors" href="#">Privacy Policy</a>
+      <a class="text-on-primary/50 hover:text-white transition-colors" href="#">Terms of Service</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
