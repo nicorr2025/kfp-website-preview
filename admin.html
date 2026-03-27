@@ -889,23 +889,97 @@ h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
 
     <!-- ==================== SHIPPING PAGE ==================== -->
     <div id="page-shipping" class="page-content hidden">
-      <div class="flex justify-between items-end mb-8">
+      <div class="flex justify-between items-end mb-6">
         <div>
           <h1 class="text-4xl font-black text-primary tracking-tighter uppercase">Shipping</h1>
-          <p class="text-stone-500 font-medium mt-1 text-sm">Track shipments and manage logistics.</p>
+          <p class="text-stone-500 font-medium mt-1 text-sm">Track shipments and estimate freight costs.</p>
         </div>
+      </div>
+
+      <!-- ── Shipping Calculator ── -->
+      <div class="bg-surface-container-low rounded-2xl p-6 mb-8">
+        <div class="flex items-center gap-2 mb-5">
+          <span class="material-symbols-outlined text-primary">calculate</span>
+          <h2 class="text-lg font-black text-primary uppercase tracking-tight">Freight Cost Estimator</h2>
+          <span class="text-[10px] text-stone-400 font-semibold uppercase tracking-wider ml-1">Origin: 24 Seeley Rd, London, KY</span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Left: Products -->
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Products / Line Items</label>
+              <button onclick="addShipProduct()" class="flex items-center gap-1 text-xs font-bold text-primary hover:underline">
+                <span class="material-symbols-outlined text-sm">add</span> Add Product
+              </button>
+            </div>
+            <div id="ship-products" class="space-y-2">
+              <!-- injected rows -->
+            </div>
+            <div class="mt-3 pt-3 border-t border-stone-200 flex justify-between text-sm">
+              <span class="text-stone-500 font-semibold">Total Weight</span>
+              <span class="font-black text-primary" id="ship-total-weight">0 lbs</span>
+            </div>
+          </div>
+
+          <!-- Right: Destination + Freight Type -->
+          <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-3">
+              <div class="col-span-2">
+                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Destination</label>
+                <input id="ship-destination" type="text" placeholder="City, State (e.g. Louisville, KY)" class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary"/>
+              </div>
+              <div>
+                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Distance (miles)</label>
+                <input id="ship-distance" type="number" min="0" placeholder="e.g. 85" oninput="recalcShipping()" class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary"/>
+              </div>
+              <div>
+                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Freight Type</label>
+                <select id="ship-freight-type" onchange="recalcShipping()" class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary">
+                  <option value="ftl">FTL Flatbed</option>
+                  <option value="ltl">LTL</option>
+                  <option value="pickup">Customer Pickup</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Fuel Surcharge %</label>
+                <input id="ship-fuel" type="number" value="18" min="0" max="100" oninput="recalcShipping()" class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary"/>
+              </div>
+              <div>
+                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Loading Fee ($)</label>
+                <input id="ship-loading" type="number" value="150" min="0" oninput="recalcShipping()" class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary"/>
+              </div>
+            </div>
+
+            <!-- Result -->
+            <div id="ship-result" class="hidden bg-primary/5 border border-primary/20 rounded-xl p-4">
+              <p class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 mb-3">Estimate Breakdown</p>
+              <div id="ship-breakdown" class="space-y-1.5 text-sm mb-3"></div>
+              <div class="flex justify-between items-center pt-3 border-t border-primary/20">
+                <span class="font-black text-primary uppercase tracking-tight text-sm">Estimated Total</span>
+                <span class="text-2xl font-black text-primary" id="ship-total-cost">$0</span>
+              </div>
+              <p class="text-[10px] text-stone-400 mt-2">* Estimate only. Actual rates may vary by carrier and market conditions.</p>
+            </div>
+            <div id="ship-no-result" class="text-xs text-stone-400 text-center py-4">
+              Add products and enter a distance to see an estimate.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Active Shipments ── -->
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-sm font-black uppercase tracking-[0.15em] text-stone-400">Active Shipments</h2>
         <button class="bg-primary px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 text-on-primary hover:bg-primary-container transition-colors shadow-lg shadow-primary/10">
           <span class="material-symbols-outlined text-sm">add</span>
           Schedule Shipment
         </button>
       </div>
-      <!-- Active Shipments -->
       <div class="space-y-4">
         <div class="bg-surface-container-low p-5 rounded-xl flex items-center justify-between hover:bg-surface-container-lowest transition-all">
           <div class="flex items-center gap-4">
-            <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-              <span class="material-symbols-outlined">local_shipping</span>
-            </div>
+            <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><span class="material-symbols-outlined">local_shipping</span></div>
             <div>
               <p class="font-bold text-primary text-sm">#SHP-2241 — Daniel Construction</p>
               <p class="text-xs text-stone-500">3-Ply Crane Mats 16' × 12 · Full Truckload</p>
@@ -918,9 +992,7 @@ h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
         </div>
         <div class="bg-surface-container-low p-5 rounded-xl flex items-center justify-between hover:bg-surface-container-lowest transition-all">
           <div class="flex items-center gap-4">
-            <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-              <span class="material-symbols-outlined">inventory</span>
-            </div>
+            <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><span class="material-symbols-outlined">inventory</span></div>
             <div>
               <p class="font-bold text-primary text-sm">#SHP-2240 — Kentucky Power Co.</p>
               <p class="text-xs text-stone-500">Cross Arms 10' × 200 · Palletized</p>
@@ -933,9 +1005,7 @@ h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
         </div>
         <div class="bg-surface-container-low p-5 rounded-xl flex items-center justify-between hover:bg-surface-container-lowest transition-all">
           <div class="flex items-center gap-4">
-            <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-              <span class="material-symbols-outlined">check_circle</span>
-            </div>
+            <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><span class="material-symbols-outlined">check_circle</span></div>
             <div>
               <p class="font-bold text-primary text-sm">#SHP-2239 — Red River Farms</p>
               <p class="text-xs text-stone-500">Pine Mulch × 8 Pallets · LTL</p>
@@ -1984,6 +2054,7 @@ document.querySelectorAll('.nav-link').forEach(link => {
     if (page === 'outreach') { refreshOutreachStats(); refreshCampaigns(); }
     if (page === 'team') refreshTeam();
     if (page === 'customers') renderCustomers();
+    if (page === 'shipping') { if (!shipProducts.length) addShipProduct(); else renderShipProducts(); }
   });
 });
 
@@ -2356,6 +2427,99 @@ function useCSVLeads() { addComposeLeads(csvParsedLeads); }
 // ══════════════════════════════════════════════════════════════════════════════
 // MANUAL ENTRY
 // ══════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
+// SHIPPING CALCULATOR
+// ══════════════════════════════════════════════════════════════════════════════
+let shipProducts = [];
+
+function addShipProduct(name='', qty=1, weightEach=0) {
+  const id = Date.now();
+  shipProducts.push({ id, name, qty, weightEach });
+  renderShipProducts();
+}
+
+function removeShipProduct(id) {
+  shipProducts = shipProducts.filter(p => p.id !== id);
+  renderShipProducts();
+}
+
+function renderShipProducts() {
+  const container = document.getElementById('ship-products');
+  if (!shipProducts.length) {
+    container.innerHTML = `<div class="text-xs text-stone-400 text-center py-4">No products added yet.</div>`;
+    recalcShipping(); return;
+  }
+  container.innerHTML = shipProducts.map(p => `
+    <div class="grid grid-cols-12 gap-2 items-center" data-id="${p.id}">
+      <input type="text" value="${p.name}" placeholder="Product name" oninput="updateShipProduct(${p.id},'name',this.value)"
+        class="col-span-5 bg-surface-container-highest border-none rounded-lg px-3 py-2 text-sm focus:ring-primary"/>
+      <input type="number" value="${p.qty}" min="1" placeholder="Qty" oninput="updateShipProduct(${p.id},'qty',+this.value)"
+        class="col-span-2 bg-surface-container-highest border-none rounded-lg px-3 py-2 text-sm focus:ring-primary"/>
+      <input type="number" value="${p.weightEach || ''}" min="0" placeholder="lbs ea." oninput="updateShipProduct(${p.id},'weightEach',+this.value)"
+        class="col-span-4 bg-surface-container-highest border-none rounded-lg px-3 py-2 text-sm focus:ring-primary"/>
+      <button onclick="removeShipProduct(${p.id})" class="col-span-1 text-stone-300 hover:text-error flex justify-center">
+        <span class="material-symbols-outlined text-sm">close</span>
+      </button>
+    </div>
+  `).join('');
+  // header labels on first render
+  recalcShipping();
+}
+
+function updateShipProduct(id, field, value) {
+  const p = shipProducts.find(x => x.id === id);
+  if (p) { p[field] = value; recalcShipping(); }
+}
+
+function recalcShipping() {
+  const totalWeight = shipProducts.reduce((s, p) => s + ((+p.qty || 0) * (+p.weightEach || 0)), 0);
+  document.getElementById('ship-total-weight').textContent = totalWeight.toLocaleString() + ' lbs';
+
+  const miles = parseFloat(document.getElementById('ship-distance')?.value) || 0;
+  const freightType = document.getElementById('ship-freight-type')?.value || 'ftl';
+  const fuelPct = parseFloat(document.getElementById('ship-fuel')?.value) / 100 || 0.18;
+  const loadingFee = parseFloat(document.getElementById('ship-loading')?.value) || 0;
+  const result = document.getElementById('ship-result');
+  const noResult = document.getElementById('ship-no-result');
+
+  if (!miles || !totalWeight || freightType === 'pickup') {
+    if (freightType === 'pickup') {
+      result?.classList.remove('hidden');
+      noResult?.classList.add('hidden');
+      document.getElementById('ship-breakdown').innerHTML = `<div class="flex justify-between"><span class="text-stone-500">Customer Pickup</span><span class="font-bold text-primary">$0.00</span></div>`;
+      document.getElementById('ship-total-cost').textContent = '$0.00';
+    } else {
+      result?.classList.add('hidden');
+      noResult?.classList.remove('hidden');
+    }
+    return;
+  }
+
+  let baseRate = 0, label = '';
+  if (freightType === 'ftl') {
+    baseRate = miles * 3.50;
+    label = `FTL Flatbed @ $3.50/mile × ${miles} mi`;
+  } else if (freightType === 'ltl') {
+    const cwt = totalWeight / 100;
+    const per100mi = miles / 100;
+    baseRate = cwt * per100mi * 8.50;
+    label = `LTL @ $8.50/CWT/100mi × ${(cwt).toFixed(1)} CWT × ${per100mi.toFixed(1)}`;
+  }
+
+  const fuelCharge = baseRate * fuelPct;
+  const total = baseRate + fuelCharge + loadingFee;
+
+  result?.classList.remove('hidden');
+  noResult?.classList.add('hidden');
+  document.getElementById('ship-breakdown').innerHTML = `
+    <div class="flex justify-between"><span class="text-stone-500">${label}</span><span class="font-semibold">$${baseRate.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+    <div class="flex justify-between"><span class="text-stone-500">Fuel Surcharge (${Math.round(fuelPct*100)}%)</span><span class="font-semibold">$${fuelCharge.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+    <div class="flex justify-between"><span class="text-stone-500">Loading Fee</span><span class="font-semibold">$${loadingFee.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+  `;
+  document.getElementById('ship-total-cost').textContent = '$' + total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 // CUSTOMERS
 // ══════════════════════════════════════════════════════════════════════════════
