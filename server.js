@@ -3,6 +3,7 @@ const express = require('express')
 const cors = require('cors')
 const path = require('path')
 const { createClient } = require('@supabase/supabase-js')
+const nodemailer = require('nodemailer')
 
 const app = express()
 app.use(cors())
@@ -407,6 +408,40 @@ app.get('/api/stats', (req, res) => {
     bounce_rate: leadsDB.length > 0 ? Math.round((leadsDB.filter(l => l.status === 'bounced').length / Math.max(1, leadsDB.filter(l => l.status !== 'new').length)) * 100) : 0,
     campaigns: campaignsDB.length,
   })
+})
+
+// ── Invoice Email ────────────────────────────────────────────────────────────
+app.post('/api/send-invoice', requireAuth, async (req, res) => {
+  const { to, subject, invoiceHtml, invoiceNumber, senderName } = req.body
+  if (!to || !invoiceHtml) return res.status(400).json({ error: 'Missing required fields' })
+
+  const smtpUser = process.env.SMTP_USER
+  const smtpPass = process.env.SMTP_PASS
+  if (!smtpUser || !smtpPass) return res.status(500).json({ error: 'Email not configured. Add SMTP_USER and SMTP_PASS to environment variables.' })
+
+  try {
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.office365.com',
+      port: 587,
+      secure: false,
+      auth: { user: smtpUser, pass: smtpPass },
+      tls: { ciphers: 'SSLv3', rejectUnauthorized: false }
+    })
+
+    const fromAddress = `"${senderName || 'KFP Sawmill Operations'}" <${smtpUser}>`
+
+    await transporter.sendMail({
+      from: fromAddress,
+      to,
+      subject: subject || `Invoice ${invoiceNumber} from Kentucky Forest Products`,
+      html: invoiceHtml,
+    })
+
+    res.json({ ok: true })
+  } catch (err) {
+    console.error('Invoice send error:', err)
+    res.status(500).json({ error: err.message || 'Failed to send invoice.' })
+  }
 })
 
 // ── Start ───────────────────────────────────────────────────────────────────

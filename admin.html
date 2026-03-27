@@ -773,9 +773,14 @@ h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
           <div>
             <div class="flex items-center justify-between mb-3">
               <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Products / Line Items</label>
-              <button onclick="addShipProduct()" class="flex items-center gap-1 text-xs font-bold text-primary hover:underline">
-                <span class="material-symbols-outlined text-sm">add</span> Add Product
-              </button>
+              <div class="flex items-center gap-3">
+                <button onclick="clearShippingCalculator()" class="flex items-center gap-1 text-xs font-bold text-stone-400 hover:text-red-500 transition-colors">
+                  <span class="material-symbols-outlined text-sm">restart_alt</span> Clear All
+                </button>
+                <button onclick="addShipProduct()" class="flex items-center gap-1 text-xs font-bold text-primary hover:underline">
+                  <span class="material-symbols-outlined text-sm">add</span> Add Product
+                </button>
+              </div>
             </div>
             <div id="ship-products" class="space-y-2">
               <!-- injected rows -->
@@ -801,8 +806,8 @@ h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
                 <p id="ship-dist-status" class="text-xs text-stone-400 mt-1 hidden"></p>
               </div>
               <div>
-                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Distance (miles)</label>
-                <input id="ship-distance" type="number" min="0" placeholder="Auto-calculated" oninput="recalcShipping()" class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary"/>
+                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Distance (miles) <span class="normal-case font-normal text-stone-400">— or enter manually</span></label>
+                <input id="ship-distance" type="number" min="0" placeholder="e.g. 85" oninput="recalcShipping()" class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary"/>
               </div>
               <div>
                 <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Freight Type</label>
@@ -831,10 +836,16 @@ h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
                 <span class="text-2xl font-black text-primary" id="ship-total-cost">$0</span>
               </div>
               <p class="text-[10px] text-stone-400 mt-2">* Estimate only. Actual rates may vary by carrier and market conditions.</p>
-              <button onclick="openShippingInvoiceModal()" class="mt-3 w-full bg-primary text-on-primary px-4 py-2 rounded-lg text-sm font-bold hover:bg-primary-container transition-colors flex items-center justify-center gap-2">
-                <span class="material-symbols-outlined text-sm">receipt_long</span>
-                Create Invoice
-              </button>
+              <div class="flex gap-2 mt-3">
+                <button onclick="openInvoiceModal('quote')" class="flex-1 border border-primary text-primary px-4 py-2 rounded-lg text-sm font-bold hover:bg-primary/5 transition-colors flex items-center justify-center gap-1.5">
+                  <span class="material-symbols-outlined text-sm">description</span>
+                  Save as Quote
+                </button>
+                <button onclick="openInvoiceModal('invoice')" class="flex-1 bg-primary text-on-primary px-4 py-2 rounded-lg text-sm font-bold hover:bg-primary-container transition-colors flex items-center justify-center gap-1.5">
+                  <span class="material-symbols-outlined text-sm">send</span>
+                  Send Invoice
+                </button>
+              </div>
             </div>
             <div id="ship-no-result" class="text-xs text-stone-400 text-center py-4">
               Add products and enter a distance to see an estimate.
@@ -854,23 +865,21 @@ h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
       <div id="shipments-list" class="space-y-4"></div>
     </div>
 
-    <!-- ── Shipping Invoice Modal ── -->
-    <div id="shipping-invoice-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    <!-- ── Unified Invoice / Quote Modal ── -->
+    <div id="invoice-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col max-h-[90vh]">
-        <!-- Header -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-stone-100">
           <div>
-            <h2 class="text-xl font-black text-primary uppercase tracking-tight">Shipping Invoice</h2>
+            <h2 class="text-xl font-black text-primary uppercase tracking-tight" id="inv-modal-title">Invoice</h2>
             <p class="text-xs text-stone-400 mt-0.5">KFP Sawmill Operations · 24 Seeley Rd, London, KY 40741</p>
           </div>
           <div class="flex items-center gap-2">
-            <button onclick="printShippingInvoice()" class="flex items-center gap-1.5 text-sm font-bold text-stone-500 hover:text-primary border border-stone-200 px-3 py-1.5 rounded-lg transition-colors">
+            <button onclick="printInvoice()" class="flex items-center gap-1.5 text-sm font-bold text-stone-500 hover:text-primary border border-stone-200 px-3 py-1.5 rounded-lg transition-colors">
               <span class="material-symbols-outlined text-sm">print</span> Print
             </button>
-            <button onclick="document.getElementById('shipping-invoice-modal').classList.add('hidden')" class="text-stone-400 hover:text-stone-600 ml-1"><span class="material-symbols-outlined">close</span></button>
+            <button onclick="document.getElementById('invoice-modal').classList.add('hidden')" class="text-stone-400 hover:text-stone-600 ml-1"><span class="material-symbols-outlined">close</span></button>
           </div>
         </div>
-        <!-- Invoice fields -->
         <div class="px-6 py-4 space-y-4 overflow-y-auto flex-1">
           <div class="grid grid-cols-2 gap-4">
             <div>
@@ -878,24 +887,27 @@ h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
               <input id="inv-customer" type="text" placeholder="Customer or company name" class="w-full bg-stone-100 border-none rounded-lg px-4 py-2.5 text-sm"/>
             </div>
             <div>
-              <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Invoice # (optional)</label>
+              <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Invoice / Quote #</label>
               <input id="inv-number" type="text" class="w-full bg-stone-100 border-none rounded-lg px-4 py-2.5 text-sm"/>
             </div>
             <div>
-              <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Invoice Date</label>
+              <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Date</label>
               <input id="inv-date" type="date" class="w-full bg-stone-100 border-none rounded-lg px-4 py-2.5 text-sm"/>
             </div>
             <div>
-              <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Due Date</label>
+              <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Due / Expiry Date</label>
               <input id="inv-due" type="date" class="w-full bg-stone-100 border-none rounded-lg px-4 py-2.5 text-sm"/>
             </div>
           </div>
-          <!-- Destination -->
           <div>
-            <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Ship To</label>
+            <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Ship To / Address</label>
             <input id="inv-shipto" type="text" class="w-full bg-stone-100 border-none rounded-lg px-4 py-2.5 text-sm"/>
           </div>
-          <!-- Line Items -->
+          <!-- Send To email — only shown for invoice mode -->
+          <div id="inv-email-row">
+            <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Send To (Email)</label>
+            <input id="inv-recipient-email" type="email" placeholder="customer@company.com" class="w-full bg-stone-100 border-none rounded-lg px-4 py-2.5 text-sm"/>
+          </div>
           <div>
             <p class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 mb-2">Line Items</p>
             <div class="bg-stone-50 rounded-xl overflow-hidden">
@@ -917,19 +929,22 @@ h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
               </table>
             </div>
           </div>
-          <!-- Notes -->
           <div>
             <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Notes</label>
             <textarea id="inv-notes" rows="2" class="w-full bg-stone-100 border-none rounded-lg px-4 py-2.5 text-sm resize-none" placeholder="Payment terms, special instructions, etc."></textarea>
           </div>
+          <div id="inv-send-status" class="hidden text-sm font-semibold text-center py-2 rounded-lg"></div>
         </div>
-        <!-- Footer -->
         <div class="px-6 py-4 border-t border-stone-100 flex justify-between items-center">
-          <button onclick="document.getElementById('shipping-invoice-modal').classList.add('hidden')" class="text-sm font-bold text-stone-400 hover:text-stone-600">Cancel</button>
+          <button onclick="document.getElementById('invoice-modal').classList.add('hidden')" class="text-sm font-bold text-stone-400 hover:text-stone-600">Cancel</button>
           <div class="flex gap-2">
-            <button onclick="saveInvoiceToQuotes()" class="bg-primary text-on-primary px-5 py-2 rounded-lg text-sm font-bold hover:bg-primary-container transition-colors flex items-center gap-2">
+            <button id="inv-save-btn" onclick="saveInvoiceToQuotes()" class="border border-primary text-primary px-5 py-2 rounded-lg text-sm font-bold hover:bg-primary/5 transition-colors flex items-center gap-2">
               <span class="material-symbols-outlined text-sm">save</span>
-              Save to Quotes
+              Save as Quote
+            </button>
+            <button id="inv-send-btn" onclick="sendInvoice()" class="bg-primary text-on-primary px-5 py-2 rounded-lg text-sm font-bold hover:bg-primary-container transition-colors flex items-center gap-2">
+              <span class="material-symbols-outlined text-sm">send</span>
+              Send Invoice
             </button>
           </div>
         </div>
@@ -2492,7 +2507,12 @@ function renderQuotes() {
       <td class="px-6 py-4 text-sm text-stone-600">${q.expires}</td>
       <td class="px-6 py-4 text-right font-black text-primary">${q.total}</td>
       <td class="px-6 py-4 text-right">
-        <button onclick="deleteQuote('${q.id}')" class="text-stone-300 hover:text-red-500 transition-colors"><span class="material-symbols-outlined text-sm">delete</span></button>
+        <div class="flex items-center justify-end gap-2">
+          <button onclick="openInvoiceFromQuote('${q.id}')" title="Convert to Invoice & Send" class="flex items-center gap-1 text-xs font-bold text-primary border border-primary/30 px-2.5 py-1 rounded-lg hover:bg-primary/5 transition-colors">
+            <span class="material-symbols-outlined text-sm">send</span> Send
+          </button>
+          <button onclick="deleteQuote('${q.id}')" class="text-stone-300 hover:text-red-500 transition-colors"><span class="material-symbols-outlined text-sm">delete</span></button>
+        </div>
       </td>
     </tr>
   `).join('');
@@ -2538,6 +2558,21 @@ function renderShipments() {
       </div>
     </div>
   `).join('');
+}
+
+function clearShippingCalculator() {
+  shipProducts = [];
+  renderShipProducts();
+  document.getElementById('ship-destination').value = '';
+  document.getElementById('ship-distance').value = '';
+  document.getElementById('ship-fuel').value = '18';
+  document.getElementById('ship-loading').value = '150';
+  document.getElementById('ship-freight-type').value = 'ftl';
+  const status = document.getElementById('ship-dist-status');
+  if (status) { status.textContent = ''; status.classList.add('hidden'); }
+  document.getElementById('ship-result')?.classList.add('hidden');
+  document.getElementById('ship-no-result')?.classList.remove('hidden');
+  addShipProduct();
 }
 
 function deleteShipment(id) {
@@ -2595,88 +2630,8 @@ function updateShipProduct(id, field, value) {
 // ══════════════════════════════════════════════════════════════════════════════
 // SHIPPING INVOICE
 // ══════════════════════════════════════════════════════════════════════════════
-function openShippingInvoiceModal() {
-  const today = new Date();
-  const due = new Date(today); due.setDate(due.getDate() + 30);
-  const fmt = d => d.toISOString().split('T')[0];
-
-  document.getElementById('inv-date').value = fmt(today);
-  document.getElementById('inv-due').value = fmt(due);
-  document.getElementById('inv-number').value = 'INV-' + String(Date.now()).slice(-5);
-  document.getElementById('inv-shipto').value = document.getElementById('ship-destination').value;
-  document.getElementById('inv-customer').value = '';
-  document.getElementById('inv-notes').value = 'Net 30. Freight estimate only — actual carrier charges may vary.';
-
-  // Build line items from shipProducts + breakdown
-  const freightType = document.getElementById('ship-freight-type').value;
-  const miles = parseFloat(document.getElementById('ship-distance').value) || 0;
-  const fuelPct = parseFloat(document.getElementById('ship-fuel').value) / 100 || 0.18;
-  const loadingFee = parseFloat(document.getElementById('ship-loading').value) || 0;
-  const totalWeight = shipProducts.reduce((s,p) => s + ((+p.qty||0)*(+p.weightEach||0)), 0);
-
-  const lineItems = [];
-
-  // Product rows
-  shipProducts.forEach(p => {
-    if (p.name || p.qty) lineItems.push({ desc: p.name || 'Product', qty: `${p.qty} × ${p.weightEach} lbs`, amount: '' });
-  });
-
-  // Freight rows
-  let baseRate = 0;
-  if (freightType === 'ftl') {
-    baseRate = miles * 3.50;
-    lineItems.push({ desc: `FTL Flatbed Freight (${miles} mi @ $3.50/mi)`, qty: '1', amount: '$' + baseRate.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) });
-  } else if (freightType === 'ltl') {
-    const cwt = totalWeight / 100;
-    const per100mi = miles / 100;
-    baseRate = cwt * per100mi * 8.50;
-    lineItems.push({ desc: `LTL Freight (${totalWeight.toLocaleString()} lbs, ${miles} mi)`, qty: '1', amount: '$' + baseRate.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) });
-  } else {
-    lineItems.push({ desc: 'Customer Pickup', qty: '1', amount: '$0.00' });
-  }
-
-  if (baseRate > 0) {
-    const fuel = baseRate * fuelPct;
-    lineItems.push({ desc: `Fuel Surcharge (${Math.round(fuelPct*100)}%)`, qty: '1', amount: '$' + fuel.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) });
-  }
-  if (loadingFee > 0) lineItems.push({ desc: 'Loading Fee', qty: '1', amount: '$' + loadingFee.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) });
-
-  document.getElementById('inv-line-items').innerHTML = lineItems.map(li => `
-    <tr>
-      <td class="px-4 py-2.5 text-stone-700">${li.desc}</td>
-      <td class="px-4 py-2.5 text-right text-stone-500">${li.qty}</td>
-      <td class="px-4 py-2.5 text-right font-semibold">${li.amount}</td>
-    </tr>
-  `).join('');
-
-  document.getElementById('inv-total').textContent = document.getElementById('ship-total-cost').textContent;
-  document.getElementById('shipping-invoice-modal').classList.remove('hidden');
-}
-
-function saveInvoiceToQuotes() {
-  const customer = document.getElementById('inv-customer').value.trim() || 'Unknown Customer';
-  const num = document.getElementById('inv-number').value.trim();
-  const total = document.getElementById('inv-total').textContent;
-  const dest = document.getElementById('inv-shipto').value.trim();
-  const freightType = { ftl: 'FTL Flatbed', ltl: 'LTL', pickup: 'Customer Pickup' }[document.getElementById('ship-freight-type').value] || 'Freight';
-  const products = shipProducts.filter(p => p.name).map(p => `${p.name} ×${p.qty}`).join(', ') || freightType;
-  const due = document.getElementById('inv-due').value;
-  const expires = due ? new Date(due).toLocaleDateString('en-US',{month:'short', day:'numeric', year:'numeric'}) : '—';
-
-  quotesData.unshift({ id: num, customer, products: products + ` · ${freightType} to ${dest}`, status:'Pending', statusColor:'tertiary', expires, total });
-
-  document.getElementById('shipping-invoice-modal').classList.add('hidden');
-
-  // Switch to Quotes tab
-  document.querySelectorAll('.nav-link').forEach(l => { l.classList.remove('nav-active'); l.classList.add('text-stone-600'); });
-  document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
-  const ql = document.querySelector('[data-page="quotes"]');
-  if (ql) { ql.classList.add('nav-active'); ql.classList.remove('text-stone-600'); }
-  document.getElementById('page-quotes').classList.remove('hidden');
-  renderQuotes();
-}
-
-function printShippingInvoice() {
+// Shared invoice HTML builder (used for print + email)
+function buildInvoiceHTML(label) {
   const customer = document.getElementById('inv-customer').value || '—';
   const invNum = document.getElementById('inv-number').value;
   const invDate = document.getElementById('inv-date').value;
@@ -2687,9 +2642,7 @@ function printShippingInvoice() {
   const rows = [...document.getElementById('inv-line-items').querySelectorAll('tr')].map(r =>
     `<tr>${[...r.querySelectorAll('td')].map(td => `<td style="padding:8px 12px;border-bottom:1px solid #eee">${td.textContent}</td>`).join('')}</tr>`
   ).join('');
-
-  const win = window.open('', '_blank');
-  win.document.write(`<!DOCTYPE html><html><head><title>Invoice ${invNum}</title>
+  return `<!DOCTYPE html><html><head><title>${label||'Invoice'} ${invNum}</title>
   <style>body{font-family:sans-serif;padding:40px;max-width:700px;margin:0 auto;color:#1a1a1a}
   h1{color:#1a4a2e;margin:0}table{width:100%;border-collapse:collapse;margin-top:16px}
   th{background:#f5f5f0;text-align:left;padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#888}
@@ -2699,19 +2652,146 @@ function printShippingInvoice() {
   @media print{body{padding:20px}}</style></head><body>
   <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #1a4a2e;padding-bottom:16px;margin-bottom:16px">
     <div><h1>KFP SAWMILL OPERATIONS</h1><p style="color:#888;margin:4px 0;font-size:13px">24 Seeley Rd · London, KY 40741 · (606) 250-2220</p></div>
-    <div style="text-align:right"><p style="font-size:22px;font-weight:900;color:#1a4a2e;margin:0">INVOICE</p><p style="color:#888;margin:4px 0;font-size:13px">${invNum}</p></div>
+    <div style="text-align:right"><p style="font-size:22px;font-weight:900;color:#1a4a2e;margin:0">${(label||'INVOICE').toUpperCase()}</p><p style="color:#888;margin:4px 0;font-size:13px">${invNum}</p></div>
   </div>
   <div class="meta">
     <div><div class="label">Bill To</div><strong>${customer}</strong></div>
     <div><div class="label">Ship To</div>${shipTo||'—'}</div>
-    <div><div class="label">Invoice Date</div>${invDate||'—'}</div>
-    <div><div class="label">Due Date</div>${dueDate||'—'}</div>
+    <div><div class="label">Date</div>${invDate||'—'}</div>
+    <div><div class="label">Due / Expires</div>${dueDate||'—'}</div>
   </div>
   <table><thead><tr><th>Description</th><th style="text-align:right">Qty</th><th style="text-align:right">Amount</th></tr></thead>
   <tbody>${rows}</tbody>
   <tfoot><tr class="total-row"><td colspan="2" style="text-align:right;padding:12px">Total</td><td style="text-align:right;padding:12px">${total}</td></tr></tfoot></table>
   ${notes ? `<p style="margin-top:24px;font-size:12px;color:#888"><strong>Notes:</strong> ${notes}</p>` : ''}
-  <script>window.onload=()=>{window.print();}<\/script></body></html>`);
+  </body></html>`;
+}
+
+function _setInvoiceDefaults(mode) {
+  const today = new Date();
+  const due = new Date(today); due.setDate(due.getDate() + 30);
+  const fmt = d => d.toISOString().split('T')[0];
+  document.getElementById('inv-date').value = fmt(today);
+  document.getElementById('inv-due').value = fmt(due);
+  document.getElementById('inv-send-status').classList.add('hidden');
+  document.getElementById('inv-modal-title').textContent = mode === 'quote' ? 'Save as Quote / Estimate' : 'Send Invoice';
+  document.getElementById('inv-email-row').classList.toggle('hidden', mode === 'quote');
+  document.getElementById('inv-send-btn').classList.toggle('hidden', mode === 'quote');
+  document.getElementById('inv-save-btn').textContent = mode === 'quote' ? 'Save as Quote' : 'Save as Quote';
+}
+
+function openInvoiceModal(mode) {
+  _setInvoiceDefaults(mode || 'invoice');
+  document.getElementById('inv-number').value = (mode === 'quote' ? 'QT-' : 'INV-') + String(Date.now()).slice(-5);
+  document.getElementById('inv-shipto').value = document.getElementById('ship-destination').value;
+  document.getElementById('inv-customer').value = '';
+  document.getElementById('inv-recipient-email').value = '';
+  document.getElementById('inv-notes').value = mode === 'quote'
+    ? 'This is an estimate only. Final charges may vary.'
+    : 'Net 30. Thank you for your business.';
+
+  // Build line items from shipping estimator
+  const freightType = document.getElementById('ship-freight-type').value;
+  const miles = parseFloat(document.getElementById('ship-distance').value) || 0;
+  const fuelPct = parseFloat(document.getElementById('ship-fuel').value) / 100 || 0.18;
+  const loadingFee = parseFloat(document.getElementById('ship-loading').value) || 0;
+  const totalWeight = shipProducts.reduce((s,p) => s + ((+p.qty||0)*(+p.weightEach||0)), 0);
+  const lineItems = [];
+  shipProducts.forEach(p => { if (p.name || p.qty) lineItems.push({ desc: p.name || 'Product', qty: `${p.qty} × ${p.weightEach} lbs`, amount: '' }); });
+  let baseRate = 0;
+  if (freightType === 'ftl') { baseRate = miles * 3.50; lineItems.push({ desc: `FTL Flatbed Freight (${miles} mi @ $3.50/mi)`, qty: '1', amount: '$' + baseRate.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) }); }
+  else if (freightType === 'ltl') { const cwt = totalWeight/100, p100 = miles/100; baseRate = cwt*p100*8.50; lineItems.push({ desc: `LTL Freight (${totalWeight.toLocaleString()} lbs, ${miles} mi)`, qty: '1', amount: '$' + baseRate.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) }); }
+  else { lineItems.push({ desc: 'Customer Pickup', qty: '1', amount: '$0.00' }); }
+  if (baseRate > 0) { const fuel = baseRate * fuelPct; lineItems.push({ desc: `Fuel Surcharge (${Math.round(fuelPct*100)}%)`, qty: '1', amount: '$' + fuel.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) }); }
+  if (loadingFee > 0) lineItems.push({ desc: 'Loading Fee', qty: '1', amount: '$' + loadingFee.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) });
+  _renderInvoiceLineItems(lineItems);
+  document.getElementById('inv-total').textContent = document.getElementById('ship-total-cost').textContent;
+  document.getElementById('invoice-modal').classList.remove('hidden');
+}
+
+function openInvoiceFromQuote(id) {
+  const q = quotesData.find(x => x.id === id);
+  if (!q) return;
+  _setInvoiceDefaults('invoice');
+  document.getElementById('inv-number').value = 'INV-' + String(Date.now()).slice(-5);
+  document.getElementById('inv-customer').value = q.customer;
+  document.getElementById('inv-recipient-email').value = '';
+  document.getElementById('inv-shipto').value = '';
+  document.getElementById('inv-notes').value = 'Net 30. Thank you for your business.';
+  const lineItems = [{ desc: q.products, qty: '1', amount: q.total }];
+  _renderInvoiceLineItems(lineItems);
+  document.getElementById('inv-total').textContent = q.total;
+  document.getElementById('invoice-modal').classList.remove('hidden');
+}
+
+function _renderInvoiceLineItems(lineItems) {
+  document.getElementById('inv-line-items').innerHTML = lineItems.map(li =>
+    `<tr><td class="px-4 py-2.5 text-stone-700">${li.desc}</td><td class="px-4 py-2.5 text-right text-stone-500">${li.qty}</td><td class="px-4 py-2.5 text-right font-semibold">${li.amount}</td></tr>`
+  ).join('');
+}
+
+function saveInvoiceToQuotes() {
+  const customer = document.getElementById('inv-customer').value.trim() || 'Unknown Customer';
+  const num = document.getElementById('inv-number').value.trim();
+  const total = document.getElementById('inv-total').textContent;
+  const dest = document.getElementById('inv-shipto').value.trim();
+  const due = document.getElementById('inv-due').value;
+  const expires = due ? new Date(due).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+  const desc = [...document.getElementById('inv-line-items').querySelectorAll('tr')].map(r => r.querySelector('td')?.textContent).filter(Boolean).join(', ');
+  quotesData.unshift({ id: num, customer, products: desc || dest, status:'Pending', statusColor:'tertiary', expires, total });
+  document.getElementById('invoice-modal').classList.add('hidden');
+  document.querySelectorAll('.nav-link').forEach(l => { l.classList.remove('nav-active'); l.classList.add('text-stone-600'); });
+  document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
+  const ql = document.querySelector('[data-page="quotes"]');
+  if (ql) { ql.classList.add('nav-active'); ql.classList.remove('text-stone-600'); }
+  document.getElementById('page-quotes').classList.remove('hidden');
+  renderQuotes();
+}
+
+async function sendInvoice() {
+  const to = document.getElementById('inv-recipient-email').value.trim();
+  if (!to || !to.includes('@')) { alert('Please enter a valid recipient email address.'); return; }
+  const invNum = document.getElementById('inv-number').value;
+  const customer = document.getElementById('inv-customer').value || 'Customer';
+  const status = document.getElementById('inv-send-status');
+  const btn = document.getElementById('inv-send-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="material-symbols-outlined text-sm">hourglass_top</span> Sending...';
+  status.className = 'text-sm font-semibold text-center py-2 rounded-lg bg-stone-100 text-stone-500';
+  status.textContent = 'Sending invoice...';
+  status.classList.remove('hidden');
+  try {
+    const invoiceHtml = buildInvoiceHTML('Invoice');
+    const token = (await supabase.auth.getSession()).data.session?.access_token;
+    const resp = await fetch('/api/send-invoice', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ to, invoiceHtml, invoiceNumber: invNum, senderName: currentUser?.user_metadata?.full_name || currentUser?.email?.split('@')[0] || 'KFP', subject: `Invoice ${invNum} from Kentucky Forest Products — ${customer}` })
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Send failed');
+    status.className = 'text-sm font-semibold text-center py-2 rounded-lg bg-green-50 text-green-700';
+    status.textContent = `✓ Invoice sent to ${to}`;
+    // Also save to quotes as sent
+    const due = document.getElementById('inv-due').value;
+    const expires = due ? new Date(due).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+    const desc = [...document.getElementById('inv-line-items').querySelectorAll('tr')].map(r => r.querySelector('td')?.textContent).filter(Boolean).join(', ');
+    quotesData.unshift({ id: invNum, customer, products: desc, status:'Sent', statusColor:'secondary', expires, total: document.getElementById('inv-total').textContent });
+    setTimeout(() => { document.getElementById('invoice-modal').classList.add('hidden'); renderQuotes(); }, 2000);
+  } catch (err) {
+    status.className = 'text-sm font-semibold text-center py-2 rounded-lg bg-red-50 text-red-600';
+    status.textContent = '✗ ' + (err.message || 'Failed to send. Check SMTP settings.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-symbols-outlined text-sm">send</span> Send Invoice';
+  }
+}
+
+function printInvoice() {
+  const label = document.getElementById('inv-modal-title').textContent;
+  const html = buildInvoiceHTML(label) .replace('</body>', '<script>window.onload=()=>{window.print();}<\/script></body>');
+  const win = window.open('', '_blank');
+  win.document.write(html);
   win.document.close();
 }
 
