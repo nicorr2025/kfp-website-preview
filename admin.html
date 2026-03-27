@@ -732,87 +732,104 @@ h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
 
     <!-- ==================== CUSTOMERS PAGE ==================== -->
     <div id="page-customers" class="page-content hidden">
-      <div class="flex justify-between items-end mb-8">
+      <!-- Add Customer Modal -->
+      <div id="add-customer-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-6">
+          <div class="flex items-center justify-between mb-5">
+            <h2 class="text-xl font-black text-primary uppercase tracking-tight">Add Customer</h2>
+            <button onclick="document.getElementById('add-customer-modal').classList.add('hidden')" class="text-stone-400 hover:text-stone-600"><span class="material-symbols-outlined">close</span></button>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="col-span-2">
+              <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Company Name *</label>
+              <input id="cust-company" type="text" class="w-full bg-stone-100 border-none rounded-lg px-4 py-2.5 text-sm" placeholder="Acme Lumber Co."/>
+            </div>
+            <div>
+              <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Industry / Type</label>
+              <input id="cust-type" type="text" class="w-full bg-stone-100 border-none rounded-lg px-4 py-2.5 text-sm" placeholder="Commercial"/>
+            </div>
+            <div>
+              <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">City, State</label>
+              <input id="cust-location" type="text" class="w-full bg-stone-100 border-none rounded-lg px-4 py-2.5 text-sm" placeholder="London, KY"/>
+            </div>
+            <div>
+              <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Contact Name</label>
+              <input id="cust-contact" type="text" class="w-full bg-stone-100 border-none rounded-lg px-4 py-2.5 text-sm" placeholder="Jane Smith"/>
+            </div>
+            <div>
+              <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Phone</label>
+              <input id="cust-phone" type="text" class="w-full bg-stone-100 border-none rounded-lg px-4 py-2.5 text-sm" placeholder="(606) 555-0100"/>
+            </div>
+            <div>
+              <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Email</label>
+              <input id="cust-email" type="email" class="w-full bg-stone-100 border-none rounded-lg px-4 py-2.5 text-sm" placeholder="contact@company.com"/>
+            </div>
+            <div>
+              <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Orders (YTD)</label>
+              <input id="cust-orders" type="number" class="w-full bg-stone-100 border-none rounded-lg px-4 py-2.5 text-sm" placeholder="0"/>
+            </div>
+            <div>
+              <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Revenue (YTD)</label>
+              <input id="cust-revenue" type="text" class="w-full bg-stone-100 border-none rounded-lg px-4 py-2.5 text-sm" placeholder="$0"/>
+            </div>
+            <div class="col-span-2">
+              <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Notes</label>
+              <textarea id="cust-notes" rows="2" class="w-full bg-stone-100 border-none rounded-lg px-4 py-2.5 text-sm resize-none" placeholder="Any additional notes..."></textarea>
+            </div>
+          </div>
+          <div class="flex justify-end gap-3 mt-5">
+            <button onclick="document.getElementById('add-customer-modal').classList.add('hidden')" class="px-4 py-2 rounded-lg text-sm font-bold text-stone-500 hover:bg-stone-100 transition-colors">Cancel</button>
+            <button onclick="saveNewCustomer()" class="bg-primary text-on-primary px-5 py-2 rounded-lg text-sm font-bold hover:bg-primary-container transition-colors">Save Customer</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customer Detail Modal -->
+      <div id="customer-detail-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-6">
+          <div class="flex items-center justify-between mb-5">
+            <h2 class="text-xl font-black text-primary uppercase tracking-tight" id="detail-company-name"></h2>
+            <button onclick="document.getElementById('customer-detail-modal').classList.add('hidden')" class="text-stone-400 hover:text-stone-600"><span class="material-symbols-outlined">close</span></button>
+          </div>
+          <div id="detail-fields" class="space-y-3 text-sm"></div>
+        </div>
+      </div>
+
+      <div class="flex justify-between items-end mb-6">
         <div>
           <h1 class="text-4xl font-black text-primary tracking-tighter uppercase">Customers</h1>
           <p class="text-stone-500 font-medium mt-1 text-sm">Manage your customer relationships and contact info.</p>
         </div>
-        <button class="bg-primary px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 text-on-primary hover:bg-primary-container transition-colors shadow-lg shadow-primary/10">
-          <span class="material-symbols-outlined text-sm">person_add</span>
-          Add Customer
-        </button>
+        <div class="flex items-center gap-2">
+          <input type="file" id="customer-csv-input" accept=".csv" class="hidden" onchange="importCustomersCSV(event)"/>
+          <button onclick="document.getElementById('customer-csv-input').click()" class="border border-stone-300 bg-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 text-stone-600 hover:bg-stone-50 transition-colors">
+            <span class="material-symbols-outlined text-sm">upload_file</span>
+            Import CSV
+          </button>
+          <button onclick="document.getElementById('add-customer-modal').classList.remove('hidden')" class="bg-primary px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 text-on-primary hover:bg-primary-container transition-colors shadow-lg shadow-primary/10">
+            <span class="material-symbols-outlined text-sm">person_add</span>
+            Add Customer
+          </button>
+        </div>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all cursor-pointer">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-11 h-11 rounded-lg bg-primary flex items-center justify-center text-on-primary font-bold">BB</div>
-            <div>
-              <p class="font-bold text-primary">Bluegrass Builders</p>
-              <p class="text-[10px] text-stone-500 uppercase tracking-wider">Commercial · Lexington, KY</p>
-            </div>
-          </div>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between"><span class="text-stone-500">Contact</span><span class="font-medium">Mark Thompson</span></div>
-            <div class="flex justify-between"><span class="text-stone-500">Orders (YTD)</span><span class="font-bold text-primary">12</span></div>
-            <div class="flex justify-between"><span class="text-stone-500">Revenue (YTD)</span><span class="font-bold text-primary">$48,200</span></div>
-          </div>
-        </div>
-        <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all cursor-pointer">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-11 h-11 rounded-lg bg-secondary flex items-center justify-center text-on-primary font-bold">AE</div>
-            <div>
-              <p class="font-bold text-primary">Appalachian Electric</p>
-              <p class="text-[10px] text-stone-500 uppercase tracking-wider">Utility · Corbin, KY</p>
-            </div>
-          </div>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between"><span class="text-stone-500">Contact</span><span class="font-medium">Sarah Williams</span></div>
-            <div class="flex justify-between"><span class="text-stone-500">Orders (YTD)</span><span class="font-bold text-primary">8</span></div>
-            <div class="flex justify-between"><span class="text-stone-500">Revenue (YTD)</span><span class="font-bold text-primary">$142,800</span></div>
-          </div>
-        </div>
-        <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all cursor-pointer">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-11 h-11 rounded-lg bg-tertiary flex items-center justify-center text-on-primary font-bold">DC</div>
-            <div>
-              <p class="font-bold text-primary">Daniel Construction</p>
-              <p class="text-[10px] text-stone-500 uppercase tracking-wider">Industrial · Somerset, KY</p>
-            </div>
-          </div>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between"><span class="text-stone-500">Contact</span><span class="font-medium">James Daniel</span></div>
-            <div class="flex justify-between"><span class="text-stone-500">Orders (YTD)</span><span class="font-bold text-primary">6</span></div>
-            <div class="flex justify-between"><span class="text-stone-500">Revenue (YTD)</span><span class="font-bold text-primary">$67,400</span></div>
-          </div>
-        </div>
-        <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all cursor-pointer">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-11 h-11 rounded-lg bg-primary-container flex items-center justify-center text-on-primary font-bold">KP</div>
-            <div>
-              <p class="font-bold text-primary">Kentucky Power Co.</p>
-              <p class="text-[10px] text-stone-500 uppercase tracking-wider">Utility · Frankfort, KY</p>
-            </div>
-          </div>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between"><span class="text-stone-500">Contact</span><span class="font-medium">David Chen</span></div>
-            <div class="flex justify-between"><span class="text-stone-500">Orders (YTD)</span><span class="font-bold text-primary">15</span></div>
-            <div class="flex justify-between"><span class="text-stone-500">Revenue (YTD)</span><span class="font-bold text-primary">$198,500</span></div>
-          </div>
-        </div>
-        <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all cursor-pointer">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-11 h-11 rounded-lg bg-stone-500 flex items-center justify-center text-on-primary font-bold">RR</div>
-            <div>
-              <p class="font-bold text-primary">Red River Farms</p>
-              <p class="text-[10px] text-stone-500 uppercase tracking-wider">Agricultural · Richmond, KY</p>
-            </div>
-          </div>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between"><span class="text-stone-500">Contact</span><span class="font-medium">Lisa Harper</span></div>
-            <div class="flex justify-between"><span class="text-stone-500">Orders (YTD)</span><span class="font-bold text-primary">4</span></div>
-            <div class="flex justify-between"><span class="text-stone-500">Revenue (YTD)</span><span class="font-bold text-primary">$8,400</span></div>
-          </div>
-        </div>
+
+      <!-- Search + count bar -->
+      <div class="flex items-center justify-between mb-4">
+        <input id="customer-search" type="text" oninput="renderCustomers()" placeholder="Search customers..." class="bg-surface-container border-none rounded-lg px-4 py-2 text-sm w-72 focus:ring-2 focus:ring-primary"/>
+        <span id="customer-count" class="text-xs text-stone-400 font-semibold uppercase tracking-wider"></span>
+      </div>
+
+      <!-- CSV column mapping hint -->
+      <div id="csv-hint" class="hidden mb-4 bg-primary/5 border border-primary/20 rounded-xl p-4 text-xs text-stone-600">
+        <p class="font-bold text-primary mb-1">CSV Column Mapping</p>
+        <p>Your CSV can use any of these column headers (case-insensitive): <span class="font-mono">Company, Type, City, State, Location, Contact, Phone, Email, Orders, Revenue, Notes</span>. Unmapped columns are shown in the detail view.</p>
+      </div>
+
+      <div id="customers-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+      <div id="customers-empty" class="hidden text-center py-20 text-stone-400">
+        <span class="material-symbols-outlined text-5xl mb-3 block">group</span>
+        <p class="font-bold">No customers yet</p>
+        <p class="text-sm mt-1">Import a CSV or add customers manually.</p>
       </div>
     </div>
 
@@ -1956,6 +1973,7 @@ document.querySelectorAll('.nav-link').forEach(link => {
     document.querySelector('.sidebar').classList.remove('open');
     if (page === 'outreach') { refreshOutreachStats(); refreshCampaigns(); }
     if (page === 'team') refreshTeam();
+    if (page === 'customers') renderCustomers();
   });
 });
 
@@ -2328,6 +2346,141 @@ function useCSVLeads() { addComposeLeads(csvParsedLeads); }
 // ══════════════════════════════════════════════════════════════════════════════
 // MANUAL ENTRY
 // ══════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
+// CUSTOMERS
+// ══════════════════════════════════════════════════════════════════════════════
+const AVATAR_COLORS = ['bg-primary','bg-secondary','bg-tertiary','bg-primary-container','bg-stone-500','bg-amber-700','bg-teal-700','bg-indigo-700'];
+let customersData = [];
+
+function customerInitials(name) {
+  return name.split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0,2);
+}
+
+function renderCustomers() {
+  const q = (document.getElementById('customer-search')?.value || '').toLowerCase();
+  const filtered = customersData.filter(c =>
+    !q ||
+    (c.company||'').toLowerCase().includes(q) ||
+    (c.contact||'').toLowerCase().includes(q) ||
+    (c.location||'').toLowerCase().includes(q) ||
+    (c.type||'').toLowerCase().includes(q)
+  );
+  const grid = document.getElementById('customers-grid');
+  const empty = document.getElementById('customers-empty');
+  const count = document.getElementById('customer-count');
+  count.textContent = `${filtered.length} customer${filtered.length !== 1 ? 's' : ''}`;
+  if (!filtered.length) { grid.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  grid.innerHTML = filtered.map((c, i) => {
+    const color = AVATAR_COLORS[i % AVATAR_COLORS.length];
+    const initials = customerInitials(c.company || '?');
+    const loc = [c.city, c.state].filter(Boolean).join(', ') || c.location || '';
+    const subtitle = [c.type, loc].filter(Boolean).join(' · ');
+    const rev = c.revenue ? (String(c.revenue).startsWith('$') ? c.revenue : '$' + c.revenue) : '—';
+    const orders = c.orders || '—';
+    return `<div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all cursor-pointer" onclick="showCustomerDetail(${i})">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-11 h-11 rounded-lg ${color} flex items-center justify-center text-white font-bold text-sm">${initials}</div>
+        <div>
+          <p class="font-bold text-primary">${c.company}</p>
+          ${subtitle ? `<p class="text-[10px] text-stone-500 uppercase tracking-wider">${subtitle}</p>` : ''}
+        </div>
+      </div>
+      <div class="space-y-2 text-sm">
+        ${c.contact ? `<div class="flex justify-between"><span class="text-stone-500">Contact</span><span class="font-medium">${c.contact}</span></div>` : ''}
+        ${c.phone ? `<div class="flex justify-between"><span class="text-stone-500">Phone</span><span class="font-medium">${c.phone}</span></div>` : ''}
+        ${c.email ? `<div class="flex justify-between"><span class="text-stone-500">Email</span><span class="font-medium text-primary">${c.email}</span></div>` : ''}
+        <div class="flex justify-between"><span class="text-stone-500">Orders (YTD)</span><span class="font-bold text-primary">${orders}</span></div>
+        <div class="flex justify-between"><span class="text-stone-500">Revenue (YTD)</span><span class="font-bold text-primary">${rev}</span></div>
+        ${c.notes ? `<p class="text-xs text-stone-400 pt-1 border-t border-stone-100 mt-1">${c.notes}</p>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function showCustomerDetail(idx) {
+  const q = (document.getElementById('customer-search')?.value || '').toLowerCase();
+  const filtered = customersData.filter(c =>
+    !q || (c.company||'').toLowerCase().includes(q) || (c.contact||'').toLowerCase().includes(q) ||
+    (c.location||'').toLowerCase().includes(q) || (c.type||'').toLowerCase().includes(q)
+  );
+  const c = filtered[idx];
+  if (!c) return;
+  document.getElementById('detail-company-name').textContent = c.company;
+  const fields = Object.entries(c).filter(([k,v]) => k !== 'company' && v);
+  const labels = { type:'Type', location:'Location', city:'City', state:'State', contact:'Contact', phone:'Phone', email:'Email', orders:'Orders (YTD)', revenue:'Revenue (YTD)', notes:'Notes' };
+  document.getElementById('detail-fields').innerHTML = fields.map(([k,v]) =>
+    `<div class="flex justify-between border-b border-stone-100 pb-2"><span class="text-stone-500 capitalize">${labels[k]||k}</span><span class="font-medium text-right max-w-[60%]">${v}</span></div>`
+  ).join('');
+  document.getElementById('customer-detail-modal').classList.remove('hidden');
+}
+
+function saveNewCustomer() {
+  const company = document.getElementById('cust-company').value.trim();
+  if (!company) { alert('Company name is required'); return; }
+  customersData.push({
+    company,
+    type: document.getElementById('cust-type').value.trim(),
+    location: document.getElementById('cust-location').value.trim(),
+    contact: document.getElementById('cust-contact').value.trim(),
+    phone: document.getElementById('cust-phone').value.trim(),
+    email: document.getElementById('cust-email').value.trim(),
+    orders: document.getElementById('cust-orders').value.trim(),
+    revenue: document.getElementById('cust-revenue').value.trim(),
+    notes: document.getElementById('cust-notes').value.trim(),
+  });
+  ['cust-company','cust-type','cust-location','cust-contact','cust-phone','cust-email','cust-orders','cust-revenue','cust-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('add-customer-modal').classList.add('hidden');
+  renderCustomers();
+}
+
+function importCustomersCSV(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const lines = e.target.result.split(/\r?\n/).filter(l => l.trim());
+    if (lines.length < 2) { alert('CSV must have a header row and at least one data row.'); return; }
+    const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g,'').trim().toLowerCase());
+    const map = {
+      company: headers.findIndex(h => /company|name|business/i.test(h)),
+      type: headers.findIndex(h => /type|industry|category/i.test(h)),
+      location: headers.findIndex(h => h === 'location' || h === 'address'),
+      city: headers.findIndex(h => h === 'city'),
+      state: headers.findIndex(h => h === 'state'),
+      contact: headers.findIndex(h => /contact|contact.?name|rep/i.test(h)),
+      phone: headers.findIndex(h => /phone|tel/i.test(h)),
+      email: headers.findIndex(h => /email/i.test(h)),
+      orders: headers.findIndex(h => /orders?/i.test(h)),
+      revenue: headers.findIndex(h => /revenue|sales|amount/i.test(h)),
+      notes: headers.findIndex(h => /notes?|comment/i.test(h)),
+    };
+    const get = (row, col) => col >= 0 ? (row[col]||'').replace(/^"|"$/g,'').trim() : '';
+    const newCustomers = lines.slice(1).map(line => {
+      const row = line.match(/(".*?"|[^,]+|(?<=,)(?=,)|(?<=,)$|^(?=,))/g) || line.split(',');
+      return {
+        company: get(row, map.company),
+        type: get(row, map.type),
+        location: get(row, map.location),
+        city: get(row, map.city),
+        state: get(row, map.state),
+        contact: get(row, map.contact),
+        phone: get(row, map.phone),
+        email: get(row, map.email),
+        orders: get(row, map.orders),
+        revenue: get(row, map.revenue),
+        notes: get(row, map.notes),
+      };
+    }).filter(c => c.company);
+    if (!newCustomers.length) { alert('No valid rows found. Make sure your CSV has a "Company" column.'); return; }
+    customersData = [...customersData, ...newCustomers];
+    renderCustomers();
+    event.target.value = '';
+    document.getElementById('csv-hint').classList.remove('hidden');
+  };
+  reader.readAsText(file);
+}
+
 function addManualLead() {
   const email = document.getElementById('manual-email').value.trim();
   if (!email || !email.includes('@')) return alert('Valid email required');
