@@ -564,85 +564,17 @@ h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
 
     <!-- ==================== INVENTORY PAGE ==================== -->
     <div id="page-inventory" class="page-content hidden">
-      <div class="flex justify-between items-end mb-8">
+      <div class="flex justify-between items-end mb-6">
         <div>
           <h1 class="text-4xl font-black text-primary tracking-tighter uppercase">Inventory</h1>
           <p class="text-stone-500 font-medium mt-1 text-sm">Current stock levels across all product lines.</p>
         </div>
-        <button class="bg-primary px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 text-on-primary hover:bg-primary-container transition-colors shadow-lg shadow-primary/10">
+        <button onclick="openAddInventoryModal()" class="bg-primary px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 text-on-primary hover:bg-primary-container transition-colors shadow-lg shadow-primary/10">
           <span class="material-symbols-outlined text-sm">add</span>
-          Add Stock
+          Add Category
         </button>
       </div>
-      <!-- Inventory Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all">
-          <div class="flex justify-between items-start mb-4">
-            <h3 class="font-black text-primary uppercase tracking-tight">Lumber</h3>
-            <span class="bg-primary/10 text-primary text-[10px] font-black uppercase px-2 py-0.5 rounded-full">In Stock</span>
-          </div>
-          <div class="space-y-3">
-            <div class="flex justify-between text-sm"><span class="text-stone-600">Pine (Treated)</span><span class="font-bold">4,200 BF</span></div>
-            <div class="flex justify-between text-sm"><span class="text-stone-600">White Oak</span><span class="font-bold">2,800 BF</span></div>
-            <div class="flex justify-between text-sm"><span class="text-stone-600">Red Oak</span><span class="font-bold">1,950 BF</span></div>
-            <div class="flex justify-between text-sm"><span class="text-stone-600">Poplar</span><span class="font-bold">3,100 BF</span></div>
-          </div>
-        </div>
-        <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all">
-          <div class="flex justify-between items-start mb-4">
-            <h3 class="font-black text-primary uppercase tracking-tight">Fencing</h3>
-            <span class="bg-primary/10 text-primary text-[10px] font-black uppercase px-2 py-0.5 rounded-full">In Stock</span>
-          </div>
-          <div class="space-y-3">
-            <div class="flex justify-between text-sm"><span class="text-stone-600">Pine Pickets</span><span class="font-bold">2,400 pcs</span></div>
-            <div class="flex justify-between text-sm"><span class="text-stone-600">Oak Split Rail</span><span class="font-bold">1,600 LF</span></div>
-            <div class="flex justify-between text-sm"><span class="text-stone-600">Treated Poplar Posts</span><span class="font-bold">890 pcs</span></div>
-          </div>
-        </div>
-        <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all">
-          <div class="flex justify-between items-start mb-4">
-            <h3 class="font-black text-primary uppercase tracking-tight">Matting</h3>
-            <span class="bg-tertiary/10 text-tertiary text-[10px] font-black uppercase px-2 py-0.5 rounded-full">Low Stock</span>
-          </div>
-          <div class="space-y-3">
-            <div class="flex justify-between text-sm"><span class="text-stone-600">3-Ply 12'</span><span class="font-bold">45 units</span></div>
-            <div class="flex justify-between text-sm"><span class="text-stone-600">3-Ply 16'</span><span class="font-bold">28 units</span></div>
-            <div class="flex justify-between text-sm"><span class="text-stone-600">Crane Mats 40'</span><span class="font-bold text-error">8 units</span></div>
-            <div class="flex justify-between text-sm"><span class="text-stone-600">Transition Mats</span><span class="font-bold">62 units</span></div>
-          </div>
-        </div>
-        <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all">
-          <div class="flex justify-between items-start mb-4">
-            <h3 class="font-black text-primary uppercase tracking-tight">Utility Poles</h3>
-            <span class="bg-primary/10 text-primary text-[10px] font-black uppercase px-2 py-0.5 rounded-full">In Stock</span>
-          </div>
-          <div class="space-y-3">
-            <div class="flex justify-between text-sm"><span class="text-stone-600">25'-35'</span><span class="font-bold">180 poles</span></div>
-            <div class="flex justify-between text-sm"><span class="text-stone-600">40'-55'</span><span class="font-bold">96 poles</span></div>
-            <div class="flex justify-between text-sm"><span class="text-stone-600">60'-105' (Ext.)</span><span class="font-bold">22 poles</span></div>
-          </div>
-        </div>
-        <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all">
-          <div class="flex justify-between items-start mb-4">
-            <h3 class="font-black text-primary uppercase tracking-tight">Cross Arms</h3>
-            <span class="bg-primary/10 text-primary text-[10px] font-black uppercase px-2 py-0.5 rounded-full">In Stock</span>
-          </div>
-          <div class="space-y-3">
-            <div class="flex justify-between text-sm"><span class="text-stone-600">8' Standard</span><span class="font-bold">340 pcs</span></div>
-            <div class="flex justify-between text-sm"><span class="text-stone-600">10' Standard</span><span class="font-bold">210 pcs</span></div>
-          </div>
-        </div>
-        <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all">
-          <div class="flex justify-between items-start mb-4">
-            <h3 class="font-black text-primary uppercase tracking-tight">Byproducts</h3>
-            <span class="bg-primary/10 text-primary text-[10px] font-black uppercase px-2 py-0.5 rounded-full">In Stock</span>
-          </div>
-          <div class="space-y-3">
-            <div class="flex justify-between text-sm"><span class="text-stone-600">Pine Mulch</span><span class="font-bold">42 pallets</span></div>
-            <div class="flex justify-between text-sm"><span class="text-stone-600">Erosion Control</span><span class="font-bold">18 pallets</span></div>
-          </div>
-        </div>
-      </div>
+      <div id="inventory-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
     </div>
 
     <!-- ==================== ORDERS PAGE ==================== -->
@@ -677,54 +609,10 @@ h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
               <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Status</th>
               <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Ship Date</th>
               <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 text-right">Total</th>
+              <th class="px-6 py-3"></th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-surface-container">
-            <tr class="hover:bg-surface transition-colors cursor-pointer">
-              <td class="px-6 py-4 text-sm font-bold text-primary">#ORD-40129</td>
-              <td class="px-6 py-4 text-sm font-medium">Bluegrass Builders</td>
-              <td class="px-6 py-4 text-sm">White Oak Fencing</td>
-              <td class="px-6 py-4 text-sm">500 LF</td>
-              <td class="px-6 py-4"><span class="bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Processing</span></td>
-              <td class="px-6 py-4 text-sm text-stone-600">Mar 28, 2026</td>
-              <td class="px-6 py-4 text-right font-black text-primary">$4,250.00</td>
-            </tr>
-            <tr class="hover:bg-surface transition-colors cursor-pointer">
-              <td class="px-6 py-4 text-sm font-bold text-primary">#ORD-40130</td>
-              <td class="px-6 py-4 text-sm font-medium">Appalachian Electric</td>
-              <td class="px-6 py-4 text-sm">Utility Poles 45'</td>
-              <td class="px-6 py-4 text-sm">24</td>
-              <td class="px-6 py-4"><span class="bg-tertiary/10 text-tertiary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Drying</span></td>
-              <td class="px-6 py-4 text-sm text-stone-600">Apr 5, 2026</td>
-              <td class="px-6 py-4 text-right font-black text-primary">$18,720.00</td>
-            </tr>
-            <tr class="hover:bg-surface transition-colors cursor-pointer">
-              <td class="px-6 py-4 text-sm font-bold text-primary">#ORD-40131</td>
-              <td class="px-6 py-4 text-sm font-medium">Daniel Construction</td>
-              <td class="px-6 py-4 text-sm">3-Ply Crane Mats 16'</td>
-              <td class="px-6 py-4 text-sm">12</td>
-              <td class="px-6 py-4"><span class="bg-secondary/10 text-secondary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Shipped</span></td>
-              <td class="px-6 py-4 text-sm text-stone-600">Mar 21, 2026</td>
-              <td class="px-6 py-4 text-right font-black text-primary">$9,600.00</td>
-            </tr>
-            <tr class="hover:bg-surface transition-colors cursor-pointer">
-              <td class="px-6 py-4 text-sm font-bold text-primary">#ORD-40132</td>
-              <td class="px-6 py-4 text-sm font-medium">Kentucky Power Co.</td>
-              <td class="px-6 py-4 text-sm">Cross Arms 10'</td>
-              <td class="px-6 py-4 text-sm">200</td>
-              <td class="px-6 py-4"><span class="bg-surface-container-highest text-stone-500 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Staged</span></td>
-              <td class="px-6 py-4 text-sm text-stone-600">Mar 30, 2026</td>
-              <td class="px-6 py-4 text-right font-black text-primary">$6,400.00</td>
-            </tr>
-            <tr class="hover:bg-surface transition-colors cursor-pointer">
-              <td class="px-6 py-4 text-sm font-bold text-primary">#ORD-40133</td>
-              <td class="px-6 py-4 text-sm font-medium">Red River Farms</td>
-              <td class="px-6 py-4 text-sm">Pine Mulch</td>
-              <td class="px-6 py-4 text-sm">8 pallets</td>
-              <td class="px-6 py-4"><span class="bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Complete</span></td>
-              <td class="px-6 py-4 text-sm text-stone-600">Mar 16, 2026</td>
-              <td class="px-6 py-4 text-right font-black text-primary">$2,100.00</td>
-            </tr>
+          <tbody id="orders-tbody" class="divide-y divide-surface-container">
           </tbody>
         </table>
       </div>
@@ -855,34 +743,10 @@ h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
               <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Status</th>
               <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Expires</th>
               <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 text-right">Total</th>
+              <th class="px-6 py-3"></th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-surface-container">
-            <tr class="hover:bg-surface transition-colors cursor-pointer">
-              <td class="px-6 py-4 text-sm font-bold text-primary">#QT-1082</td>
-              <td class="px-6 py-4 text-sm font-medium">Cumberland Homes LLC</td>
-              <td class="px-6 py-4 text-sm">Pine Fencing 800 LF + Posts</td>
-              <td class="px-6 py-4"><span class="bg-tertiary/10 text-tertiary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Pending</span></td>
-              <td class="px-6 py-4 text-sm text-stone-600">Apr 10, 2026</td>
-              <td class="px-6 py-4 text-right font-black text-primary">$7,840.00</td>
-            </tr>
-            <tr class="hover:bg-surface transition-colors cursor-pointer">
-              <td class="px-6 py-4 text-sm font-bold text-primary">#QT-1081</td>
-              <td class="px-6 py-4 text-sm font-medium">Tri-County Electric</td>
-              <td class="px-6 py-4 text-sm">Utility Poles 35' (40 qty)</td>
-              <td class="px-6 py-4"><span class="bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Accepted</span></td>
-              <td class="px-6 py-4 text-sm text-stone-600">—</td>
-              <td class="px-6 py-4 text-right font-black text-primary">$24,000.00</td>
-            </tr>
-            <tr class="hover:bg-surface transition-colors cursor-pointer">
-              <td class="px-6 py-4 text-sm font-bold text-primary">#QT-1080</td>
-              <td class="px-6 py-4 text-sm font-medium">Southeastern Pipeline Co.</td>
-              <td class="px-6 py-4 text-sm">3-Ply Mats 40' (30 qty)</td>
-              <td class="px-6 py-4"><span class="bg-error/10 text-error text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Expired</span></td>
-              <td class="px-6 py-4 text-sm text-stone-600">Mar 15, 2026</td>
-              <td class="px-6 py-4 text-right font-black text-primary">$36,000.00</td>
-            </tr>
-          </tbody>
+          <tbody id="quotes-tbody" class="divide-y divide-surface-container"></tbody>
         </table>
       </div>
     </div>
@@ -976,47 +840,7 @@ h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
           Schedule Shipment
         </button>
       </div>
-      <div class="space-y-4">
-        <div class="bg-surface-container-low p-5 rounded-xl flex items-center justify-between hover:bg-surface-container-lowest transition-all">
-          <div class="flex items-center gap-4">
-            <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><span class="material-symbols-outlined">local_shipping</span></div>
-            <div>
-              <p class="font-bold text-primary text-sm">#SHP-2241 — Daniel Construction</p>
-              <p class="text-xs text-stone-500">3-Ply Crane Mats 16' × 12 · Full Truckload</p>
-            </div>
-          </div>
-          <div class="text-right">
-            <span class="bg-secondary/10 text-secondary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">In Transit</span>
-            <p class="text-[10px] text-stone-500 mt-1">ETA: Mar 27, 2026</p>
-          </div>
-        </div>
-        <div class="bg-surface-container-low p-5 rounded-xl flex items-center justify-between hover:bg-surface-container-lowest transition-all">
-          <div class="flex items-center gap-4">
-            <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><span class="material-symbols-outlined">inventory</span></div>
-            <div>
-              <p class="font-bold text-primary text-sm">#SHP-2240 — Kentucky Power Co.</p>
-              <p class="text-xs text-stone-500">Cross Arms 10' × 200 · Palletized</p>
-            </div>
-          </div>
-          <div class="text-right">
-            <span class="bg-surface-container-highest text-stone-500 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Staging</span>
-            <p class="text-[10px] text-stone-500 mt-1">Pickup: Mar 30, 2026</p>
-          </div>
-        </div>
-        <div class="bg-surface-container-low p-5 rounded-xl flex items-center justify-between hover:bg-surface-container-lowest transition-all">
-          <div class="flex items-center gap-4">
-            <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><span class="material-symbols-outlined">check_circle</span></div>
-            <div>
-              <p class="font-bold text-primary text-sm">#SHP-2239 — Red River Farms</p>
-              <p class="text-xs text-stone-500">Pine Mulch × 8 Pallets · LTL</p>
-            </div>
-          </div>
-          <div class="text-right">
-            <span class="bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Delivered</span>
-            <p class="text-[10px] text-stone-500 mt-1">Mar 16, 2026</p>
-          </div>
-        </div>
-      </div>
+      <div id="shipments-list" class="space-y-4"></div>
     </div>
 
     <!-- ==================== OUTREACH PAGE ==================== -->
@@ -2054,7 +1878,10 @@ document.querySelectorAll('.nav-link').forEach(link => {
     if (page === 'outreach') { refreshOutreachStats(); refreshCampaigns(); }
     if (page === 'team') refreshTeam();
     if (page === 'customers') renderCustomers();
-    if (page === 'shipping') { if (!shipProducts.length) addShipProduct(); else renderShipProducts(); }
+    if (page === 'shipping') { if (!shipProducts.length) addShipProduct(); else renderShipProducts(); renderShipments(); }
+    if (page === 'inventory') renderInventory();
+    if (page === 'orders') renderOrders();
+    if (page === 'quotes') renderQuotes();
   });
 });
 
@@ -2428,6 +2255,206 @@ function useCSVLeads() { addComposeLeads(csvParsedLeads); }
 // MANUAL ENTRY
 // ══════════════════════════════════════════════════════════════════════════════
 // ══════════════════════════════════════════════════════════════════════════════
+// INVENTORY
+// ══════════════════════════════════════════════════════════════════════════════
+let inventoryData = [
+  { id:1, name:'Lumber', status:'In Stock', statusColor:'primary', items:[
+    {name:'Pine (Treated)', qty:'4,200 BF'}, {name:'White Oak', qty:'2,800 BF'},
+    {name:'Red Oak', qty:'1,950 BF'}, {name:'Poplar', qty:'3,100 BF'}
+  ]},
+  { id:2, name:'Fencing', status:'In Stock', statusColor:'primary', items:[
+    {name:'Pine Pickets', qty:'2,400 pcs'}, {name:'Oak Split Rail', qty:'1,600 LF'},
+    {name:'Treated Poplar Posts', qty:'890 pcs'}
+  ]},
+  { id:3, name:'Matting', status:'Low Stock', statusColor:'tertiary', items:[
+    {name:'3-Ply 12\'', qty:'45 units'}, {name:'3-Ply 16\'', qty:'28 units'},
+    {name:'Crane Mats 40\'', qty:'8 units'}, {name:'Transition Mats', qty:'62 units'}
+  ]},
+  { id:4, name:'Utility Poles', status:'In Stock', statusColor:'primary', items:[
+    {name:'25\'-35\'', qty:'180 poles'}, {name:'40\'-55\'', qty:'96 poles'},
+    {name:'60\'-105\' (Ext.)', qty:'22 poles'}
+  ]},
+  { id:5, name:'Cross Arms', status:'In Stock', statusColor:'primary', items:[
+    {name:'8\' Standard', qty:'340 pcs'}, {name:'10\' Standard', qty:'210 pcs'}
+  ]},
+  { id:6, name:'Byproducts', status:'In Stock', statusColor:'primary', items:[
+    {name:'Pine Mulch', qty:'42 pallets'}, {name:'Erosion Control', qty:'18 pallets'}
+  ]},
+];
+
+function renderInventory() {
+  const grid = document.getElementById('inventory-grid');
+  if (!grid) return;
+  grid.innerHTML = inventoryData.map(cat => `
+    <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all">
+      <div class="flex justify-between items-start mb-4">
+        <h3 class="font-black text-primary uppercase tracking-tight">${cat.name}</h3>
+        <div class="flex items-center gap-2">
+          <span class="bg-${cat.statusColor}/10 text-${cat.statusColor} text-[10px] font-black uppercase px-2 py-0.5 rounded-full">${cat.status}</span>
+          <button onclick="deleteInventoryCategory(${cat.id})" class="text-stone-300 hover:text-red-500 transition-colors" title="Delete category">
+            <span class="material-symbols-outlined text-sm">delete</span>
+          </button>
+        </div>
+      </div>
+      <div class="space-y-2">
+        ${cat.items.map((item, ii) => `
+          <div class="flex justify-between text-sm items-center group">
+            <span class="text-stone-600">${item.name}</span>
+            <div class="flex items-center gap-2">
+              <span class="font-bold ${item.qty.startsWith('8') && cat.name==='Matting' ? 'text-red-500' : ''}">${item.qty}</span>
+              <button onclick="deleteInventoryItem(${cat.id}, ${ii})" class="opacity-0 group-hover:opacity-100 text-stone-300 hover:text-red-500 transition-all" title="Delete item">
+                <span class="material-symbols-outlined text-xs">close</span>
+              </button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function deleteInventoryCategory(id) {
+  const cat = inventoryData.find(c => c.id === id);
+  if (!cat || !confirm(`Delete "${cat.name}" category and all its items?`)) return;
+  inventoryData = inventoryData.filter(c => c.id !== id);
+  renderInventory();
+}
+
+function deleteInventoryItem(catId, itemIdx) {
+  const cat = inventoryData.find(c => c.id === catId);
+  if (!cat) return;
+  const item = cat.items[itemIdx];
+  if (!item || !confirm(`Delete "${item.name}"?`)) return;
+  cat.items.splice(itemIdx, 1);
+  renderInventory();
+}
+
+function openAddInventoryModal() {
+  const name = prompt('Category name:');
+  if (!name?.trim()) return;
+  const status = prompt('Status (In Stock / Low Stock / Out of Stock):', 'In Stock') || 'In Stock';
+  const color = status.toLowerCase().includes('low') ? 'tertiary' : status.toLowerCase().includes('out') ? 'error' : 'primary';
+  inventoryData.push({ id: Date.now(), name: name.trim(), status, statusColor: color, items: [] });
+  renderInventory();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ORDERS
+// ══════════════════════════════════════════════════════════════════════════════
+let ordersData = [
+  { id:'ORD-40129', customer:'Bluegrass Builders', product:'White Oak Fencing', qty:'500 LF', status:'Processing', statusColor:'primary', shipDate:'Mar 28, 2026', total:'$4,250.00' },
+  { id:'ORD-40130', customer:'Appalachian Electric', product:'Utility Poles 45\'', qty:'24', status:'Drying', statusColor:'tertiary', shipDate:'Apr 5, 2026', total:'$18,720.00' },
+  { id:'ORD-40131', customer:'Daniel Construction', product:'3-Ply Crane Mats 16\'', qty:'12', status:'Shipped', statusColor:'secondary', shipDate:'Mar 21, 2026', total:'$9,600.00' },
+  { id:'ORD-40132', customer:'Kentucky Power Co.', product:'Cross Arms 10\'', qty:'200', status:'Staged', statusColor:'stone', shipDate:'Mar 30, 2026', total:'$6,400.00' },
+  { id:'ORD-40133', customer:'Red River Farms', product:'Pine Mulch', qty:'8 pallets', status:'Complete', statusColor:'primary', shipDate:'Mar 16, 2026', total:'$2,100.00' },
+];
+
+function renderOrders() {
+  const tbody = document.getElementById('orders-tbody');
+  if (!tbody) return;
+  if (!ordersData.length) { tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-12 text-center text-stone-400 text-sm">No orders.</td></tr>'; return; }
+  tbody.innerHTML = ordersData.map(o => {
+    const badgeClass = o.statusColor === 'stone' ? 'bg-surface-container-highest text-stone-500' : `bg-${o.statusColor}/10 text-${o.statusColor}`;
+    return `<tr class="hover:bg-surface transition-colors cursor-pointer">
+      <td class="px-6 py-4 text-sm font-bold text-primary">#${o.id}</td>
+      <td class="px-6 py-4 text-sm font-medium">${o.customer}</td>
+      <td class="px-6 py-4 text-sm">${o.product}</td>
+      <td class="px-6 py-4 text-sm">${o.qty}</td>
+      <td class="px-6 py-4"><span class="${badgeClass} text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">${o.status}</span></td>
+      <td class="px-6 py-4 text-sm text-stone-600">${o.shipDate}</td>
+      <td class="px-6 py-4 text-right font-black text-primary">${o.total}</td>
+      <td class="px-6 py-4 text-right">
+        <button onclick="deleteOrder('${o.id}')" class="text-stone-300 hover:text-red-500 transition-colors"><span class="material-symbols-outlined text-sm">delete</span></button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function deleteOrder(id) {
+  const o = ordersData.find(x => x.id === id);
+  if (!o || !confirm(`Delete order #${o.id} — ${o.customer}?`)) return;
+  ordersData = ordersData.filter(x => x.id !== id);
+  renderOrders();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// QUOTES
+// ══════════════════════════════════════════════════════════════════════════════
+let quotesData = [
+  { id:'QT-1082', customer:'Cumberland Homes LLC', products:'Pine Fencing 800 LF + Posts', status:'Pending', statusColor:'tertiary', expires:'Apr 10, 2026', total:'$7,840.00' },
+  { id:'QT-1081', customer:'Tri-County Electric', products:'Utility Poles 35\' (40 qty)', status:'Accepted', statusColor:'primary', expires:'—', total:'$24,000.00' },
+  { id:'QT-1080', customer:'Southeastern Pipeline Co.', products:'3-Ply Mats 40\' (30 qty)', status:'Expired', statusColor:'error', expires:'Mar 15, 2026', total:'$36,000.00' },
+];
+
+function renderQuotes() {
+  const tbody = document.getElementById('quotes-tbody');
+  if (!tbody) return;
+  if (!quotesData.length) { tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-12 text-center text-stone-400 text-sm">No quotes.</td></tr>'; return; }
+  tbody.innerHTML = quotesData.map(q => `
+    <tr class="hover:bg-surface transition-colors cursor-pointer">
+      <td class="px-6 py-4 text-sm font-bold text-primary">#${q.id}</td>
+      <td class="px-6 py-4 text-sm font-medium">${q.customer}</td>
+      <td class="px-6 py-4 text-sm">${q.products}</td>
+      <td class="px-6 py-4"><span class="bg-${q.statusColor}/10 text-${q.statusColor} text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">${q.status}</span></td>
+      <td class="px-6 py-4 text-sm text-stone-600">${q.expires}</td>
+      <td class="px-6 py-4 text-right font-black text-primary">${q.total}</td>
+      <td class="px-6 py-4 text-right">
+        <button onclick="deleteQuote('${q.id}')" class="text-stone-300 hover:text-red-500 transition-colors"><span class="material-symbols-outlined text-sm">delete</span></button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function deleteQuote(id) {
+  const q = quotesData.find(x => x.id === id);
+  if (!q || !confirm(`Delete quote #${q.id} — ${q.customer}?`)) return;
+  quotesData = quotesData.filter(x => x.id !== id);
+  renderQuotes();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SHIPMENTS (Active Shipments list)
+// ══════════════════════════════════════════════════════════════════════════════
+let shipmentsData = [
+  { id:'SHP-2241', customer:'Daniel Construction', desc:'3-Ply Crane Mats 16\' × 12 · Full Truckload', status:'In Transit', statusClass:'bg-secondary/10 text-secondary', eta:'ETA: Mar 27, 2026', icon:'local_shipping' },
+  { id:'SHP-2240', customer:'Kentucky Power Co.', desc:'Cross Arms 10\' × 200 · Palletized', status:'Staging', statusClass:'bg-surface-container-highest text-stone-500', eta:'Pickup: Mar 30, 2026', icon:'inventory' },
+  { id:'SHP-2239', customer:'Red River Farms', desc:'Pine Mulch × 8 Pallets · LTL', status:'Delivered', statusClass:'bg-primary/10 text-primary', eta:'Mar 16, 2026', icon:'check_circle' },
+];
+
+function renderShipments() {
+  const list = document.getElementById('shipments-list');
+  if (!list) return;
+  if (!shipmentsData.length) { list.innerHTML = '<p class="text-center text-stone-400 text-sm py-8">No active shipments.</p>'; return; }
+  list.innerHTML = shipmentsData.map(s => `
+    <div class="bg-surface-container-low p-5 rounded-xl flex items-center justify-between hover:bg-surface-container-lowest transition-all">
+      <div class="flex items-center gap-4">
+        <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+          <span class="material-symbols-outlined">${s.icon}</span>
+        </div>
+        <div>
+          <p class="font-bold text-primary text-sm">#${s.id} — ${s.customer}</p>
+          <p class="text-xs text-stone-500">${s.desc}</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="text-right">
+          <span class="${s.statusClass} text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">${s.status}</span>
+          <p class="text-[10px] text-stone-500 mt-1">${s.eta}</p>
+        </div>
+        <button onclick="deleteShipment('${s.id}')" class="text-stone-300 hover:text-red-500 transition-colors ml-2"><span class="material-symbols-outlined text-sm">delete</span></button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function deleteShipment(id) {
+  const s = shipmentsData.find(x => x.id === id);
+  if (!s || !confirm(`Delete shipment #${s.id} — ${s.customer}?`)) return;
+  shipmentsData = shipmentsData.filter(x => x.id !== id);
+  renderShipments();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 // ══════════════════════════════════════════════════════════════════════════════
 // SHIPPING CALCULATOR
 // ══════════════════════════════════════════════════════════════════════════════
@@ -2568,7 +2595,12 @@ function renderCustomers() {
         <div class="flex justify-between"><span class="text-stone-500">Revenue (YTD)</span><span class="font-bold text-primary">${rev}</span></div>
         ${c.notes ? `<p class="text-xs text-stone-400 pt-1 border-t border-stone-100 mt-1">${c.notes}</p>` : ''}
       </div>
-    </div>`;
+    <div class="flex justify-end mt-3 pt-2 border-t border-stone-100">
+      <button onclick="event.stopPropagation();deleteCustomer(${i})" class="flex items-center gap-1 text-xs text-stone-400 hover:text-red-500 transition-colors font-semibold">
+        <span class="material-symbols-outlined text-sm">delete</span> Delete
+      </button>
+    </div>
+  </div>`;
   }).join('');
 }
 
@@ -2605,6 +2637,19 @@ function saveNewCustomer() {
   });
   ['cust-company','cust-type','cust-location','cust-contact','cust-phone','cust-email','cust-orders','cust-revenue','cust-notes'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('add-customer-modal').classList.add('hidden');
+  renderCustomers();
+}
+
+function deleteCustomer(idx) {
+  const q = (document.getElementById('customer-search')?.value || '').toLowerCase();
+  const filtered = customersData.filter(c =>
+    !q || (c.company||'').toLowerCase().includes(q) || (c.contact||'').toLowerCase().includes(q) ||
+    (c.location||'').toLowerCase().includes(q) || (c.type||'').toLowerCase().includes(q)
+  );
+  const c = filtered[idx];
+  if (!c) return;
+  if (!confirm(`Delete "${c.company}"?`)) return;
+  customersData = customersData.filter(x => x !== c);
   renderCustomers();
 }
 
