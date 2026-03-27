@@ -89,6 +89,8 @@ h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
   transform: translateX(1px);
 }
 
+@keyframes spin { to { transform: rotate(360deg); } }
+
 /* Scrollbar styling */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -1307,11 +1309,11 @@ h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
                   <div class="space-y-3">
                     <div>
                       <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Subject</label>
-                      <input type="text" class="email-step-subject w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary" placeholder="Subject line..."/>
+                      <input type="text" class="email-step-subject w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary" placeholder="Subject line..." oninput="updateWizardNav()"/>
                     </div>
                     <div>
                       <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Body</label>
-                      <textarea class="email-step-body w-full bg-surface-container-highest border-none rounded-lg px-4 py-3 text-sm focus:ring-primary h-40 resize-y" placeholder="Write your email here..."></textarea>
+                      <textarea class="email-step-body w-full bg-surface-container-highest border-none rounded-lg px-4 py-3 text-sm focus:ring-primary h-40 resize-y" placeholder="Write your email here..." oninput="updateWizardNav()"></textarea>
                     </div>
                     <!-- Variable Chips -->
                     <div class="flex flex-wrap gap-1.5">
@@ -1331,8 +1333,35 @@ h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
                 Add Follow-Up Step
               </button>
             </div>
-            <!-- Templates Sidebar -->
+            <!-- AI Writer + Templates Sidebar -->
             <div class="lg:col-span-2 space-y-4">
+              <!-- AI Email Writer -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <h3 class="font-black text-primary uppercase tracking-tight text-sm mb-1 flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-base">auto_awesome</span>
+                  AI Email Writer
+                </h3>
+                <p class="text-[10px] text-stone-400 mb-3">Describe what you want to say — AI writes the email.</p>
+                <textarea id="ai-prompt" class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-3 text-sm focus:ring-primary h-24 resize-y" placeholder="e.g. Introduce KFP's pressure-treated utility poles to an electrical utility company in the Southeast..."></textarea>
+                <div class="flex items-center gap-2 mt-2">
+                  <select id="ai-step-count" class="bg-surface-container-highest border-none rounded-lg px-3 py-2 text-xs font-bold focus:ring-primary">
+                    <option value="1">1 email</option>
+                    <option value="2">2-step sequence</option>
+                    <option value="3">3-step sequence</option>
+                  </select>
+                  <button onclick="generateAIEmail()" id="ai-generate-btn" class="flex-1 bg-primary text-on-primary px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary-container transition-colors flex items-center justify-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm">auto_awesome</span>
+                    Generate
+                  </button>
+                </div>
+                <div id="ai-result" class="hidden mt-3">
+                  <div id="ai-preview" class="bg-surface-container-lowest rounded-lg p-3 space-y-3 text-xs max-h-52 overflow-y-auto"></div>
+                  <button onclick="useAIEmail()" class="w-full mt-2 bg-primary/10 text-primary px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary/20 transition-colors">
+                    Use This
+                  </button>
+                </div>
+              </div>
+              <!-- Templates -->
               <div class="bg-surface-container-low rounded-xl p-5">
                 <h3 class="font-black text-primary uppercase tracking-tight text-sm mb-3">Templates</h3>
                 <div id="compose-templates-list" class="space-y-2">
@@ -2346,6 +2375,76 @@ function renderComposeLeadsSummary() {
   document.getElementById('compose-lead-chips').innerHTML = outreachState.composeLeads.map((l, i) =>
     `<span class="bg-surface-container-lowest rounded-lg px-2.5 py-1 text-xs font-medium flex items-center gap-1.5">${esc(l.email)}<button onclick="removeComposeLead(${i})" class="text-stone-400 hover:text-error"><span class="material-symbols-outlined text-xs">close</span></button></span>`
   ).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// AI EMAIL WRITER
+// ══════════════════════════════════════════════════════════════════════════════
+let aiGeneratedSteps = [];
+
+async function generateAIEmail() {
+  const prompt = document.getElementById('ai-prompt').value.trim();
+  if (!prompt) return;
+  const stepCount = parseInt(document.getElementById('ai-step-count').value);
+  const btn = document.getElementById('ai-generate-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="material-symbols-outlined text-sm" style="animation:spin 1s linear infinite">progress_activity</span> Generating...';
+  document.getElementById('ai-result').classList.add('hidden');
+
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const token = session?.access_token;
+    const r = await fetch('/api/outreach/ai-compose', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ prompt, stepCount }),
+    });
+    const data = await r.json();
+    if (!r.ok || !data.steps) { alert(data.error || 'Generation failed'); return; }
+
+    aiGeneratedSteps = data.steps;
+    document.getElementById('ai-preview').innerHTML = data.steps.map((s, i) =>
+      `<div class="${i > 0 ? 'border-t border-surface-container pt-2' : ''}">
+        <p class="font-bold text-primary mb-0.5">Step ${i+1}: ${esc(s.subject)}</p>
+        <p class="text-stone-600 whitespace-pre-wrap">${esc(s.body)}</p>
+      </div>`
+    ).join('');
+    document.getElementById('ai-result').classList.remove('hidden');
+  } catch (e) {
+    alert('Generation failed: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-symbols-outlined text-sm">auto_awesome</span> Generate';
+  }
+}
+
+function useAIEmail() {
+  if (!aiGeneratedSteps.length) return;
+  const container = document.getElementById('email-steps-container');
+  // Remove all follow-up steps
+  container.querySelectorAll('.email-step-editor:not(:first-child)').forEach(el => el.remove());
+
+  // Populate first step
+  const firstEditor = container.querySelector('.email-step-editor');
+  if (firstEditor) {
+    firstEditor.querySelector('.email-step-subject').value = aiGeneratedSteps[0]?.subject || '';
+    firstEditor.querySelector('.email-step-body').value = aiGeneratedSteps[0]?.body || '';
+  }
+
+  // Add remaining steps
+  for (let i = 1; i < aiGeneratedSteps.length; i++) {
+    addEmailStep();
+    const editors = container.querySelectorAll('.email-step-editor');
+    const editor = editors[i];
+    if (editor) {
+      editor.querySelector('.email-step-subject').value = aiGeneratedSteps[i]?.subject || '';
+      editor.querySelector('.email-step-body').value = aiGeneratedSteps[i]?.body || '';
+    }
+  }
+
+  updateWizardNav();
+  document.getElementById('ai-result').classList.add('hidden');
+  aiGeneratedSteps = [];
 }
 
 // ══════════════════════════════════════════════════════════════════════════════

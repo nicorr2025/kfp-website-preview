@@ -223,6 +223,44 @@ app.post('/api/apollo/enrich-person', async (req, res) => {
   }
 })
 
+// ── AI Email Composer ────────────────────────────────────────────────────────
+app.post('/api/outreach/ai-compose', requireAuth, async (req, res) => {
+  const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY
+  if (!ANTHROPIC_API_KEY) return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' })
+
+  const { prompt, stepCount = 1 } = req.body
+  if (!prompt) return res.status(400).json({ error: 'prompt required' })
+
+  const count = Math.min(Math.max(parseInt(stepCount) || 1, 1), 3)
+  const system = `You are a B2B cold email copywriter for Kentucky Forest Products (KFP) — a family-owned sawmill, pole, and lumber company established in 1981 in Kentucky. Write professional, concise cold outreach emails for potential customers and partners. Keep emails under 150 words per step, conversational, and direct. You may use these variables: $first_name, $last_name, $company, $title, $city, $state. Return ONLY a JSON array of ${count} email step(s) in this exact format: [{"subject":"...","body":"..."}]. No markdown, no explanation — just the JSON array.`
+
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 2048,
+        system,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    })
+    const data = await r.json()
+    if (!r.ok) return res.status(r.status).json({ error: data.error?.message || 'AI generation failed' })
+
+    let text = (data.content?.[0]?.text || '').trim().replace(/^```json\n?/, '').replace(/^```\n?/, '').replace(/\n?```$/, '')
+    let steps
+    try { steps = JSON.parse(text) } catch { return res.status(500).json({ error: 'Could not parse AI response as JSON' }) }
+    res.json({ steps })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
 // ── Leads Storage (in-memory for now, can be backed by SQLite/JSON file) ────
 let leadsDB = []
 let campaignsDB = []
