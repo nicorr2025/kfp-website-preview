@@ -105,6 +105,7 @@ h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body class="bg-surface text-on-surface">
 
@@ -689,10 +690,10 @@ h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
           <p class="text-stone-500 font-medium mt-1 text-sm">Manage your customer relationships and contact info.</p>
         </div>
         <div class="flex items-center gap-2">
-          <input type="file" id="customer-csv-input" accept=".csv" class="hidden" onchange="importCustomersCSV(event)"/>
+          <input type="file" id="customer-csv-input" accept=".csv,.xlsx,.xls" class="hidden" onchange="importCustomersCSV(event)"/>
           <button onclick="document.getElementById('customer-csv-input').click()" class="border border-stone-300 bg-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 text-stone-600 hover:bg-stone-50 transition-colors">
             <span class="material-symbols-outlined text-sm">upload_file</span>
-            Import CSV
+            Import CSV / Excel
           </button>
           <button onclick="document.getElementById('add-customer-modal').classList.remove('hidden')" class="bg-primary px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 text-on-primary hover:bg-primary-container transition-colors shadow-lg shadow-primary/10">
             <span class="material-symbols-outlined text-sm">person_add</span>
@@ -2999,48 +3000,55 @@ function deleteCustomer(idx) {
 function importCustomersCSV(event) {
   const file = event.target.files[0];
   if (!file) return;
+  const isExcel = /\.(xlsx|xls)$/i.test(file.name);
   const reader = new FileReader();
   reader.onload = function(e) {
-    const lines = e.target.result.split(/\r?\n/).filter(l => l.trim());
-    if (lines.length < 2) { alert('CSV must have a header row and at least one data row.'); return; }
-    const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g,'').trim().toLowerCase());
+    let rows = [];
+    if (isExcel) {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+    } else {
+      rows = e.target.result.split(/\r?\n/).filter(l => l.trim()).map(line =>
+        (line.match(/(".*?"|[^,]+|(?<=,)(?=,)|(?<=,)$|^(?=,))/g) || line.split(',')).map(c => c.replace(/^"|"$/g,'').trim())
+      );
+    }
+    if (rows.length < 2) { alert('File must have a header row and at least one data row.'); return; }
+    const headers = rows[0].map(h => String(h).trim().toLowerCase());
     const map = {
-      company: headers.findIndex(h => /company|name|business/i.test(h)),
-      type: headers.findIndex(h => /type|industry|category/i.test(h)),
+      company:  headers.findIndex(h => /company|name|business/i.test(h)),
+      type:     headers.findIndex(h => /type|industry|category/i.test(h)),
       location: headers.findIndex(h => h === 'location' || h === 'address'),
-      city: headers.findIndex(h => h === 'city'),
-      state: headers.findIndex(h => h === 'state'),
-      contact: headers.findIndex(h => /contact|contact.?name|rep/i.test(h)),
-      phone: headers.findIndex(h => /phone|tel/i.test(h)),
-      email: headers.findIndex(h => /email/i.test(h)),
-      orders: headers.findIndex(h => /orders?/i.test(h)),
-      revenue: headers.findIndex(h => /revenue|sales|amount/i.test(h)),
-      notes: headers.findIndex(h => /notes?|comment/i.test(h)),
+      city:     headers.findIndex(h => h === 'city'),
+      state:    headers.findIndex(h => h === 'state'),
+      contact:  headers.findIndex(h => /contact|contact.?name|rep/i.test(h)),
+      phone:    headers.findIndex(h => /phone|tel/i.test(h)),
+      email:    headers.findIndex(h => /email/i.test(h)),
+      orders:   headers.findIndex(h => /orders?/i.test(h)),
+      revenue:  headers.findIndex(h => /revenue|sales|amount/i.test(h)),
+      notes:    headers.findIndex(h => /notes?|comment/i.test(h)),
     };
-    const get = (row, col) => col >= 0 ? (row[col]||'').replace(/^"|"$/g,'').trim() : '';
-    const newCustomers = lines.slice(1).map(line => {
-      const row = line.match(/(".*?"|[^,]+|(?<=,)(?=,)|(?<=,)$|^(?=,))/g) || line.split(',');
-      return {
-        company: get(row, map.company),
-        type: get(row, map.type),
-        location: get(row, map.location),
-        city: get(row, map.city),
-        state: get(row, map.state),
-        contact: get(row, map.contact),
-        phone: get(row, map.phone),
-        email: get(row, map.email),
-        orders: get(row, map.orders),
-        revenue: get(row, map.revenue),
-        notes: get(row, map.notes),
-      };
-    }).filter(c => c.company);
-    if (!newCustomers.length) { alert('No valid rows found. Make sure your CSV has a "Company" column.'); return; }
+    const get = (row, col) => col >= 0 ? String(row[col] ?? '').trim() : '';
+    const newCustomers = rows.slice(1).map(row => ({
+      company:  get(row, map.company),
+      type:     get(row, map.type),
+      location: get(row, map.location),
+      city:     get(row, map.city),
+      state:    get(row, map.state),
+      contact:  get(row, map.contact),
+      phone:    get(row, map.phone),
+      email:    get(row, map.email),
+      orders:   get(row, map.orders),
+      revenue:  get(row, map.revenue),
+      notes:    get(row, map.notes),
+    })).filter(c => c.company);
+    if (!newCustomers.length) { alert('No valid rows found. Make sure your file has a "Company" column.'); return; }
     customersData = [...customersData, ...newCustomers];
     renderCustomers();
     event.target.value = '';
     document.getElementById('csv-hint').classList.remove('hidden');
   };
-  reader.readAsText(file);
+  isExcel ? reader.readAsArrayBuffer(file) : reader.readAsText(file);
 }
 
 function addManualLead() {
