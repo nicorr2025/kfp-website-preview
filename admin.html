@@ -2506,14 +2506,16 @@ function updateShipProduct(id, field, value) {
   if (p) { p[field] = value; recalcShipping(); }
 }
 
-const KFP_ADDRESS = '24 Seeley Rd, London, KY 40741';
+// KFP facility GPS coords — 24 Seeley Rd, London, KY 40741
+const KFP_LAT = 37.1077;
+const KFP_LON = -84.0902;
 
 async function geocode(address) {
   const url = 'https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(address) + '&format=json&limit=1&countrycodes=us';
   const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
   const data = await res.json();
-  if (!data.length) throw new Error('Address not found: "' + address + '"');
-  return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon), display: data[0].display_name };
+  if (!data.length) throw new Error('Address not found. Try adding a zip code or being more specific.');
+  return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
 }
 
 async function calculateShippingDistance() {
@@ -2522,17 +2524,17 @@ async function calculateShippingDistance() {
   const btn = document.getElementById('ship-dist-btn');
   const status = document.getElementById('ship-dist-status');
   btn.disabled = true;
-  btn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">progress_activity</span> Calculating...';
-  status.textContent = 'Looking up addresses...';
+  btn.innerHTML = '<span class="material-symbols-outlined text-sm">hourglass_top</span> Calculating...';
+  status.textContent = 'Looking up destination...';
   status.className = 'text-xs text-stone-400 mt-1';
   status.classList.remove('hidden');
   try {
-    const [origin, destination] = await Promise.all([geocode(KFP_ADDRESS), geocode(dest)]);
+    const destination = await geocode(dest);
     status.textContent = 'Calculating driving route...';
-    const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${origin.lon},${origin.lat};${destination.lon},${destination.lat}?overview=false`;
+    const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${KFP_LON},${KFP_LAT};${destination.lon},${destination.lat}?overview=false`;
     const res = await fetch(osrmUrl);
     const data = await res.json();
-    if (data.code !== 'Ok' || !data.routes?.length) throw new Error('No driving route found between these addresses.');
+    if (data.code !== 'Ok' || !data.routes?.length) throw new Error('No driving route found. Check the address and try again.');
     const miles = (data.routes[0].distance / 1609.344).toFixed(1);
     const mins = data.routes[0].duration;
     const hrs = Math.floor(mins / 3600);
@@ -2543,7 +2545,7 @@ async function calculateShippingDistance() {
     status.className = 'text-xs text-green-600 mt-1';
     recalcShipping();
   } catch (err) {
-    status.textContent = '✗ ' + (err.message || 'Could not calculate distance. Try a more specific address.');
+    status.textContent = '✗ ' + (err.message || 'Could not calculate distance.');
     status.className = 'text-xs text-red-500 mt-1';
   } finally {
     btn.disabled = false;
