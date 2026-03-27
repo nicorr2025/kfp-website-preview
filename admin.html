@@ -790,12 +790,19 @@ h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
           <div class="space-y-4">
             <div class="grid grid-cols-2 gap-3">
               <div class="col-span-2">
-                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Destination</label>
-                <input id="ship-destination" type="text" placeholder="City, State (e.g. Louisville, KY)" class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary"/>
+                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Destination Address</label>
+                <div class="flex gap-2">
+                  <input id="ship-destination" type="text" placeholder="123 Main St, Louisville, KY 40202" class="flex-1 bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary"/>
+                  <button onclick="calculateShippingDistance()" id="ship-dist-btn" class="bg-primary text-on-primary px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-primary-container transition-colors whitespace-nowrap flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm">route</span>
+                    Get Distance
+                  </button>
+                </div>
+                <p id="ship-dist-status" class="text-xs text-stone-400 mt-1 hidden"></p>
               </div>
               <div>
                 <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Distance (miles)</label>
-                <input id="ship-distance" type="number" min="0" placeholder="e.g. 85" oninput="recalcShipping()" class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary"/>
+                <input id="ship-distance" type="number" min="0" placeholder="Auto-calculated" oninput="recalcShipping()" class="w-full bg-surface-container-highest border-none rounded-lg px-4 py-2.5 text-sm focus:ring-primary"/>
               </div>
               <div>
                 <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Freight Type</label>
@@ -2497,6 +2504,51 @@ function renderShipProducts() {
 function updateShipProduct(id, field, value) {
   const p = shipProducts.find(x => x.id === id);
   if (p) { p[field] = value; recalcShipping(); }
+}
+
+const KFP_ADDRESS = '24 Seeley Rd, London, KY 40741';
+
+async function geocode(address) {
+  const url = 'https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(address) + '&format=json&limit=1&countrycodes=us';
+  const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+  const data = await res.json();
+  if (!data.length) throw new Error('Address not found: "' + address + '"');
+  return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon), display: data[0].display_name };
+}
+
+async function calculateShippingDistance() {
+  const dest = document.getElementById('ship-destination').value.trim();
+  if (!dest) { alert('Please enter a destination address.'); return; }
+  const btn = document.getElementById('ship-dist-btn');
+  const status = document.getElementById('ship-dist-status');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">progress_activity</span> Calculating...';
+  status.textContent = 'Looking up addresses...';
+  status.className = 'text-xs text-stone-400 mt-1';
+  status.classList.remove('hidden');
+  try {
+    const [origin, destination] = await Promise.all([geocode(KFP_ADDRESS), geocode(dest)]);
+    status.textContent = 'Calculating driving route...';
+    const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${origin.lon},${origin.lat};${destination.lon},${destination.lat}?overview=false`;
+    const res = await fetch(osrmUrl);
+    const data = await res.json();
+    if (data.code !== 'Ok' || !data.routes?.length) throw new Error('No driving route found between these addresses.');
+    const miles = (data.routes[0].distance / 1609.344).toFixed(1);
+    const mins = data.routes[0].duration;
+    const hrs = Math.floor(mins / 3600);
+    const mn = Math.round((mins % 3600) / 60);
+    const driveTime = hrs > 0 ? `${hrs}h ${mn}m` : `${mn}m`;
+    document.getElementById('ship-distance').value = miles;
+    status.textContent = `✓ ${parseFloat(miles).toLocaleString()} miles · ~${driveTime} drive from London, KY`;
+    status.className = 'text-xs text-green-600 mt-1';
+    recalcShipping();
+  } catch (err) {
+    status.textContent = '✗ ' + (err.message || 'Could not calculate distance. Try a more specific address.');
+    status.className = 'text-xs text-red-500 mt-1';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-symbols-outlined text-sm">route</span> Get Distance';
+  }
 }
 
 function recalcShipping() {
