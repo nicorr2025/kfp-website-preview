@@ -1342,6 +1342,16 @@ h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
                       <button onclick="insertVariable('$city', this)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary hover:bg-primary/20 transition-colors">$city</button>
                       <button onclick="insertVariable('$state', this)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary hover:bg-primary/20 transition-colors">$state</button>
                     </div>
+                    <!-- Attachments -->
+                    <div>
+                      <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Attachments</label>
+                      <input type="file" multiple class="email-step-file-input hidden" onchange="handleStepAttachment(this)"/>
+                      <div class="attachment-list flex flex-wrap gap-2 mb-2"></div>
+                      <button type="button" onclick="this.previousElementSibling.previousElementSibling.click()" class="flex items-center gap-1.5 text-xs font-bold text-stone-500 hover:text-primary bg-surface-container-highest px-3 py-1.5 rounded-lg transition-colors">
+                        <span class="material-symbols-outlined text-sm">attach_file</span>
+                        Attach File
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2606,7 +2616,23 @@ function useAIEmail() {
 function resetWizard() {
   outreachState.wizardStep = 1;
   outreachState.composeLeads = [];
-  outreachState.emailSteps = [{ subject: '', body: '', delay: 0 }];
+  outreachState.emailSteps = [{ subject: '', body: '', delay: 0, attachments: [] }];
+  outreachState.attachments = [[]];
+  // Clear DOM fields on step 1 editor
+  const container = document.getElementById('email-steps-container');
+  if (container) {
+    // Remove any dynamically added follow-up steps
+    container.querySelectorAll('.email-step-editor:not(:first-child)').forEach(el => el.remove());
+    const first = container.querySelector('.email-step-editor');
+    if (first) {
+      const subj = first.querySelector('.email-step-subject');
+      const body = first.querySelector('.email-step-body');
+      const atList = first.querySelector('.attachment-list');
+      if (subj) subj.value = '';
+      if (body) body.value = '';
+      if (atList) atList.innerHTML = '';
+    }
+  }
   renderComposeLeadsSummary();
   updateWizardUI();
 }
@@ -2703,10 +2729,31 @@ function addEmailStep() {
         <button onclick="insertVariable('$company',this)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary hover:bg-primary/20">$company</button>
         <button onclick="insertVariable('$title',this)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary hover:bg-primary/20">$title</button>
       </div>
+      <div>
+        <label class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 block mb-1">Attachments</label>
+        <input type="file" multiple class="email-step-file-input hidden" onchange="handleStepAttachment(this)"/>
+        <div class="attachment-list flex flex-wrap gap-2 mb-2"></div>
+        <button type="button" onclick="this.previousElementSibling.previousElementSibling.click()" class="flex items-center gap-1.5 text-xs font-bold text-stone-500 hover:text-primary bg-surface-container-highest px-3 py-1.5 rounded-lg transition-colors">
+          <span class="material-symbols-outlined text-sm">attach_file</span>
+          Attach File
+        </button>
+      </div>
     </div>
   `;
   container.appendChild(div);
   if (document.querySelectorAll('.email-step-editor').length >= 3) document.getElementById('add-step-btn').classList.add('hidden');
+}
+
+function handleStepAttachment(input) {
+  const editor = input.closest('.email-step-editor');
+  const list = editor.querySelector('.attachment-list');
+  Array.from(input.files).forEach(file => {
+    const chip = document.createElement('div');
+    chip.className = 'flex items-center gap-1.5 bg-surface-container-highest rounded-lg px-3 py-1 text-xs font-medium text-stone-600';
+    chip.innerHTML = `<span class="material-symbols-outlined text-sm text-primary">description</span><span class="max-w-[160px] truncate">${file.name}</span><button type="button" onclick="this.parentElement.remove()" class="text-stone-400 hover:text-error ml-1"><span class="material-symbols-outlined text-sm">close</span></button>`;
+    list.appendChild(chip);
+  });
+  input.value = '';
 }
 
 function insertVariable(variable, btn) {
