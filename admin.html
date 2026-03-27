@@ -1700,15 +1700,19 @@ async function authSignOut() {
   // Fetch team member record (auto-provisions if needed)
   try {
     const res = await authFetch('/api/team/me')
+    if (!res || !res.ok) throw new Error('API returned ' + (res?.status || 'no response'))
     const data = await res.json()
     currentMember = data.member
   } catch (e) {
     console.error('Failed to fetch team record:', e)
-    window.location.href = 'login.html'
+    document.getElementById('auth-loading').innerHTML = '<div class="text-center"><span class="material-symbols-outlined text-6xl text-error/50 mb-4">cloud_off</span><h2 class="text-xl font-black text-primary uppercase tracking-tighter mb-2">Connection Error</h2><p class="text-stone-500 text-sm mb-4">Could not reach the server. The database may not be set up yet.</p><button onclick="location.reload()" class="text-sm text-primary hover:underline">Retry</button><br/><button onclick="authSignOut()" class="text-sm text-stone-400 hover:text-primary mt-2">Sign Out</button></div>'
     return
   }
 
-  if (!currentMember) { window.location.href = 'login.html'; return; }
+  if (!currentMember) {
+    document.getElementById('auth-loading').innerHTML = '<div class="text-center"><span class="material-symbols-outlined text-6xl text-error/50 mb-4">person_off</span><h2 class="text-xl font-black text-primary uppercase tracking-tighter mb-2">Account Error</h2><p class="text-stone-500 text-sm mb-4">Could not load your team record.</p><button onclick="authSignOut()" class="text-sm text-primary hover:underline">Sign Out</button></div>'
+    return
+  }
 
   // Check status
   if (currentMember.status === 'pending') {
