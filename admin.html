@@ -2383,8 +2383,7 @@ async function renderInventory() {
       <p class="mt-2 text-sm font-semibold">Loading inventory from Lits...</p>
     </div>`;
     try {
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
-      const res = await fetch('/api/inventory', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await authFetch('/api/inventory');
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to load inventory');
       inventoryData = data.categories;
@@ -2442,8 +2441,7 @@ async function refreshInventoryMetric() {
   }
   // Silently pre-fetch for the dashboard metric
   try {
-    const token = (await supabase.auth.getSession()).data.session?.access_token;
-    const res = await fetch('/api/inventory', { headers: { Authorization: `Bearer ${token}` } });
+    const res = await authFetch('/api/inventory');
     const data = await res.json();
     if (!res.ok) return;
     inventoryData = data.categories;
