@@ -331,7 +331,7 @@ h1, h2, h3, .headline { font-family: 'Work Sans', sans-serif; }
             </div>
           </div>
           <div class="mt-3">
-            <p class="text-4xl font-black text-primary">12.5k</p>
+            <p class="text-4xl font-black text-primary" id="dash-inventory-bf">—</p>
             <p class="text-[10px] text-stone-500 font-bold mt-1 tracking-wider uppercase">Board Feet (BF)</p>
           </div>
         </div>
@@ -1824,6 +1824,9 @@ function initAdmin() {
 
   // Hide loading overlay
   document.getElementById('auth-loading').classList.add('hidden')
+
+  // Pre-fetch inventory so dashboard metric is populated on load
+  refreshInventoryMetric()
 }
 
 function applyTabAccess() {
@@ -1984,6 +1987,7 @@ document.querySelectorAll('.nav-link').forEach(link => {
     const target = document.getElementById('page-' + page);
     if (target) target.classList.remove('hidden');
     document.querySelector('.sidebar').classList.remove('open');
+    if (page === 'dashboard') refreshInventoryMetric();
     if (page === 'outreach') { refreshOutreachStats(); refreshCampaigns(); }
     if (page === 'team') refreshTeam();
     if (page === 'customers') renderCustomers();
@@ -2366,55 +2370,54 @@ function useCSVLeads() { addComposeLeads(csvParsedLeads); }
 // ══════════════════════════════════════════════════════════════════════════════
 // INVENTORY
 // ══════════════════════════════════════════════════════════════════════════════
-let inventoryData = [
-  { id:1, name:'Lumber', status:'In Stock', statusColor:'primary', items:[
-    {name:'Pine (Treated)', qty:'4,200 BF'}, {name:'White Oak', qty:'2,800 BF'},
-    {name:'Red Oak', qty:'1,950 BF'}, {name:'Poplar', qty:'3,100 BF'}
-  ]},
-  { id:2, name:'Fencing', status:'In Stock', statusColor:'primary', items:[
-    {name:'Pine Pickets', qty:'2,400 pcs'}, {name:'Oak Split Rail', qty:'1,600 LF'},
-    {name:'Treated Poplar Posts', qty:'890 pcs'}
-  ]},
-  { id:3, name:'Matting', status:'Low Stock', statusColor:'tertiary', items:[
-    {name:'3-Ply 12\'', qty:'45 units'}, {name:'3-Ply 16\'', qty:'28 units'},
-    {name:'Crane Mats 40\'', qty:'8 units'}, {name:'Transition Mats', qty:'62 units'}
-  ]},
-  { id:4, name:'Utility Poles', status:'In Stock', statusColor:'primary', items:[
-    {name:'25\'-35\'', qty:'180 poles'}, {name:'40\'-55\'', qty:'96 poles'},
-    {name:'60\'-105\' (Ext.)', qty:'22 poles'}
-  ]},
-  { id:5, name:'Cross Arms', status:'In Stock', statusColor:'primary', items:[
-    {name:'8\' Standard', qty:'340 pcs'}, {name:'10\' Standard', qty:'210 pcs'}
-  ]},
-  { id:6, name:'Byproducts', status:'In Stock', statusColor:'primary', items:[
-    {name:'Pine Mulch', qty:'42 pallets'}, {name:'Erosion Control', qty:'18 pallets'}
-  ]},
-];
+let inventoryData = [];
+let inventoryLoaded = false;
 
-function renderInventory() {
+async function renderInventory() {
   const grid = document.getElementById('inventory-grid');
   if (!grid) return;
+
+  if (!inventoryLoaded) {
+    grid.innerHTML = `<div class="col-span-3 py-16 text-center text-stone-400">
+      <span class="material-symbols-outlined text-4xl animate-pulse">inventory_2</span>
+      <p class="mt-2 text-sm font-semibold">Loading inventory from Lits...</p>
+    </div>`;
+    try {
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      const res = await fetch('/api/inventory', { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load inventory');
+      inventoryData = data.categories;
+      inventoryLoaded = true;
+      // update dashboard metric
+      const dashBF = document.getElementById('dash-inventory-bf');
+      if (dashBF && data.totalBF) {
+        const m = data.totalBF >= 1000000
+          ? (data.totalBF / 1000000).toFixed(1) + 'M'
+          : (data.totalBF / 1000).toFixed(1) + 'k';
+        dashBF.textContent = m;
+      }
+    } catch (err) {
+      grid.innerHTML = `<div class="col-span-3 py-16 text-center text-red-400">
+        <span class="material-symbols-outlined text-4xl">error</span>
+        <p class="mt-2 text-sm font-semibold">Failed to load inventory: ${err.message}</p>
+        <button onclick="inventoryLoaded=false;renderInventory()" class="mt-3 text-xs text-primary underline">Retry</button>
+      </div>`;
+      return;
+    }
+  }
+
   grid.innerHTML = inventoryData.map(cat => `
     <div class="bg-surface-container-low p-5 rounded-xl hover:bg-surface-container-lowest transition-all">
       <div class="flex justify-between items-start mb-4">
         <h3 class="font-black text-primary uppercase tracking-tight">${cat.name}</h3>
-        <div class="flex items-center gap-2">
-          <span class="bg-${cat.statusColor}/10 text-${cat.statusColor} text-[10px] font-black uppercase px-2 py-0.5 rounded-full">${cat.status}</span>
-          <button onclick="deleteInventoryCategory(${cat.id})" class="text-stone-300 hover:text-red-500 transition-colors" title="Delete category">
-            <span class="material-symbols-outlined text-sm">delete</span>
-          </button>
-        </div>
+        <span class="bg-${cat.statusColor}/10 text-${cat.statusColor} text-[10px] font-black uppercase px-2 py-0.5 rounded-full">${cat.status}</span>
       </div>
       <div class="space-y-2">
-        ${cat.items.map((item, ii) => `
-          <div class="flex justify-between text-sm items-center group">
+        ${cat.items.map(item => `
+          <div class="flex justify-between text-sm items-center">
             <span class="text-stone-600">${item.name}</span>
-            <div class="flex items-center gap-2">
-              <span class="font-bold ${item.qty.startsWith('8') && cat.name==='Matting' ? 'text-red-500' : ''}">${item.qty}</span>
-              <button onclick="deleteInventoryItem(${cat.id}, ${ii})" class="opacity-0 group-hover:opacity-100 text-stone-300 hover:text-red-500 transition-all" title="Delete item">
-                <span class="material-symbols-outlined text-xs">close</span>
-              </button>
-            </div>
+            <span class="font-bold">${item.qty}</span>
           </div>
         `).join('')}
       </div>
@@ -2422,29 +2425,37 @@ function renderInventory() {
   `).join('');
 }
 
-function deleteInventoryCategory(id) {
-  const cat = inventoryData.find(c => c.id === id);
-  if (!cat || !confirm(`Delete "${cat.name}" category and all its items?`)) return;
-  inventoryData = inventoryData.filter(c => c.id !== id);
-  renderInventory();
-}
-
-function deleteInventoryItem(catId, itemIdx) {
-  const cat = inventoryData.find(c => c.id === catId);
-  if (!cat) return;
-  const item = cat.items[itemIdx];
-  if (!item || !confirm(`Delete "${item.name}"?`)) return;
-  cat.items.splice(itemIdx, 1);
-  renderInventory();
-}
-
-function openAddInventoryModal() {
-  const name = prompt('Category name:');
-  if (!name?.trim()) return;
-  const status = prompt('Status (In Stock / Low Stock / Out of Stock):', 'In Stock') || 'In Stock';
-  const color = status.toLowerCase().includes('low') ? 'tertiary' : status.toLowerCase().includes('out') ? 'error' : 'primary';
-  inventoryData.push({ id: Date.now(), name: name.trim(), status, statusColor: color, items: [] });
-  renderInventory();
+async function refreshInventoryMetric() {
+  if (inventoryLoaded) {
+    const totalBF = inventoryData.reduce((s, c) => {
+      const bfItem = c.items.find(i => i.name === 'Board Feet');
+      if (!bfItem) return s;
+      return s + parseInt(bfItem.qty.replace(/[^0-9]/g, ''), 10);
+    }, 0);
+    const dashBF = document.getElementById('dash-inventory-bf');
+    if (dashBF && totalBF) {
+      dashBF.textContent = totalBF >= 1000000
+        ? (totalBF / 1000000).toFixed(1) + 'M'
+        : (totalBF / 1000).toFixed(1) + 'k';
+    }
+    return;
+  }
+  // Silently pre-fetch for the dashboard metric
+  try {
+    const token = (await supabase.auth.getSession()).data.session?.access_token;
+    const res = await fetch('/api/inventory', { headers: { Authorization: `Bearer ${token}` } });
+    const data = await res.json();
+    if (!res.ok) return;
+    inventoryData = data.categories;
+    inventoryLoaded = true;
+    const dashBF = document.getElementById('dash-inventory-bf');
+    if (dashBF && data.totalBF) {
+      const m = data.totalBF >= 1000000
+        ? (data.totalBF / 1000000).toFixed(1) + 'M'
+        : (data.totalBF / 1000).toFixed(1) + 'k';
+      dashBF.textContent = m;
+    }
+  } catch (_) {}
 }
 
 // ══════════════════════════════════════════════════════════════════════════════

@@ -1,4 +1,4 @@
-require('dotenv').config()
+require('dotenv').config({ path: require('path').join(__dirname, '.env') })
 const express = require('express')
 const cors = require('cors')
 const path = require('path')
@@ -12,6 +12,18 @@ app.use(express.static(path.join(__dirname)))
 
 const APOLLO_BASE = 'https://api.apollo.io/api/v1'
 const APOLLO_API_KEY = process.env.APOLLO_API_KEY
+
+const LITS_API_URL = 'https://lits.litsystem.org/API/getItem.php'
+const LITS_PUBLIC_KEY = process.env.LITS_PUBLIC_KEY
+const LITS_PRIVATE_KEY = process.env.LITS_PRIVATE_KEY
+
+const SPECIES_NAMES = {
+  'WOK': 'White Oak', 'ROK': 'Red Oak', 'COK': 'Chestnut Oak',
+  'POP': 'Poplar', 'PIN': 'Pine', 'CHE': 'Cherry',
+  'HIC': 'Hickory', 'ASH': 'Ash', 'WAL': 'Walnut',
+  'SMP': 'Soft Maple', 'HMP': 'Hard Maple', 'SOK': 'Scarlet Oak',
+  'MXH': 'Mixed Hardwood',
+}
 
 // ── Supabase Admin Client ───────────────────────────────────────────────────
 const supabase = createClient(
@@ -397,6 +409,62 @@ app.delete('/api/templates/:id', (req, res) => {
   const id = parseInt(req.params.id)
   templatesDB = templatesDB.filter(t => t.id !== id)
   res.json({ ok: true })
+})
+
+// ── Lits Inventory ──────────────────────────────────────────────────────────
+app.get('/api/inventory', requireAuth, async (req, res) => {
+  if (!LITS_PUBLIC_KEY || !LITS_PRIVATE_KEY) {
+    return res.status(500).json({ error: 'Lits API keys not configured' })
+  }
+  try {
+    const r = await fetch(LITS_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-KEY': LITS_PRIVATE_KEY,
+        'X-API-PUBLIC-KEY': LITS_PUBLIC_KEY,
+      },
+      body: JSON.stringify({ module: 'logging', table: 'Logs - Active' }),
+    })
+    const data = await r.json()
+    if (!r.ok) return res.status(r.status).json({ error: data.error || 'Lits API error' })
+
+    // Aggregate by species
+    const speciesMap = {}
+    for (const log of (data.results || [])) {
+      const code = log.Species || 'UNK'
+      if (!speciesMap[code]) speciesMap[code] = { logs: 0, bf: 0, totalCost: 0 }
+      speciesMap[code].logs += 1
+      speciesMap[code].bf += (log['Board Feet'] || 0)
+      speciesMap[code].totalCost += parseFloat(log['Log Cost'] || 0)
+    }
+
+    const categories = Object.entries(speciesMap)
+      .sort((a, b) => b[1].bf - a[1].bf)
+      .map(([code, stats], idx) => {
+        const name = SPECIES_NAMES[code] || code
+        const status = stats.bf < 1000 ? 'Out of Stock' : stats.bf < 20000 ? 'Low Stock' : 'In Stock'
+        const statusColor = stats.bf < 1000 ? 'error' : stats.bf < 20000 ? 'tertiary' : 'primary'
+        const costStr = stats.totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        return {
+          id: idx + 1,
+          name,
+          code,
+          status,
+          statusColor,
+          items: [
+            { name: 'Log Count', qty: `${stats.logs.toLocaleString()} logs` },
+            { name: 'Board Feet', qty: `${stats.bf.toLocaleString()} BF` },
+            { name: 'Inventory Value', qty: `$${costStr}` },
+          ],
+        }
+      })
+
+    const totalBF = Object.values(speciesMap).reduce((s, v) => s + v.bf, 0)
+    res.json({ categories, totalBF, logCount: data.count })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
 })
 
 // Stats
