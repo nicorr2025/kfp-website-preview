@@ -1,0 +1,197 @@
+/* ========================================================
+   Kentucky Forest Products — Shared + 3D Depth Stylesheet
+   ======================================================== */
+
+/* ─── Material Symbols ─── */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ─── Nav dropdowns ─── */
+.nav-dropdown { display: none; position: absolute; top: 100%; left: 0; min-width: 220px; }
+.nav-group:hover .nav-dropdown { display: block; }
+.nav-dropdown a { display: block; padding: 0.625rem 1.25rem; }
+.nav-dropdown a:hover { background: rgba(0, 69, 13, 0.05); }
+
+/* ─── Mobile menu ─── */
+.mobile-menu { display: none; }
+.mobile-menu.active { display: block; }
+.mobile-submenu { display: none; }
+.mobile-submenu.active { display: block; }
+
+/* ─── Text shadow ─── */
+.text-shadow-sm {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ================================================================
+   3D DEPTH SYSTEM
+   ================================================================ */
+
+/* ── Glass Card — layered depth + top highlight ── */
+.glass-card {
+  background: rgba(250, 250, 245, 0.76);
+  backdrop-filter: blur(18px) saturate(1.7);
+  -webkit-backdrop-filter: blur(18px) saturate(1.7);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-bottom-color: rgba(192, 201, 187, 0.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.03),
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    0 8px 24px rgba(0, 0, 0, 0.09),
+    0 24px 60px rgba(0, 69, 13, 0.07);
+}
+
+/* ── Nav — richer depth shadow ── */
+nav.fixed {
+  box-shadow:
+    0 1px 0 rgba(192, 201, 187, 0.3),
+    0 4px 20px rgba(0, 0, 0, 0.08),
+    0 12px 40px rgba(0, 69, 13, 0.05) !important;
+}
+
+/* ── Upgrade all standard shadows ── */
+.shadow-lg {
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.08),
+    0 12px 32px rgba(0, 0, 0, 0.10),
+    0 0 0 1px rgba(0, 0, 0, 0.03) !important;
+}
+.shadow-xl {
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.10),
+    0 16px 40px rgba(0, 0, 0, 0.11),
+    0 0 0 1px rgba(0, 0, 0, 0.03) !important;
+}
+.shadow-2xl {
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.12),
+    0 24px 56px rgba(0, 0, 0, 0.14),
+    0 0 0 1px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* ── Glass card hover lift (content cards) ── */
+.glass-card.hover\:shadow-xl,
+.glass-card.hover\:shadow-2xl {
+  transition: transform 0.38s cubic-bezier(.22,.68,0,1.2), box-shadow 0.38s ease, border-color 0.38s ease !important;
+  will-change: transform;
+}
+.glass-card.hover\:shadow-xl:hover {
+  transform: translateY(-7px);
+  border-color: rgba(255, 255, 255, 0.82) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 4px 8px rgba(0, 0, 0, 0.07),
+    0 16px 44px rgba(0, 0, 0, 0.14),
+    0 32px 64px rgba(0, 69, 13, 0.10) !important;
+}
+.glass-card.hover\:shadow-2xl:hover {
+  transform: translateY(-10px);
+  border-color: rgba(255, 255, 255, 0.88) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 6px 12px rgba(0, 0, 0, 0.09),
+    0 22px 52px rgba(0, 0, 0, 0.16),
+    0 44px 80px rgba(0, 69, 13, 0.12) !important;
+}
+
+/* ── Image overlay card hover lift ── */
+a.hover\:shadow-2xl {
+  transition: transform 0.38s cubic-bezier(.22,.68,0,1.2), box-shadow 0.38s ease !important;
+  will-change: transform;
+}
+a.hover\:shadow-2xl:hover {
+  transform: translateY(-10px);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.22),
+    0 8px 20px rgba(0, 69, 13, 0.12) !important;
+}
+
+/* ── Primary CTA buttons (green) — raised 3D look ── */
+a.bg-primary.rounded-xl,
+button.bg-primary.rounded-xl {
+  background: linear-gradient(175deg, #1d7a34 0%, #00450d 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.13),
+    0 4px 0 #002408,
+    0 6px 18px rgba(0, 69, 13, 0.35) !important;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease !important;
+}
+a.bg-primary.rounded-xl:hover,
+button.bg-primary.rounded-xl:hover {
+  opacity: 1 !important;
+  transform: translateY(-2px) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 6px 0 #002408,
+    0 12px 28px rgba(0, 69, 13, 0.42) !important;
+}
+a.bg-primary.rounded-xl:active,
+button.bg-primary.rounded-xl:active {
+  transform: translateY(3px) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 1px 0 #002408,
+    0 2px 10px rgba(0, 69, 13, 0.22) !important;
+}
+
+/* ── White CTA buttons (inside green banners) ── */
+a.bg-white.rounded-xl {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    0 4px 0 rgba(0, 0, 0, 0.14),
+    0 8px 22px rgba(0, 0, 0, 0.22) !important;
+  transition: transform 0.12s ease, box-shadow 0.12s ease !important;
+}
+a.bg-white.rounded-xl:hover {
+  transform: translateY(-3px) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    0 7px 0 rgba(0, 0, 0, 0.15),
+    0 14px 32px rgba(0, 0, 0, 0.26) !important;
+}
+a.bg-white.rounded-xl:active {
+  transform: translateY(3px) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    0 1px 0 rgba(0, 0, 0, 0.10),
+    0 2px 8px rgba(0, 0, 0, 0.14) !important;
+}
+
+/* ── CTA banner (green rounded-[2rem] boxes) — depth ── */
+.rounded-\[2rem\] {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 8px 32px rgba(0, 0, 0, 0.18),
+    0 32px 80px rgba(0, 30, 8, 0.28) !important;
+}
+
+/* ── Section heading accent lines ── */
+.h-1.w-20 {
+  background: linear-gradient(to right, #77574d, #a08070, transparent) !important;
+  box-shadow: 0 2px 8px rgba(119, 87, 77, 0.30);
+  height: 3px !important;
+  border-radius: 2px;
+}
+
+/* ── Form inputs — inset depth ── */
+input.rounded-xl,
+textarea.rounded-xl {
+  box-shadow:
+    inset 0 2px 5px rgba(0, 0, 0, 0.06),
+    inset 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease !important;
+}
+input.rounded-xl:focus,
+textarea.rounded-xl:focus {
+  box-shadow:
+    inset 0 2px 5px rgba(0, 0, 0, 0.05),
+    0 0 0 2px rgba(0, 69, 13, 0.18),
+    0 4px 14px rgba(0, 69, 13, 0.12) !important;
+}
+
+/* ── Footer top-inset shadow ── */
+footer.bg-primary {
+  box-shadow: inset 0 4px 24px rgba(0, 0, 0, 0.12);
+}

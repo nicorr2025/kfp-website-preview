@@ -59,29 +59,8 @@ tailwind.config = {
   },
 }
 </script>
-<style>
-  .material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-  }
-  .glass-card {
-    background: rgba(250, 250, 245, 0.7);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(192, 201, 187, 0.2);
-  }
-  .text-shadow-sm {
-    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-  /* Dropdown menus */
-  .nav-dropdown { display: none; position: absolute; top: 100%; left: 0; min-width: 220px; }
-  .nav-group:hover .nav-dropdown { display: block; }
-  .nav-dropdown a { display: block; padding: 0.625rem 1.25rem; }
-  .nav-dropdown a:hover { background: rgba(0, 69, 13, 0.05); }
-  /* Mobile menu */
-  .mobile-menu { display: none; }
-  .mobile-menu.active { display: block; }
-  .mobile-submenu { display: none; }
-  .mobile-submenu.active { display: block; }
-</style>
+<link href="style.css" rel="stylesheet"/>
+<script src="scripts.js" defer></script>
 </head>
 <body class="bg-surface font-body text-on-surface antialiased selection:bg-primary selection:text-on-primary">
 
@@ -292,27 +271,22 @@ tailwind.config = {
 </section>
 
 <!-- ========== CTA ========== -->
-<section class="py-24 bg-surface">
-  <div class="max-w-7xl mx-auto px-6">
-    <div class="bg-primary rounded-[2rem] p-12 md:p-24 text-center text-on-primary overflow-hidden relative">
-      <div class="absolute inset-0 opacity-10 pointer-events-none">
-        <div class="absolute inset-0" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 40px 40px;"></div>
-      </div>
-      <div class="relative z-10 max-w-3xl mx-auto">
-        <span class="material-symbols-outlined text-6xl mb-6 block text-primary-fixed">park</span>
-        <h2 class="text-4xl md:text-6xl font-headline font-extrabold mb-6 leading-tight">Have Logs to Sell?</h2>
-        <p class="text-xl text-primary-fixed mb-12 opacity-90">
-          Get the best value for your Logs! Contact us today for competitive pricing on all hardwood species.
-        </p>
-        <div class="flex flex-col md:flex-row gap-4 justify-center">
-          <a href="contact.html" class="bg-white text-primary px-10 py-5 rounded-xl font-black text-lg hover:scale-105 transition-transform shadow-xl inline-block">
-            Contact Us
-          </a>
-          <a href="tel:6062502220" class="border border-white/30 backdrop-blur-sm px-10 py-5 rounded-xl font-black text-lg hover:bg-white/10 transition-colors inline-block">
-            Call (606) 250-2220
-          </a>
-        </div>
-      </div>
+<section class="relative py-24 overflow-hidden">
+  <img src="images/webp/DJI_20260611140825_0207_D.webp" alt="Log trucks delivering timber to the Kentucky Forest Products facility" class="absolute inset-0 w-full h-full object-cover object-center"/>
+  <div class="absolute inset-0 bg-primary/70"></div>
+  <div class="relative z-10 max-w-3xl mx-auto px-6 text-center text-on-primary">
+    <span class="material-symbols-outlined text-6xl mb-6 block">park</span>
+    <h2 class="text-4xl md:text-6xl font-headline font-extrabold mb-6 leading-tight">Have Logs to Sell?</h2>
+    <p class="text-xl mb-12 opacity-90">
+      Get the best value for your Logs! Contact us today for competitive pricing on all hardwood species.
+    </p>
+    <div class="flex flex-col md:flex-row gap-4 justify-center">
+      <a href="contact.html" class="bg-white text-primary px-10 py-5 rounded-xl font-black text-lg hover:scale-105 transition-transform shadow-xl inline-block">
+        Contact Us
+      </a>
+      <a href="tel:6062502220" class="border border-white/30 backdrop-blur-sm px-10 py-5 rounded-xl font-black text-lg hover:bg-white/10 transition-colors inline-block">
+        Call (606) 250-2220
+      </a>
     </div>
   </div>
 </section>

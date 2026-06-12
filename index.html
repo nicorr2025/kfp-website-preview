@@ -59,29 +59,8 @@ tailwind.config = {
   },
 }
 </script>
-<style>
-  .material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-  }
-  .glass-card {
-    background: rgba(250, 250, 245, 0.7);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(192, 201, 187, 0.2);
-  }
-  .text-shadow-sm {
-    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-  /* Dropdown menus */
-  .nav-dropdown { display: none; position: absolute; top: 100%; left: 0; min-width: 220px; }
-  .nav-group:hover .nav-dropdown { display: block; }
-  .nav-dropdown a { display: block; padding: 0.625rem 1.25rem; }
-  .nav-dropdown a:hover { background: rgba(0, 69, 13, 0.05); }
-  /* Mobile menu */
-  .mobile-menu { display: none; }
-  .mobile-menu.active { display: block; }
-  .mobile-submenu { display: none; }
-  .mobile-submenu.active { display: block; }
-</style>
+<link href="style.css" rel="stylesheet"/>
+<script src="scripts.js" defer></script>
 </head>
 <body class="bg-surface font-body text-on-surface antialiased selection:bg-primary selection:text-on-primary">
 
@@ -170,15 +149,16 @@ tailwind.config = {
 
 <!-- ========== HERO ========== -->
 <main>
-<section class="relative h-[75vh] min-h-[500px] flex items-center justify-center overflow-hidden pt-16">
+<section class="relative h-[80vh] min-h-[560px] flex items-center justify-start overflow-hidden pt-16">
   <div class="absolute inset-0 z-0">
-    <img alt="Kentucky forest with sunlight filtering through timber trees" class="w-full h-full object-cover" src="images/webp/P1140475.webp" loading="lazy"/>
-    <div class="absolute inset-0 bg-gradient-to-b from-primary/30 via-transparent to-surface"></div>
+    <img alt="Aerial view of Kentucky Forest Products facility showing log yards and sawmill buildings" class="w-full h-full object-cover object-center" src="images/webp/DJI_20260611140122_0192_D.webp" loading="lazy"/>
+    <div class="absolute inset-0 bg-gradient-to-r from-black/40 via-black/10 to-transparent"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent"></div>
   </div>
   <div class="relative z-10 max-w-7xl mx-auto px-6 w-full">
-    <div class="glass-card max-w-3xl p-8 md:p-12 rounded-xl">
+    <div class="glass-card max-w-xl p-8 md:p-12 rounded-xl">
       <span class="uppercase tracking-[0.2em] text-primary font-bold mb-3 block text-xs">Since 1981 &bull; London, Kentucky</span>
-      <h1 class="text-4xl md:text-6xl font-extrabold font-headline leading-[1.1] text-primary tracking-tight mb-5">
+      <h1 class="text-5xl md:text-7xl font-extrabold font-headline leading-[1.1] text-primary tracking-tight mb-5">
         More Than Just a Sawmill.
       </h1>
       <p class="text-base md:text-lg text-on-surface-variant max-w-xl mb-6 leading-relaxed">
@@ -220,7 +200,7 @@ tailwind.config = {
       </a>
       <!-- Card 2: Industrial Matting -->
       <a href="matting.html" class="group relative h-[380px] overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 block">
-        <img alt="Heavy equipment timber matting on a job site" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="images/webp/P1140488.webp" loading="lazy"/>
+        <img alt="Workers operating the matting press on the production floor" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="images/webp/IMG_0366.webp" loading="lazy"/>
         <div class="absolute inset-0 bg-primary/20 group-hover:bg-primary/10 transition-colors"></div>
         <div class="absolute bottom-6 left-6 right-6 glass-card p-6 rounded-xl">
           <span class="material-symbols-outlined text-primary mb-3 block text-3xl">construction</span>
@@ -258,14 +238,22 @@ tailwind.config = {
       <p class="text-lg text-on-surface-variant leading-relaxed">
         Since 1981, the Kentucky Forest Products sawmill has been more than just a sawmill &mdash; we're your dedicated partner in wood products delivery. We combine generational expertise with precision machinery to ensure every board, pole, and mat that leaves our facility meets the highest standards.
       </p>
-      <div class="grid grid-cols-2 gap-6 pt-3">
-        <div class="space-y-2">
-          <div class="text-primary font-bold">Buying. Sawing. Shipping.</div>
-          <div class="text-sm text-on-surface-variant">From Kentucky's forests to your project site.</div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 pt-4 border-t border-outline-variant/30">
+        <div class="text-center">
+          <div class="text-3xl font-black text-primary">44+</div>
+          <div class="text-xs uppercase tracking-widest text-secondary font-bold mt-1">Years in Business</div>
         </div>
-        <div class="space-y-2">
-          <div class="text-primary font-bold">Same-Day Shipping</div>
-          <div class="text-sm text-on-surface-variant">Nationwide delivery with quick turnaround for repeat customers.</div>
+        <div class="text-center">
+          <div class="text-3xl font-black text-primary">8+</div>
+          <div class="text-xs uppercase tracking-widest text-secondary font-bold mt-1">Hardwood Species</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-black text-primary">50</div>
+          <div class="text-xs uppercase tracking-widest text-secondary font-bold mt-1">States Served</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-black text-primary">1-Day</div>
+          <div class="text-xs uppercase tracking-widest text-secondary font-bold mt-1">Shipping Available</div>
         </div>
       </div>
     </div>
@@ -278,13 +266,14 @@ tailwind.config = {
     <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
       <div>
         <h2 class="text-3xl md:text-4xl font-headline font-bold text-primary tracking-tight">What We Offer</h2>
+        <div class="h-1 w-20 bg-secondary mt-4 mb-2"></div>
         <p class="text-on-surface-variant mt-2">From premium hardwoods to heavy-duty industrial products.</p>
       </div>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-4 h-auto md:h-[550px]">
       <!-- Large: Lumber -->
       <a href="lumber.html" class="md:col-span-2 md:row-span-2 relative group overflow-hidden rounded-xl shadow-lg block">
-        <img alt="Premium hardwood lumber boards with rich grain" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" src="images/webp/P1140256.webp" loading="lazy"/>
+        <img alt="Aerial view of Kentucky Forest Products facility with log yards" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" src="images/webp/DJI_0435.webp" loading="lazy"/>
         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity"></div>
         <div class="absolute bottom-10 left-10 text-white">
           <h3 class="text-3xl font-bold mb-2">Premium Lumber</h3>
@@ -294,7 +283,7 @@ tailwind.config = {
       </a>
       <!-- Fencing -->
       <a href="fencing.html" class="md:col-span-2 md:row-span-1 relative group overflow-hidden rounded-xl shadow-lg block">
-        <img alt="Wooden fence posts and boards" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" src="images/webp/P1140409.webp" loading="lazy"/>
+        <img alt="Wooden fence posts and boards" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" src="images/webp/P1213386.webp" loading="lazy"/>
         <div class="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors"></div>
         <div class="absolute top-8 left-8">
           <div class="glass-card px-4 py-2 rounded-lg text-primary font-bold text-sm inline-block">Wood Products</div>
@@ -303,7 +292,15 @@ tailwind.config = {
       </a>
       <!-- Matting -->
       <a href="matting.html" class="relative group overflow-hidden rounded-xl shadow-lg block">
-        <img alt="Timber matting for heavy equipment access" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" src="images/webp/P1140488.webp" loading="lazy"/>
+        <div class="absolute inset-0 flex">
+          <div class="w-1/2 overflow-hidden">
+            <img alt="Stacked timber matting under covered shed" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" src="images/webp/IMG_0361.webp" loading="lazy"/>
+          </div>
+          <div class="w-px bg-white/40 flex-shrink-0 z-10"></div>
+          <div class="w-1/2 overflow-hidden">
+            <img alt="Green-end timber matting ready for shipment" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" src="images/webp/IMG_0363.webp" loading="lazy"/>
+          </div>
+        </div>
         <div class="absolute inset-0 bg-secondary/20 group-hover:bg-transparent transition-colors"></div>
         <div class="absolute bottom-6 left-6">
           <h3 class="text-lg font-bold text-white drop-shadow-md">Matting</h3>
@@ -322,40 +319,37 @@ tailwind.config = {
 </section>
 
 <!-- ========== LOG BUYING CTA ========== -->
-<section class="py-12 bg-surface-container-low">
-  <div class="max-w-5xl mx-auto px-6 text-center">
-    <span class="material-symbols-outlined text-primary text-4xl mb-3">park</span>
-    <h2 class="text-3xl md:text-4xl font-headline font-extrabold text-primary mb-4">We Buy Logs</h2>
-    <p class="text-base text-on-surface-variant max-w-2xl mx-auto mb-6 leading-relaxed">
+<section class="relative py-20 overflow-hidden">
+  <img src="images/webp/DJI_20260611140825_0207_D.webp" alt="Log trucks delivering timber to the Kentucky Forest Products facility" class="absolute inset-0 w-full h-full object-cover object-center"/>
+  <div class="absolute inset-0 bg-primary/70"></div>
+  <div class="relative z-10 max-w-5xl mx-auto px-6 text-center">
+    <span class="material-symbols-outlined text-white text-4xl mb-3">park</span>
+    <h2 class="text-3xl md:text-4xl font-headline font-extrabold text-white mb-4">We Buy Logs</h2>
+    <p class="text-base text-white/80 max-w-2xl mx-auto mb-6 leading-relaxed">
       Get the best value for your timber. We purchase Cherry, Walnut, Ash, Oak, Maple, Hickory, Poplar, and Mixed Hardwood logs at competitive, top prices.
     </p>
-    <a href="logs.html" class="bg-primary text-on-primary px-10 py-4 rounded-xl font-bold text-lg hover:shadow-xl transition-all inline-block">
+    <a href="logs.html" class="bg-white text-primary px-10 py-4 rounded-xl font-bold text-lg hover:shadow-xl transition-all inline-block">
       Learn More
     </a>
   </div>
 </section>
 
 <!-- ========== CTA ========== -->
-<section class="py-12 bg-surface">
-  <div class="max-w-7xl mx-auto px-6">
-    <div class="bg-primary rounded-[2rem] p-10 md:p-16 text-center text-on-primary overflow-hidden relative">
-      <div class="absolute inset-0 opacity-10 pointer-events-none">
-        <div class="absolute inset-0" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 40px 40px;"></div>
-      </div>
-      <div class="relative z-10 max-w-3xl mx-auto">
-        <h2 class="text-3xl md:text-5xl font-headline font-extrabold mb-5 leading-tight">Ready to start your next project?</h2>
-        <p class="text-lg text-primary-fixed mb-8 opacity-90">
-          Contact us for a custom quote. Same-day shipping available with nationwide delivery options.
-        </p>
-        <div class="flex flex-col md:flex-row gap-4 justify-center">
-          <a href="contact.html" class="bg-white text-primary px-10 py-5 rounded-xl font-black text-lg hover:scale-105 transition-transform shadow-xl inline-block">
-            Get a Quote
-          </a>
-          <a href="tel:6062502220" class="border border-white/30 backdrop-blur-sm px-10 py-5 rounded-xl font-black text-lg hover:bg-white/10 transition-colors inline-block">
-            Call (606) 250-2220
-          </a>
-        </div>
-      </div>
+<section class="relative py-28 overflow-hidden">
+  <img src="images/webp/DJI_20260611140544_0199_D.webp" alt="Aerial view of Kentucky Forest Products facility" class="absolute inset-0 w-full h-full object-cover object-center"/>
+  <div class="absolute inset-0 bg-primary/75"></div>
+  <div class="relative z-10 max-w-3xl mx-auto px-6 text-center">
+    <h2 class="text-4xl md:text-6xl font-headline font-extrabold mb-5 leading-tight text-white">Ready to start your next project?</h2>
+    <p class="text-lg text-white/80 mb-10 leading-relaxed">
+      Contact us for a custom quote. Same-day shipping available with nationwide delivery options.
+    </p>
+    <div class="flex flex-col md:flex-row gap-4 justify-center">
+      <a href="contact.html" class="bg-white text-primary px-10 py-5 rounded-xl font-black text-lg hover:shadow-xl transition-all inline-block">
+        Get a Quote
+      </a>
+      <a href="tel:6062502220" class="border border-white/30 backdrop-blur-sm px-10 py-5 rounded-xl font-black text-lg hover:bg-white/10 transition-colors text-white inline-block">
+        Call (606) 250-2220
+      </a>
     </div>
   </div>
 </section>
