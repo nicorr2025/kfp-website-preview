@@ -8,7 +8,7 @@
 }
 
 /* ─── Nav dropdowns ─── */
-.nav-dropdown { display: none; position: absolute; top: 100%; left: 0; min-width: 220px; }
+.nav-dropdown { display: none; position: absolute; top: 100%; left: 0; min-width: 220px; margin-top: 0 !important; padding-top: 6px; }
 .nav-group:hover .nav-dropdown { display: block; }
 .nav-dropdown a { display: block; padding: 0.625rem 1.25rem; }
 .nav-dropdown a:hover { background: rgba(0, 69, 13, 0.05); }
