@@ -215,7 +215,34 @@ tailwind.config = {
       <!-- Right Column: Contact Form -->
       <div class="glass-card rounded-xl p-8 md:p-12 shadow-lg">
         <h3 class="text-2xl font-bold text-primary mb-8">Send Us a Message</h3>
-        <form action="#" method="POST" class="space-y-6">
+        <form id="contact-form" class="space-y-6">
+          <div>
+            <label for="product" class="block text-sm font-semibold text-primary mb-2">Product Interest <span class="text-error">*</span></label>
+            <select id="product" name="product" required class="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-white/50 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
+              <option value="" disabled selected>Select a product or topic&hellip;</option>
+              <option value="lumber">Lumber</option>
+              <option value="fencing">Fencing</option>
+              <option value="mulch">Mulch / Byproducts</option>
+              <option value="matting">Industrial Matting</option>
+              <option value="utility">Utility Poles &amp; Cross Arms</option>
+              <option value="cross-ties">Railroad Cross-Ties</option>
+              <option value="general">General Inquiry</option>
+            </select>
+          </div>
+
+          <!-- Dynamic rep card (shown after product selection) -->
+          <div id="rep-card" class="hidden bg-primary/5 border border-primary/20 rounded-xl p-4 flex items-center gap-4">
+            <div class="bg-primary/10 rounded-full p-3 shrink-0">
+              <span class="material-symbols-outlined text-primary text-2xl">person</span>
+            </div>
+            <div>
+              <p class="text-xs text-on-surface-variant font-medium mb-0.5">Your Sales Representative</p>
+              <p id="rep-name" class="font-bold text-primary text-base leading-tight"></p>
+              <p id="rep-specialty" class="text-xs text-on-surface-variant mb-1"></p>
+              <a id="rep-phone-link" href="#" class="text-sm text-primary hover:underline font-medium"></a>
+            </div>
+          </div>
+
           <div>
             <label for="name" class="block text-sm font-semibold text-primary mb-2">Name <span class="text-error">*</span></label>
             <input type="text" id="name" name="name" required class="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-white/50 text-on-surface placeholder-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" placeholder="Your full name"/>
@@ -236,10 +263,85 @@ tailwind.config = {
             <textarea id="message" name="message" required rows="5" class="w-full px-4 py-3 rounded-xl border border-outline-variant/30 bg-white/50 text-on-surface placeholder-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-vertical" placeholder="Tell us about your project or request..."></textarea>
           </div>
 
-          <button type="submit" class="w-full bg-primary text-on-primary px-8 py-4 rounded-xl font-bold hover:shadow-xl hover:opacity-90 transition-all active:scale-[0.98] duration-150 text-base">
-            Send Message
+          <div id="form-success" class="hidden bg-green-50 border border-green-200 text-green-800 rounded-xl px-5 py-4 text-sm font-medium flex items-center gap-3">
+            <span class="material-symbols-outlined text-green-600 shrink-0">check_circle</span>
+            <span>Message sent! Your representative will be in touch soon.</span>
+          </div>
+          <div id="form-error" class="hidden bg-error-container border border-error/20 text-error rounded-xl px-5 py-4 text-sm font-medium flex items-center gap-3">
+            <span class="material-symbols-outlined shrink-0">error</span>
+            <span id="form-error-text">Something went wrong. Please try again or call us directly.</span>
+          </div>
+
+          <button type="submit" id="submit-btn" class="w-full bg-primary text-on-primary px-8 py-4 rounded-xl font-bold hover:shadow-xl hover:opacity-90 transition-all active:scale-[0.98] duration-150 text-base flex items-center justify-center gap-2 disabled:opacity-60">
+            <span id="submit-label">Send Message</span>
           </button>
         </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== SALES TEAM ========== -->
+<section class="py-24 bg-surface">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="mb-12">
+      <h2 class="text-3xl md:text-4xl font-headline font-bold text-primary tracking-tight">Meet Our Sales Team</h2>
+      <div class="h-1 w-20 bg-secondary mt-4"></div>
+      <p class="text-on-surface-variant mt-5 max-w-xl leading-relaxed">Our representatives know their product lines inside and out. Reach out directly or let the form route your message automatically.</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- Tony Love -->
+      <div class="glass-card rounded-xl p-8 flex flex-col items-center text-center shadow-md">
+        <div class="bg-primary/10 rounded-full p-5 mb-5">
+          <span class="material-symbols-outlined text-primary text-4xl">person</span>
+        </div>
+        <h3 class="text-xl font-bold text-primary mb-1">Tony Love</h3>
+        <p class="text-sm text-on-surface-variant mb-5">Sales Manager</p>
+        <div class="w-full space-y-3 text-sm">
+          <a href="tel:6062502220" class="flex items-center justify-center gap-2 text-on-surface-variant hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-base text-primary">phone</span>(606) 250-2220
+          </a>
+          <a href="mailto:tony.love@kyforest.com" class="flex items-center justify-center gap-2 text-on-surface-variant hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-base text-primary">mail</span>tony.love@kyforest.com
+          </a>
+        </div>
+        <div class="mt-6 pt-5 border-t border-outline-variant/20 w-full text-xs text-on-surface-variant font-medium">Cross-Ties &amp; General Inquiries</div>
+      </div>
+
+      <!-- Ben Klingerman -->
+      <div class="glass-card rounded-xl p-8 flex flex-col items-center text-center shadow-md">
+        <div class="bg-primary/10 rounded-full p-5 mb-5">
+          <span class="material-symbols-outlined text-primary text-4xl">person</span>
+        </div>
+        <h3 class="text-xl font-bold text-primary mb-1">Ben Klingerman</h3>
+        <p class="text-sm text-on-surface-variant mb-5">Utility Poles &amp; Matting</p>
+        <div class="w-full space-y-3 text-sm">
+          <a href="tel:3302478113" class="flex items-center justify-center gap-2 text-on-surface-variant hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-base text-primary">phone</span>(330) 247-8113
+          </a>
+          <a href="mailto:Ben.klingeman@kyforest.com" class="flex items-center justify-center gap-2 text-on-surface-variant hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-base text-primary">mail</span>Ben.klingeman@kyforest.com
+          </a>
+        </div>
+        <div class="mt-6 pt-5 border-t border-outline-variant/20 w-full text-xs text-on-surface-variant font-medium">Utility Poles &amp; Industrial Matting</div>
+      </div>
+
+      <!-- Josh Lakes -->
+      <div class="glass-card rounded-xl p-8 flex flex-col items-center text-center shadow-md">
+        <div class="bg-primary/10 rounded-full p-5 mb-5">
+          <span class="material-symbols-outlined text-primary text-4xl">person</span>
+        </div>
+        <h3 class="text-xl font-bold text-primary mb-1">Josh Lakes</h3>
+        <p class="text-sm text-on-surface-variant mb-5">Fencing, Lumber &amp; Mulch</p>
+        <div class="w-full space-y-3 text-sm">
+          <a href="tel:6064935526" class="flex items-center justify-center gap-2 text-on-surface-variant hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-base text-primary">phone</span>(606) 493-5526
+          </a>
+          <a href="mailto:Josh.lakes@kyforest.com" class="flex items-center justify-center gap-2 text-on-surface-variant hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-base text-primary">mail</span>Josh.lakes@kyforest.com
+          </a>
+        </div>
+        <div class="mt-6 pt-5 border-t border-outline-variant/20 w-full text-xs text-on-surface-variant font-medium">Fencing, Lumber &amp; Mulch / Byproducts</div>
       </div>
     </div>
   </div>
@@ -314,5 +416,78 @@ tailwind.config = {
   </div>
 </footer>
 
+<script>
+const REPS = {
+  lumber:         { name: 'Josh Lakes',     phone: '(606) 493-5526', specialty: 'Fencing, Lumber & Mulch' },
+  fencing:        { name: 'Josh Lakes',     phone: '(606) 493-5526', specialty: 'Fencing, Lumber & Mulch' },
+  mulch:          { name: 'Josh Lakes',     phone: '(606) 493-5526', specialty: 'Fencing, Lumber & Mulch' },
+  matting:        { name: 'Ben Klingerman', phone: '(330) 247-8113', specialty: 'Utility Poles & Matting' },
+  utility:        { name: 'Ben Klingerman', phone: '(330) 247-8113', specialty: 'Utility Poles & Matting' },
+  'cross-ties':   { name: 'Tony Love',      phone: '(606) 250-2220', specialty: 'Sales Manager' },
+  general:        { name: 'Tony Love',      phone: '(606) 250-2220', specialty: 'Sales Manager' },
+}
+
+const productSel = document.getElementById('product')
+const repCard = document.getElementById('rep-card')
+const repNameEl = document.getElementById('rep-name')
+const repSpecialtyEl = document.getElementById('rep-specialty')
+const repPhoneLink = document.getElementById('rep-phone-link')
+
+productSel.addEventListener('change', () => {
+  const rep = REPS[productSel.value]
+  if (rep) {
+    repNameEl.textContent = rep.name
+    repSpecialtyEl.textContent = rep.specialty
+    repPhoneLink.textContent = rep.phone
+    repPhoneLink.href = 'tel:' + rep.phone.replace(/\D/g, '')
+    repCard.classList.remove('hidden')
+  } else {
+    repCard.classList.add('hidden')
+  }
+})
+
+document.getElementById('contact-form').addEventListener('submit', async (e) => {
+  e.preventDefault()
+  const btn = document.getElementById('submit-btn')
+  const label = document.getElementById('submit-label')
+  const success = document.getElementById('form-success')
+  const error = document.getElementById('form-error')
+  const errorText = document.getElementById('form-error-text')
+
+  success.classList.add('hidden')
+  error.classList.add('hidden')
+  btn.disabled = true
+  label.textContent = 'Sending…'
+
+  try {
+    const res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        product: document.getElementById('product').value,
+        message: document.getElementById('message').value,
+      })
+    })
+    const data = await res.json()
+    if (res.ok) {
+      success.classList.remove('hidden')
+      e.target.reset()
+      repCard.classList.add('hidden')
+    } else {
+      errorText.textContent = data.error || 'Something went wrong. Please call us directly.'
+      error.classList.remove('hidden')
+    }
+  } catch {
+    errorText.textContent = 'Network error. Please call us directly at (606) 250-2220.'
+    error.classList.remove('hidden')
+  } finally {
+    btn.disabled = false
+    label.textContent = 'Send Message'
+  }
+})
+</script>
 </body>
 </html>

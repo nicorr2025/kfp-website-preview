@@ -512,6 +512,77 @@ app.post('/api/send-invoice', requireAuth, async (req, res) => {
   }
 })
 
+// ── Contact Form ─────────────────────────────────────────────────────────────
+const SALES_REPS = {
+  lumber:         { name: 'Josh Lakes',     email: 'Josh.lakes@kyforest.com',    phone: '(606) 493-5526', specialty: 'Fencing, Lumber & Mulch' },
+  fencing:        { name: 'Josh Lakes',     email: 'Josh.lakes@kyforest.com',    phone: '(606) 493-5526', specialty: 'Fencing, Lumber & Mulch' },
+  mulch:          { name: 'Josh Lakes',     email: 'Josh.lakes@kyforest.com',    phone: '(606) 493-5526', specialty: 'Fencing, Lumber & Mulch' },
+  matting:        { name: 'Ben Klingerman', email: 'Ben.klingeman@kyforest.com', phone: '(330) 247-8113', specialty: 'Utility Poles & Matting' },
+  utility:        { name: 'Ben Klingerman', email: 'Ben.klingeman@kyforest.com', phone: '(330) 247-8113', specialty: 'Utility Poles & Matting' },
+  'cross-ties':   { name: 'Tony Love',      email: 'tony.love@kyforest.com',     phone: '(606) 250-2220', specialty: 'Sales Manager' },
+  general:        { name: 'Tony Love',      email: 'tony.love@kyforest.com',     phone: '(606) 250-2220', specialty: 'Sales Manager' },
+}
+const DEFAULT_REP = { name: 'Tony Love', email: 'tony.love@kyforest.com', phone: '(606) 250-2220', specialty: 'Sales Manager' }
+
+const PRODUCT_LABELS = {
+  lumber: 'Lumber', fencing: 'Fencing', mulch: 'Mulch / Byproducts',
+  matting: 'Industrial Matting', utility: 'Utility Poles & Cross Arms',
+  'cross-ties': 'Railroad Cross-Ties', general: 'General Inquiry',
+}
+
+app.post('/api/contact', async (req, res) => {
+  const { name, email, phone, product, message } = req.body
+  if (!name || !email || !message) return res.status(400).json({ error: 'Name, email, and message are required.' })
+
+  const smtpUser = process.env.SMTP_USER
+  const smtpPass = process.env.SMTP_PASS
+  if (!smtpUser || !smtpPass) return res.status(500).json({ error: 'Email not configured.' })
+
+  const rep = SALES_REPS[product] || DEFAULT_REP
+  const productLabel = PRODUCT_LABELS[product] || 'General Inquiry'
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;">
+      <div style="background:#00450d;padding:24px 32px;border-radius:8px 8px 0 0;">
+        <h2 style="color:white;margin:0;font-size:20px;">New Website Inquiry</h2>
+        <p style="color:rgba(255,255,255,0.7);margin:6px 0 0;font-size:13px;">Kentucky Forest Products — kfp-website.com</p>
+      </div>
+      <div style="background:#f9f9f4;padding:32px;border:1px solid #e0e0d8;border-top:none;border-radius:0 0 8px 8px;">
+        <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
+          <tr><td style="padding:8px 0;color:#666;font-size:13px;width:140px;vertical-align:top;">Product Interest</td><td style="padding:8px 0;font-weight:700;color:#1a1a1a;">${productLabel}</td></tr>
+          <tr><td style="padding:8px 0;color:#666;font-size:13px;vertical-align:top;">Name</td><td style="padding:8px 0;color:#1a1a1a;">${name}</td></tr>
+          <tr><td style="padding:8px 0;color:#666;font-size:13px;vertical-align:top;">Email</td><td style="padding:8px 0;"><a href="mailto:${email}" style="color:#00450d;">${email}</a></td></tr>
+          ${phone ? `<tr><td style="padding:8px 0;color:#666;font-size:13px;vertical-align:top;">Phone</td><td style="padding:8px 0;"><a href="tel:${phone.replace(/\D/g,'')}" style="color:#00450d;">${phone}</a></td></tr>` : ''}
+        </table>
+        <hr style="border:none;border-top:1px solid #e0e0d8;margin:0 0 20px;"/>
+        <p style="color:#666;font-size:13px;margin:0 0 8px;font-weight:600;">Message</p>
+        <p style="color:#1a1a1a;white-space:pre-wrap;margin:0;line-height:1.7;font-size:15px;">${message.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>
+        <hr style="border:none;border-top:1px solid #e0e0d8;margin:24px 0 16px;"/>
+        <p style="color:#999;font-size:12px;margin:0;">Routed to <strong>${rep.name}</strong> (${rep.specialty}) · Reply directly to this email to respond to ${name}.</p>
+      </div>
+    </div>`
+
+  try {
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.office365.com', port: 587, secure: false,
+      auth: { user: smtpUser, pass: smtpPass },
+      tls: { ciphers: 'SSLv3', rejectUnauthorized: false }
+    })
+    await transporter.sendMail({
+      from: `"KFP Website" <${smtpUser}>`,
+      to: rep.email,
+      cc: smtpUser,
+      replyTo: email,
+      subject: `Website Inquiry: ${productLabel} — ${name}`,
+      html,
+    })
+    res.json({ ok: true, rep: rep.name })
+  } catch (err) {
+    console.error('Contact form error:', err)
+    res.status(500).json({ error: 'Failed to send. Please call us directly.' })
+  }
+})
+
 // ── Start ───────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 8080
 // Local dev: start server
